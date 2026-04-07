@@ -1,0 +1,173 @@
+import type { CanvasSummary } from '../api'
+import type { ModelResourceListItem } from '../model-resources/modelResourceTypes'
+import type { WorkflowEditorNode } from '../workflow-editor/workflowEditorGraphTypes'
+import type { WorkflowNodeType } from '../workflow-editor/workflowEditorTypes'
+import type { WorkflowState } from '../shared/workflowSharedTypes'
+
+import CanvasActions from './workflow-sidebar/CanvasActions'
+import CanvasSwitcher from './workflow-sidebar/CanvasSwitcher'
+import RunInputsSection from './workflow-sidebar/RunInputsSection'
+import SidebarRunActions from './workflow-sidebar/SidebarRunActions'
+
+interface WorkflowSidebarProps {
+    requestedCanvasId: string
+    activeCanvasId: string
+    canvasList: CanvasSummary[]
+    temporaryCanvasId?: string | null
+    modelResources: ModelResourceListItem[]
+    isSwitchingWorkflow: boolean
+    onRequestCanvasChange: (canvasId: string) => void
+    onRefreshWorkflowList: () => void
+    onOpenCreateCanvas: () => void
+    onDeleteCurrentCanvas: () => void | Promise<void>
+    onAddNodeByType: (type: WorkflowNodeType) => void
+    inputNodes: WorkflowEditorNode[]
+    runInputs: WorkflowState
+    onRunInputChange: (key: string, value: string) => void
+    onSave: (event?: { preventDefault?: () => void }) => void | Promise<void>
+    onRun: () => void | Promise<void>
+    onClearRunState: () => void
+    onOpenModelResources: () => void
+    isSaving: boolean
+    isRunning: boolean
+    isDeleting: boolean
+    hasRunResult: boolean
+    hasAnyNodes: boolean
+    canDeleteCurrentCanvas: boolean
+    getRunInputKey: (node: WorkflowEditorNode) => string
+}
+
+export default function WorkflowSidebar({
+                                            requestedCanvasId,
+                                            activeCanvasId,
+                                            canvasList,
+                                            temporaryCanvasId = null,
+                                            modelResources,
+                                            isSwitchingWorkflow,
+                                            onRequestCanvasChange,
+                                            onRefreshWorkflowList,
+                                            onOpenCreateCanvas,
+                                            onDeleteCurrentCanvas,
+                                            onAddNodeByType,
+                                            inputNodes,
+                                            runInputs,
+                                            onRunInputChange,
+                                            onSave,
+                                            onRun,
+                                            onClearRunState,
+                                            onOpenModelResources,
+                                            isSaving,
+                                            isRunning,
+                                            isDeleting,
+                                            hasRunResult,
+                                            hasAnyNodes,
+                                            canDeleteCurrentCanvas,
+                                            getRunInputKey,
+                                        }: WorkflowSidebarProps) {
+    const isShowingCanvasSwitchingState =
+        isSwitchingWorkflow && requestedCanvasId !== activeCanvasId
+    const isActiveCanvasTemporary = temporaryCanvasId === activeCanvasId
+
+    const effectiveCanvasList = [...canvasList]
+    const seenCanvasIds = new Set(effectiveCanvasList.map(item => item.canvas_id))
+
+    const ensureCanvasOption = (
+        canvasId: string | null | undefined,
+        label: string
+    ) => {
+        if (!canvasId || seenCanvasIds.has(canvasId)) {
+            return
+        }
+
+        effectiveCanvasList.unshift({
+            canvas_id: canvasId,
+            label,
+        })
+        seenCanvasIds.add(canvasId)
+    }
+
+    ensureCanvasOption(
+        temporaryCanvasId,
+        temporaryCanvasId ? `${temporaryCanvasId} (unsaved)` : ''
+    )
+    ensureCanvasOption(activeCanvasId, activeCanvasId)
+    ensureCanvasOption(requestedCanvasId, requestedCanvasId)
+
+    return (
+        <div
+            style={{
+                width: 240,
+                borderRight: '1px solid #ddd',
+                padding: 12,
+                background: '#fff',
+            }}
+        >
+            <h3 style={{ marginTop: 0 }}>Nodes</h3>
+
+            <CanvasSwitcher
+                requestedCanvasId={requestedCanvasId}
+                activeCanvasId={activeCanvasId}
+                effectiveCanvasList={effectiveCanvasList}
+                isShowingCanvasSwitchingState={isShowingCanvasSwitchingState}
+                isSwitchingWorkflow={isSwitchingWorkflow}
+                onRequestCanvasChange={onRequestCanvasChange}
+            />
+
+            <div style={{ marginBottom: 16 }}>
+                <CanvasActions
+                    modelResourceCount={modelResources.length}
+                    isSwitchingWorkflow={isSwitchingWorkflow}
+                    isDeleting={isDeleting}
+                    canDeleteCurrentCanvas={canDeleteCurrentCanvas}
+                    isActiveCanvasTemporary={isActiveCanvasTemporary}
+                    onOpenCreateCanvas={onOpenCreateCanvas}
+                    onDeleteCurrentCanvas={onDeleteCurrentCanvas}
+                    onRefreshWorkflowList={onRefreshWorkflowList}
+                    onOpenModelResources={onOpenModelResources}
+                />
+            </div>
+
+            <button
+                onClick={() => onAddNodeByType('input')}
+                style={{ display: 'block', width: '100%', marginBottom: 8 }}
+            >
+                + Input Node
+            </button>
+            <button
+                onClick={() => onAddNodeByType('prompt')}
+                style={{ display: 'block', width: '100%', marginBottom: 8 }}
+            >
+                + Prompt Node
+            </button>
+            <button
+                onClick={() => onAddNodeByType('output')}
+                style={{ display: 'block', width: '100%' }}
+            >
+                + Output Node
+            </button>
+
+            <hr style={{ margin: '16px 0' }} />
+
+            <RunInputsSection
+                inputNodes={inputNodes}
+                runInputs={runInputs}
+                onRunInputChange={onRunInputChange}
+                getRunInputKey={getRunInputKey}
+            />
+
+            <hr style={{ margin: '16px 0' }} />
+
+            <SidebarRunActions
+                isSaving={isSaving}
+                isRunning={isRunning}
+                isSwitchingWorkflow={isSwitchingWorkflow}
+                isDeleting={isDeleting}
+                hasRunResult={hasRunResult}
+                hasAnyNodes={hasAnyNodes}
+                onSave={onSave}
+                onRun={onRun}
+                onClearRunState={onClearRunState}
+            />
+        </div>
+    )
+}

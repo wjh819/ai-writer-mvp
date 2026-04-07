@@ -1,0 +1,212 @@
+﻿ai-writer-mvp
+├── api
+│   ├── routes
+│   │   ├── __init__.py
+│   │   ├── model_resource_routes.py
+│   │   ├── prompt_routes.py
+│   │   ├── route_helpers.py
+│   │   ├── run_routes.py
+│   │   └── workflow_routes.py
+│   ├── __init__.py
+│   ├── error_translator.py
+│   ├── model_resource_http_schemas.py
+│   ├── model_resource_reference_service.py
+│   ├── run_http_schemas.py
+│   ├── run_outcome.py
+│   ├── run_result_mapper.py
+│   ├── workflow_canonical_loader.py
+│   ├── workflow_converter.py
+│   ├── workflow_editor_loader.py
+│   ├── workflow_loader.py
+│   ├── workflow_metadata_io.py
+│   ├── workflow_normalizer.py
+│   ├── workflow_paths.py
+│   ├── workflow_run_service.py
+│   ├── workflow_sidecar_io.py
+│   ├── workflow_validator.py
+│   ├── workflow_yaml_io.py
+│   └── workflows.py
+├── config
+│   └── model_resources.json
+├── contracts
+│   ├── model_resource_contracts.py
+│   ├── step_projections.py
+│   ├── workflow_contracts.py
+│   └── workflow_sidecar_contracts.py
+├── core
+│   ├── engine.py
+│   ├── execution_types.py
+│   ├── llm.py
+│   └── model_resource_registry.py
+├── frontend-react
+│   ├── public
+│   │   └── vite.svg
+│   ├── src
+│   │   ├── api
+│   │   │   ├── core.ts
+│   │   │   ├── modelResourceApi.ts
+│   │   │   ├── promptApi.ts
+│   │   │   ├── runApi.ts
+│   │   │   └── workflowApi.ts
+│   │   ├── assets
+│   │   │   └── react.svg
+│   │   ├── components
+│   │   │   ├── model-resource-panel
+│   │   │   │   ├── CreateResourceForm.tsx
+│   │   │   │   ├── DeleteBlockedDetail.tsx
+│   │   │   │   ├── EditResourceForm.tsx
+│   │   │   │   ├── ModelResourceList.tsx
+│   │   │   │   ├── modelResourcePanelErrors.ts
+│   │   │   │   ├── ModelResourcePanelShell.tsx
+│   │   │   │   └── ModelResourceStatusCard.tsx
+│   │   │   ├── node-config
+│   │   │   │   ├── InputNodeConfig.tsx
+│   │   │   │   ├── OutputNodeConfig.tsx
+│   │   │   │   └── PromptNodeConfig.tsx
+│   │   │   ├── node-config-panel
+│   │   │   │   ├── NodeConfigSection.tsx
+│   │   │   │   ├── NodeOutputsEditor.tsx
+│   │   │   │   ├── NodeTestInputSection.tsx
+│   │   │   │   ├── NodeTestRawJsonSection.tsx
+│   │   │   │   ├── NodeTestResultSection.tsx
+│   │   │   │   └── NodeTypeConfigSection.tsx
+│   │   │   ├── run
+│   │   │   │   ├── display-mappers
+│   │   │   │   │   ├── displayFailureMapper.ts
+│   │   │   │   │   ├── displayPrimaryState.ts
+│   │   │   │   │   ├── displayStepMapper.ts
+│   │   │   │   │   └── writebackReplay.ts
+│   │   │   │   ├── panel
+│   │   │   │   │   ├── RunFailureSummary.tsx
+│   │   │   │   │   ├── RunRawJsonPanel.tsx
+│   │   │   │   │   └── RunResultHeader.tsx
+│   │   │   │   ├── runDisplayMappers.ts
+│   │   │   │   ├── runDisplayModels.ts
+│   │   │   │   ├── runFailure.ts
+│   │   │   │   ├── runFormatters.ts
+│   │   │   │   ├── RunResultPanel.tsx
+│   │   │   │   ├── RunResultStepCard.tsx
+│   │   │   │   ├── RunResultSteps.tsx
+│   │   │   │   ├── RunStateOverview.tsx
+│   │   │   │   ├── RunStepCardBase.tsx
+│   │   │   │   ├── RunStepTimeline.tsx
+│   │   │   │   ├── RunStepWritebackSection.tsx
+│   │   │   │   └── RunValueBlock.tsx
+│   │   │   ├── workflow-page
+│   │   │   │   ├── useCanvasLifecycle.ts
+│   │   │   │   ├── useWorkflowPageContext.ts
+│   │   │   │   ├── useWorkflowRunContext.ts
+│   │   │   │   ├── useWorkflowSubgraphTestPanel.ts
+│   │   │   │   ├── WorkflowDialogs.tsx
+│   │   │   │   └── WorkflowPageBanners.tsx
+│   │   │   ├── workflow-sidebar
+│   │   │   │   ├── CanvasActions.tsx
+│   │   │   │   ├── CanvasSwitcher.tsx
+│   │   │   │   ├── RunInputsSection.tsx
+│   │   │   │   └── SidebarRunActions.tsx
+│   │   │   ├── NodeConfigPanel.tsx
+│   │   │   ├── WorkflowEditor.tsx
+│   │   │   ├── WorkflowModelResourcePanel.tsx
+│   │   │   ├── WorkflowNode.tsx
+│   │   │   ├── WorkflowSelectionBar.tsx
+│   │   │   └── WorkflowSidebar.tsx
+│   │   ├── model-resources
+│   │   │   └── modelResourceTypes.ts
+│   │   ├── run
+│   │   │   └── runTypes.ts
+│   │   ├── shared
+│   │   │   └── workflowSharedTypes.ts
+│   │   ├── workflow-editor
+│   │   │   ├── actions
+│   │   │   │   ├── actionTypes.ts
+│   │   │   │   ├── contextLinkActions.ts
+│   │   │   │   ├── edgeActions.ts
+│   │   │   │   ├── nodeActions.ts
+│   │   │   │   ├── reactFlowChangeActions.ts
+│   │   │   │   └── workflowEditorActions.ts
+│   │   │   ├── controllers
+│   │   │   │   ├── useWorkflowBootstrap.ts
+│   │   │   │   ├── useWorkflowGraphEditor.ts
+│   │   │   │   ├── useWorkflowGraphEvents.ts
+│   │   │   │   ├── useWorkflowGraphSelection.ts
+│   │   │   │   ├── useWorkflowGraphState.ts
+│   │   │   │   ├── useWorkflowPendingBinding.ts
+│   │   │   │   ├── useWorkflowPersistence.ts
+│   │   │   │   ├── useWorkflowRunInputs.ts
+│   │   │   │   ├── useWorkflowRuntime.ts
+│   │   │   │   ├── useWorkflowSidecarStore.ts
+│   │   │   │   └── useWorkflowSubgraphTestStore.ts
+│   │   │   ├── domain
+│   │   │   │   ├── contextLinkModeSync.ts
+│   │   │   │   ├── contextLinkRules.ts
+│   │   │   │   ├── edgeConnectRules.ts
+│   │   │   │   ├── graphHelpers.ts
+│   │   │   │   ├── graphRemoval.ts
+│   │   │   │   ├── nodeGraphSync.ts
+│   │   │   │   ├── promptVariableHints.ts
+│   │   │   │   ├── workflowEditorConfig.ts
+│   │   │   │   ├── workflowEditorExecutionGraph.ts
+│   │   │   │   ├── workflowEditorGraph.ts
+│   │   │   │   ├── workflowEditorHelpers.ts
+│   │   │   │   ├── workflowEditorMappers.ts
+│   │   │   │   ├── workflowEditorNodeFactory.ts
+│   │   │   │   ├── workflowEditorRequests.ts
+│   │   │   │   ├── workflowEditorSemantic.ts
+│   │   │   │   ├── workflowEditorValidationRules.ts
+│   │   │   │   └── workflowEditorValidators.ts
+│   │   │   ├── operations
+│   │   │   │   ├── bootstrapQueries.ts
+│   │   │   │   ├── operationResultHelpers.ts
+│   │   │   │   ├── runMutations.ts
+│   │   │   │   ├── workflowEditorOperations.ts
+│   │   │   │   ├── workflowMutations.ts
+│   │   │   │   └── workflowQueries.ts
+│   │   │   ├── state
+│   │   │   │   ├── displayEdgeBuilders.ts
+│   │   │   │   ├── displayNodeBuilders.ts
+│   │   │   │   ├── graphFactDerivers.ts
+│   │   │   │   ├── runStepSelectors.ts
+│   │   │   │   ├── runtimeFieldDerivers.ts
+│   │   │   │   ├── selectionReducers.ts
+│   │   │   │   ├── selectionSelectors.ts
+│   │   │   │   ├── workflowEditorRunInputs.ts
+│   │   │   │   ├── workflowEditorSelection.ts
+│   │   │   │   ├── workflowEditorSubgraphTestInputs.ts
+│   │   │   │   └── workflowEditorViewState.ts
+│   │   │   ├── loadWarnings.ts
+│   │   │   ├── runContextTypes.ts
+│   │   │   ├── runtimeActionTypes.ts
+│   │   │   ├── sidecarTypes.ts
+│   │   │   ├── workflowEditorGraphTypes.ts
+│   │   │   ├── workflowEditorTypes.ts
+│   │   │   └── workflowEditorUiTypes.ts
+│   │   ├── api.ts
+│   │   ├── App.tsx
+│   │   ├── index.css
+│   │   └── main.tsx
+│   ├── .gitignore
+│   ├── eslint.config.js
+│   ├── index.html
+│   ├── package.json
+│   ├── package-lock.json
+│   ├── README.md
+│   ├── tsconfig.json
+│   └── vite.config.js
+├── prompt
+│   ├── draft.txt
+│   ├── outline.txt
+│   └── refine.txt
+├── shared
+│   └── model_resource_config_shared.py
+├── storage
+│   ├── __init__.py
+│   └── model_resource_store.py
+├── utils
+│   └── prompt_loader.py
+├── workflows
+│   └── article
+│       ├── metadata.yaml
+│       └── workflow.yaml
+├── app_errors.py
+├── fastapi_app.py
+└── requirements.txt

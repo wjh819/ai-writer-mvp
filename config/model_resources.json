@@ -1,0 +1,14 @@
+{
+  "1": {
+    "provider": "openai_compatible",
+    "model": "deepseek-chat",
+    "api_key": "sk-6ebd4a7bb7634cf09056bd6fc8498fd3",
+    "base_url": "https://api.deepseek.com/v1"
+  },
+  "1111": {
+    "provider": "openai_compatible",
+    "model": "1111111111",
+    "api_key": "11111",
+    "base_url": "https://api.deepseek.com/v1"
+  }
+}

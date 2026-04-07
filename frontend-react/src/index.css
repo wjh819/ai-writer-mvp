@@ -1,0 +1,56 @@
+:root {
+  /*
+   * 全局基础字体与文本渲染设置。
+   *
+   * 作用：
+   * 为整个前端应用提供统一的默认字体族、
+   * 行高与系统级文本渲染优化。
+   */
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  /* 全局盒模型统一为 border-box，便于布局控制。 */
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  /*
+   * 页面根容器基础尺寸设置。
+   *
+   * 作用：
+   * - 清除默认 margin
+   * - 保证应用最小宽度
+   * - 让页面与根挂载容器至少铺满视口高度
+   */
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+}
+
+body {
+  /*
+   * 页面级默认背景与文字颜色。
+   *
+   * 当前用于为 workflow 编辑器提供统一的浅色应用底色。
+   */
+  background: #f5f7fb;
+  color: #1f2937;
+  font-family: inherit;
+}
+
+button,
+input,
+select,
+textarea {
+  /* 表单控件继承全局字体设置，保持界面风格一致。 */
+  font: inherit;
+}

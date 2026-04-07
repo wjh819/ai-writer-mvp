@@ -1,0 +1,65 @@
+nodes:
+  input_node_1:
+    type: input
+    position:
+      x: -807.5371566584024
+      y: -226.2016650279362
+    outputs:
+    - name: result
+      stateKey: state_topic
+    comment: 测试主题输入
+    inputKey: topic
+    defaultValue: ''
+  prompt_node_1:
+    type: prompt
+    position:
+      x: -1520.7292807291285
+      y: -31.438492179016066
+    outputs:
+    - name: title
+      stateKey: state_title
+    - name: outline
+      stateKey: state_outline
+    - name: keywords
+      stateKey: state_keywords
+    comment: 单节点多输出测试
+    promptMode: inline
+    prompt: ''
+    inlinePrompt: "你是一个严格的 JSON 输出器。\n\n你的任务：基于主题 {topic_text}，返回一个 JSON 对象。\n\n必须严格遵守以下规则：\n\
+      1. 只能输出 JSON 本体\n2. 不允许输出任何解释文字\n3. 不允许输出 markdown\n4. 不允许输出代码块标记\n5. 不允许输出前缀或后缀\n\
+      6. 顶层必须是一个 JSON object\n7. 这个对象必须且只能包含以下三个字段：\n   - \"title\"\n   - \"outline\"\
+      \n   - \"keywords\"\n8. 三个字段的值都必须是字符串\n9. 不允许出现任何额外字段\n\n返回格式示例：\n返回格式示例：\n\
+      {{\"title\":\"示例标题\",\"outline\":\"1. 第一部分\\n2. 第二部分\",\"keywords\":\"关键词1、关键词2\"\
+      }}\n\n现在开始。主题：{topic_text}"
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 120
+      max_retries: 2
+  output_node_1:
+    type: output
+    position:
+      x: 163.0980665910207
+      y: 1048.7807028576483
+    outputs:
+    - name: result
+      stateKey: final_payload
+    comment: 聚合多输出结果
+edges:
+- source: prompt_node_1
+  sourceOutput: title
+  target: output_node_1
+  targetInput: title
+- source: prompt_node_1
+  sourceOutput: outline
+  target: output_node_1
+  targetInput: outline
+- source: prompt_node_1
+  sourceOutput: keywords
+  target: output_node_1
+  targetInput: keywords
+- source: input_node_1
+  sourceOutput: result
+  target: prompt_node_1
+  targetInput: topic_text
+contextLinks: []
