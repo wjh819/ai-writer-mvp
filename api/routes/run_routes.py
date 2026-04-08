@@ -18,13 +18,13 @@ router = APIRouter()
 
 @router.post("/workflows/{canvas_id}/run-draft")
 def run_workflow_draft(canvas_id: str, req: RunDraftRequest):
-    _ = canvas_id
 
     try:
         normalized_workflow = normalize_workflow_editor_data(req.workflow)
         validate_workflow_editor_data(normalized_workflow)
 
         execution = execute_draft_workflow(
+            canvas_id=canvas_id,
             workflow=normalized_workflow,
             input_state=dict(req.input_state or {}),
             prompt_overrides=dict(req.prompt_overrides or {}),

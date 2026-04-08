@@ -6,6 +6,12 @@ from typing import Any
 from app_errors import AppError, InvalidInputError
 from core.engine import WorkflowDefinitionError, WorkflowEngine
 from core.execution_types import WorkflowExecutionResult, WorkflowRunError
+from core.output_exporter import WorkflowOutputExporter
+from api.workflow_paths import (
+    ensure_workflow_exists,
+    get_canvas_outputs_dir,
+    get_canvas_workflow_path,
+)
 
 """
 workflow 执行服务层。
@@ -237,6 +243,7 @@ def build_failed_execution_result(
 
 def execute_draft_workflow(
     *,
+    canvas_id: str,
     workflow,
     input_state: dict[str, Any],
     prompt_overrides: dict[str, str] | None = None,
@@ -247,6 +254,7 @@ def execute_draft_workflow(
     """
     safe_input_state: dict[str, Any] = {}
     safe_prompt_overrides: dict[str, str] = {}
+    output_exporter: WorkflowOutputExporter | None = None
 
     try:
         safe_input_state = _normalize_state_object(
@@ -255,9 +263,15 @@ def execute_draft_workflow(
         )
         safe_prompt_overrides = _normalize_prompt_overrides(prompt_overrides)
 
+        ensure_workflow_exists(get_canvas_workflow_path(canvas_id))
+        output_exporter = WorkflowOutputExporter(
+            get_canvas_outputs_dir(canvas_id)
+        )
+
         engine = WorkflowEngine(
             workflow_data=workflow,
             prompt_overrides=safe_prompt_overrides,
+            output_exporter=output_exporter,
         )
 
         final_state, steps = engine.run(safe_input_state)

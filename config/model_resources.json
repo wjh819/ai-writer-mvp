@@ -2,7 +2,7 @@
   "1": {
     "provider": "openai_compatible",
     "model": "deepseek-chat",
-    "api_key": "sk-6ebd4a7bb7634cf09056bd6fc8498fd3",
+    "api_key": "sk-65dc612da55e4aaca3632ebeee55b508",
     "base_url": "https://api.deepseek.com/v1"
   },
   "1111": {

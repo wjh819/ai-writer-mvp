@@ -33,6 +33,7 @@ from core.model_resource_registry import (
     resolve_model_resource,
 )
 from utils.prompt_loader import load_prompt
+from core.output_exporter import OutputExportError, WorkflowOutputExporter
 
 """
 workflow 执行引擎。
@@ -116,6 +117,8 @@ class PromptRenderError(WorkflowNodeExecutionError):
 class StructuredOutputError(WorkflowNodeExecutionError):
     error_type = "structured_output_invalid"
 
+class OutputWriteError(WorkflowNodeExecutionError):
+    error_type = "output_write_failed"
 
 class WorkflowEngine:
     """
@@ -141,6 +144,7 @@ class WorkflowEngine:
         self,
         workflow_data: WorkflowEditorData,
         prompt_overrides: dict[str, str] | None = None,
+        output_exporter: WorkflowOutputExporter | None = None,
     ):
         if not isinstance(workflow_data, WorkflowEditorData):
             raise ValueError("workflow_data must be WorkflowEditorData")
@@ -168,7 +172,7 @@ class WorkflowEngine:
         self.prompt_committed_history_by_node: dict[str, list[BaseMessage]] = {}
 
         self._build_graph()
-
+        self.output_exporter = output_exporter
     def _build_graph(self) -> None:
         for node in self.nodes:
             self.graph[node.id] = []
@@ -1247,6 +1251,19 @@ class WorkflowEngine:
             output_value = next(iter(bound_inputs.values()))
         else:
             output_value = dict(bound_inputs)
+
+        if self.output_exporter is not None:
+            try:
+                self.output_exporter.export_output(
+                    node_id=node.id,
+                    value=output_value,
+                )
+            except OutputExportError as exc:
+                raise OutputWriteError(
+                    f"Output node '{node.id}' failed to write markdown file",
+                    error_detail=str(exc),
+                    bound_inputs=bound_inputs,
+                ) from exc
 
         named_outputs = {
             output_spec.name: output_value,

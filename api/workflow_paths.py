@@ -9,6 +9,7 @@ WORKFLOW_DIR = "workflows"
 WORKFLOW_FILE_NAME = "workflow.yaml"
 METADATA_FILE_NAME = "metadata.yaml"
 SIDECAR_FILE_NAME = "sidecar.yaml"
+OUTPUTS_DIR_NAME = "outputs"
 CANVAS_ID_RE = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
@@ -85,6 +86,15 @@ def get_canvas_sidecar_path(canvas_id: str) -> str:
 
     return os.path.join(get_canvas_dir(canvas_id), SIDECAR_FILE_NAME)
 
+
+def get_canvas_outputs_dir(canvas_id: str) -> str:
+    """
+    返回当前 canvas 的 output 导出根目录。
+
+    正式路径：
+    - workflows/<canvas_id>/outputs/
+    """
+    return os.path.join(get_canvas_dir(canvas_id), OUTPUTS_DIR_NAME)
 
 def get_sibling_sidecar_path_from_workflow_path(workflow_path: str) -> str:
     """

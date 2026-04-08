@@ -1,0 +1,33 @@
+nodes:
+  input_node_1:
+    type: input
+    position:
+      x: 170.0
+      y: 120.0
+    outputs:
+    - name: value
+      stateKey: out_input_node_1
+    inputKey: input_node_1
+    defaultValue: ''
+  prompt_node_1:
+    type: prompt
+    position:
+      x: 58.0
+      y: 416.0
+    outputs:
+    - name: result
+      stateKey: out_prompt_node_1
+    promptMode: inline
+    prompt: ''
+    inlinePrompt: '{a1}'
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 120
+      max_retries: 2
+edges:
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_1
+  targetInput: a1
+contextLinks: []
