@@ -1,27 +1,13 @@
 import {
     getModelResources,
-    getPrompts,
     listWorkflows,
 } from '../../api'
 import { getErrorMessage } from '../domain/workflowEditorRequests'
 import type {
     FetchModelResourceListResult,
-    FetchPromptListResult,
     FetchWorkflowBootstrapResult,
     FetchWorkflowListResult,
 } from './operationResultHelpers'
-
-export async function fetchPromptListResult(): Promise<FetchPromptListResult> {
-    try {
-        const prompts = await getPrompts()
-        return { prompts }
-    } catch (error) {
-        return {
-            errorMessage: getErrorMessage(error, 'Load prompts failed'),
-            prompts: [],
-        }
-    }
-}
 
 export async function fetchModelResourceListResult(): Promise<FetchModelResourceListResult> {
     try {
@@ -48,16 +34,13 @@ export async function fetchWorkflowListResult(): Promise<FetchWorkflowListResult
 }
 
 export async function fetchWorkflowBootstrapResult(): Promise<FetchWorkflowBootstrapResult> {
-    const [promptResult, modelResourceResult, workflowListResult] =
+    const [modelResourceResult, workflowListResult] =
         await Promise.all([
-            fetchPromptListResult(),
             fetchModelResourceListResult(),
             fetchWorkflowListResult(),
         ])
 
     return {
-        prompts: promptResult.prompts,
-        promptErrorMessage: promptResult.errorMessage ?? '',
         modelResources: modelResourceResult.modelResources,
         modelResourceErrorMessage: modelResourceResult.errorMessage ?? '',
         canvasList: workflowListResult.canvasList,

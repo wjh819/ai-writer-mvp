@@ -1,11 +1,11 @@
 from __future__ import annotations
-
+import re
 import json
 import time
 from collections import defaultdict, deque
 from datetime import datetime, timezone
 from typing import Any, Iterable
-
+import logging
 from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
 from contracts.workflow_contracts import (
@@ -32,7 +32,6 @@ from core.model_resource_registry import (
     load_model_resource_registry,
     resolve_model_resource,
 )
-from utils.prompt_loader import load_prompt
 from core.output_exporter import OutputExportError, WorkflowOutputExporter
 
 """
@@ -66,7 +65,138 @@ workflow 执行引擎。
 - 同层可执行节点顺序依赖当前图构建顺序，尚无独立 canonical ordering
 - validator 与 engine 之间存在部分防御性规则重复
 """
+_SINGLE_OUTPUT_OUTER_FENCE_RE = re.compile(
+    r"^\s*```(?:json|markdown|md|text)?\s*\n(?P<body>[\s\S]*?)\n```\s*$",
+    re.IGNORECASE,
+)
+logger = logging.getLogger(__name__)
 
+def _strip_outer_fence(text: str) -> str:
+    match = _SINGLE_OUTPUT_OUTER_FENCE_RE.match(text.strip())
+    if not match:
+        return text
+    return match.group("body")
+
+
+def _coerce_single_output_text(
+    *,
+    node: WorkflowNode,
+    output_name: str,
+    raw_text: str,
+    bound_inputs: dict[str, Any],
+    rendered_prompt: str,
+    window_runtime: dict[str, Any],
+) -> str:
+    original = raw_text if isinstance(raw_text, str) else str(raw_text)
+    unfenced = _strip_outer_fence(original).strip()
+
+    looks_like_wrapped_json = (
+        unfenced.startswith("{")
+        or original.strip().lower().startswith("```json")
+    )
+
+    if looks_like_wrapped_json:
+        try:
+            parsed = json.loads(unfenced)
+        except Exception as exc:
+            raise StructuredOutputError(
+                f"Node '{node.id}' single-output prompt returned invalid or incomplete JSON wrapper. "
+                f"Return plain text only for '{output_name}', or return a valid single-key JSON object.",
+                bound_inputs=bound_inputs,
+                rendered_prompt=rendered_prompt,
+                window_mode=window_runtime["window_mode"],
+                window_source_node_id=window_runtime["window_source_node_id"],
+                window_id=window_runtime["window_id"],
+                window_parent_id=window_runtime["window_parent_id"],
+            ) from exc
+
+        if not isinstance(parsed, dict):
+            raise StructuredOutputError(
+                f"Node '{node.id}' single-output prompt must return plain text, "
+                f"or a JSON object containing only '{output_name}'",
+                bound_inputs=bound_inputs,
+                rendered_prompt=rendered_prompt,
+                window_mode=window_runtime["window_mode"],
+                window_source_node_id=window_runtime["window_source_node_id"],
+                window_id=window_runtime["window_id"],
+                window_parent_id=window_runtime["window_parent_id"],
+            )
+
+        actual_keys = set(parsed.keys())
+        expected_keys = {output_name}
+        if actual_keys != expected_keys:
+            raise StructuredOutputError(
+                f"Node '{node.id}' single-output prompt returned JSON keys {sorted(actual_keys)}, "
+                f"expected only {sorted(expected_keys)}",
+                bound_inputs=bound_inputs,
+                rendered_prompt=rendered_prompt,
+                window_mode=window_runtime["window_mode"],
+                window_source_node_id=window_runtime["window_source_node_id"],
+                window_id=window_runtime["window_id"],
+                window_parent_id=window_runtime["window_parent_id"],
+            )
+
+        value = parsed[output_name]
+        if value is None:
+            return ""
+
+        if isinstance(value, str):
+            return value
+
+        return json.dumps(
+            value,
+            ensure_ascii=False,
+            indent=2,
+            sort_keys=True,
+            default=str,
+        )
+
+    return original
+
+def _safe_preview_text(value: Any, limit: int = 200) -> str:
+    text = value if isinstance(value, str) else str(value)
+    text = text.replace("\r", "\\r").replace("\n", "\\n")
+    if len(text) <= limit:
+        return text
+    return text[:limit] + "...<truncated>"
+
+
+def _extract_llm_debug_metadata(response: Any) -> dict[str, Any]:
+    """
+    只做调试透视，不参与正式 contract。
+    尽量从 langchain / provider 响应对象里提取可用 metadata。
+    """
+    response_metadata = getattr(response, "response_metadata", None)
+    usage_metadata = getattr(response, "usage_metadata", None)
+    content = getattr(response, "content", None)
+    additional_kwargs = getattr(response, "additional_kwargs", None)
+    message_id = getattr(response, "id", None)
+
+    finish_reason = None
+    model_name = None
+
+    if isinstance(response_metadata, dict):
+        finish_reason = (
+            response_metadata.get("finish_reason")
+            or response_metadata.get("stop_reason")
+            or response_metadata.get("finishReason")
+        )
+        model_name = (
+            response_metadata.get("model_name")
+            or response_metadata.get("model")
+        )
+
+    return {
+        "message_id": message_id,
+        "content_type": type(content).__name__,
+        "content_preview": _safe_preview_text(content, limit=300),
+        "content_length": len(content) if isinstance(content, str) else None,
+        "finish_reason": finish_reason,
+        "model_name": model_name,
+        "response_metadata": response_metadata if isinstance(response_metadata, dict) else response_metadata,
+        "usage_metadata": usage_metadata if isinstance(usage_metadata, dict) else usage_metadata,
+        "additional_kwargs": additional_kwargs if isinstance(additional_kwargs, dict) else additional_kwargs,
+    }
 
 def utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
@@ -86,8 +216,6 @@ class WorkflowNodeExecutionError(Exception):
         error_detail: str | None = None,
         bound_inputs: dict[str, Any] | None = None,
         rendered_prompt: str | None = None,
-        prompt_mode: str | None = None,
-        prompt_ref: str | None = None,
         window_mode: str | None = None,
         window_source_node_id: str | None = None,
         window_id: str | None = None,
@@ -98,8 +226,6 @@ class WorkflowNodeExecutionError(Exception):
         self.error_detail = error_detail or message
         self.bound_inputs = dict(bound_inputs or {})
         self.rendered_prompt = rendered_prompt
-        self.prompt_mode = prompt_mode
-        self.prompt_ref = prompt_ref
         self.window_mode = window_mode
         self.window_source_node_id = window_source_node_id
         self.window_id = window_id
@@ -707,54 +833,33 @@ class WorkflowEngine:
         # 后续任何从它 branch 出去的节点，都必须基于这个快照。
         self.prompt_committed_history_by_node[node_id] = list(updated_history)
 
-    def _resolve_prompt_template(
-        self,
-        node: WorkflowNode,
-        config: PromptNodeConfig,
-    ) -> tuple[str, str | None]:
+    def _resolve_prompt_text(
+            self,
+            node: WorkflowNode,
+            config: PromptNodeConfig,
+    ) -> str:
         """
         解析当前 prompt 节点本次运行使用的正文。
 
         优先级：
         1) prompt_overrides[node.id]
-        2) inline 模式使用 config.inlinePrompt
-        3) template 模式使用 load_prompt(config.prompt)
-
-        返回：
-        - prompt_template: 本次运行要 format 的 prompt 正文
-        - prompt_ref: 仅当走 template 文件引用时返回模板名；override/inline 返回 None
+        2) 保存态 config.promptText
 
         注意：
         - prompt_overrides 是 run-time 临时覆盖，不属于保存态 workflow
+        - 当前正式保存态不再区分 template / inline；engine 只消费 promptText
         """
         override_prompt_text = self.prompt_overrides.get(node.id)
         if override_prompt_text is not None and str(override_prompt_text).strip():
-            return str(override_prompt_text).strip(), None
+            return str(override_prompt_text).strip()
 
-        if config.promptMode == "inline":
-            prompt_template = (config.inlinePrompt or "").strip()
-            if not prompt_template:
-                raise WorkflowDefinitionError(
-                    f"Node '{node.id}' inline prompt is empty"
-                )
-            return prompt_template, None
+        prompt_text = (config.promptText or "").strip()
+        if not prompt_text:
+            raise WorkflowDefinitionError(
+                f"Node '{node.id}' prompt text is empty"
+            )
 
-        if config.promptMode == "template":
-            prompt_name = (config.prompt or "").strip()
-            if not prompt_name:
-                raise WorkflowDefinitionError(
-                    f"Node '{node.id}' prompt template name is empty"
-                )
-            try:
-                return load_prompt(prompt_name), prompt_name
-            except Exception as exc:
-                raise WorkflowDefinitionError(
-                    f"Node '{node.id}' prompt template load failed: {exc}"
-                ) from exc
-
-        raise WorkflowDefinitionError(
-            f"Node '{node.id}' has invalid promptMode: {config.promptMode}"
-        )
+        return prompt_text
 
     def _build_failed_step(
         self,
@@ -788,10 +893,6 @@ class WorkflowEngine:
             if execution_error is not None:
                 bound_inputs = dict(getattr(execution_error, "bound_inputs", {}) or {})
                 rendered_prompt = getattr(execution_error, "rendered_prompt", None)
-                prompt_mode = (
-                    getattr(execution_error, "prompt_mode", None) or config.promptMode
-                )
-                prompt_ref = getattr(execution_error, "prompt_ref", None)
                 window_mode = getattr(execution_error, "window_mode", None)
                 window_source_node_id = getattr(
                     execution_error,
@@ -811,8 +912,6 @@ class WorkflowEngine:
                     bound_inputs = {}
 
                 rendered_prompt = None
-                prompt_mode = config.promptMode
-                prompt_ref = config.prompt if config.promptMode == "template" else None
 
                 window_metadata = self._build_prompt_window_metadata_for_failed_step(
                     node,
@@ -826,8 +925,6 @@ class WorkflowEngine:
             return PromptFailedExecutionStep(
                 node_id=node.id,
                 primary_state_key=primary_state_key,
-                prompt_mode=prompt_mode,
-                prompt_ref=prompt_ref,
                 bound_inputs=bound_inputs,
                 rendered_prompt=rendered_prompt,
                 error_message=error_message,
@@ -1164,7 +1261,7 @@ class WorkflowEngine:
         )
         primary_state_key = self._get_primary_state_key(node)
 
-        prompt_template, prompt_ref = self._resolve_prompt_template(node, config)
+        prompt_template = self._resolve_prompt_text(node, config)
         window_runtime = (
             dict(window_runtime_override)
             if window_runtime_override is not None
@@ -1181,8 +1278,6 @@ class WorkflowEngine:
                 f"Node '{node.id}' prompt formatting failed, missing variable: {exc}",
                 bound_inputs=bound_inputs,
                 rendered_prompt=None,
-                prompt_mode=config.promptMode,
-                prompt_ref=prompt_ref,
                 window_mode=window_runtime["window_mode"],
                 window_source_node_id=window_runtime["window_source_node_id"],
                 window_id=window_runtime["window_id"],
@@ -1219,6 +1314,20 @@ class WorkflowEngine:
                 messages=messages_to_invoke,
             )
 
+            llm_debug_metadata = _extract_llm_debug_metadata(response)
+
+            logger.warning(
+                "LLM debug | node=%s | provider=%s | model=%s | metadata=%s",
+                node.id,
+                model_resource["provider"],
+                model_resource["model"],
+                json.dumps(
+                    llm_debug_metadata,
+                    ensure_ascii=False,
+                    default=str,
+                ),
+            )
+
             output_text = (
                 response.content
                 if isinstance(response.content, str)
@@ -1228,8 +1337,17 @@ class WorkflowEngine:
             output_specs = list(config.outputs or [])
 
             if len(output_specs) == 1:
+                output_name = output_specs[0].name
+                normalized_single_output_text = _coerce_single_output_text(
+                    node=node,
+                    output_name=output_name,
+                    raw_text=output_text,
+                    bound_inputs=bound_inputs,
+                    rendered_prompt=rendered_prompt,
+                    window_runtime=window_runtime,
+                )
                 named_outputs = {
-                    output_specs[0].name: output_text,
+                    output_name: normalized_single_output_text,
                 }
             else:
                 try:
@@ -1239,8 +1357,6 @@ class WorkflowEngine:
                         f"Node '{node.id}' multi-output prompt must return valid JSON object: {exc}",
                         bound_inputs=bound_inputs,
                         rendered_prompt=rendered_prompt,
-                        prompt_mode=config.promptMode,
-                        prompt_ref=prompt_ref,
                         window_mode=window_runtime["window_mode"],
                         window_source_node_id=window_runtime["window_source_node_id"],
                         window_id=window_runtime["window_id"],
@@ -1252,8 +1368,6 @@ class WorkflowEngine:
                         f"Node '{node.id}' multi-output prompt must return a JSON object",
                         bound_inputs=bound_inputs,
                         rendered_prompt=rendered_prompt,
-                        prompt_mode=config.promptMode,
-                        prompt_ref=prompt_ref,
                         window_mode=window_runtime["window_mode"],
                         window_source_node_id=window_runtime["window_source_node_id"],
                         window_id=window_runtime["window_id"],
@@ -1269,8 +1383,6 @@ class WorkflowEngine:
                         f"expected {sorted(expected_names)}",
                         bound_inputs=bound_inputs,
                         rendered_prompt=rendered_prompt,
-                        prompt_mode=config.promptMode,
-                        prompt_ref=prompt_ref,
                         window_mode=window_runtime["window_mode"],
                         window_source_node_id=window_runtime["window_source_node_id"],
                         window_id=window_runtime["window_id"],
@@ -1287,8 +1399,6 @@ class WorkflowEngine:
                 error_detail=str(exc),
                 bound_inputs=bound_inputs,
                 rendered_prompt=rendered_prompt,
-                prompt_mode=config.promptMode,
-                prompt_ref=prompt_ref,
                 window_mode=window_runtime["window_mode"],
                 window_source_node_id=window_runtime["window_source_node_id"],
                 window_id=window_runtime["window_id"],
@@ -1305,8 +1415,6 @@ class WorkflowEngine:
         step_info = PromptSuccessExecutionStep(
             node_id=node.id,
             primary_state_key=primary_state_key,
-            prompt_mode=config.promptMode,
-            prompt_ref=prompt_ref,
             bound_inputs=bound_inputs,
             rendered_prompt=rendered_prompt,
             raw_output_text=output_text,

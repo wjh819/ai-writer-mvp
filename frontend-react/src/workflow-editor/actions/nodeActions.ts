@@ -35,18 +35,30 @@ export function buildUpdateNodeResult(
     contextLinks: WorkflowContextLink[],
     updatedNode: WorkflowEditorNode
 ): GraphActionResult | { error: string } {
-    const previousNode = (nodes || []).find(node => node.id === updatedNode.id)
-    const previousConfig = previousNode?.data?.config
+    const nextNodeId = String(updatedNode?.id || '').trim()
+    if (!nextNodeId) {
+        return { error: 'Node id is required' }
+    }
+
+    const previousNode = (nodes || []).find(node => node.id === nextNodeId)
+    if (!previousNode) {
+        return {
+            error: `Node '${nextNodeId}' not found. Node id is immutable and cannot be changed.`,
+        }
+    }
+
+    const previousConfig = previousNode.data?.config
     const nextConfig = updatedNode.data.config
 
     if (previousConfig && previousConfig.type !== nextConfig.type) {
         return {
-            error: `Node '${updatedNode.id}' type cannot be changed from '${previousConfig.type}' to '${nextConfig.type}'`,
+            error: `Node '${nextNodeId}' type cannot be changed from '${previousConfig.type}' to '${nextConfig.type}'`,
         }
     }
 
     const nextNode: WorkflowEditorNode = {
         ...updatedNode,
+        id: nextNodeId,
         type: 'workflowNode',
     }
 

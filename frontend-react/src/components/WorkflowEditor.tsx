@@ -89,7 +89,7 @@ export default function WorkflowEditor() {
 
     const {
         canvasList,
-        prompts,
+
         modelResources,
         runInputs,
 
@@ -595,7 +595,7 @@ export default function WorkflowEditor() {
                     isNodeTestLocked={isLiveRunActive}
                     onChange={updateNode}
                     onDelete={deleteNode}
-                    prompts={prompts}
+
                     modelResources={modelResources}
                     pinnedInputDraftTexts={currentPinnedInputDraftTexts}
                     onPinnedInputDraftChange={handlePinnedInputDraftChange}

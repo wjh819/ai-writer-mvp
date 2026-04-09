@@ -14,7 +14,6 @@ import PromptNodeConfigForm from '../node-config/PromptNodeConfig'
 
 interface NodeTypeConfigSectionProps {
     config: InputNodeConfig | PromptNodeConfig | OutputNodeConfig
-    prompts: string[]
     modelResources: ModelResourceListItem[]
     derivedTargetInputs: string[]
     inboundBindings: InboundBindingDisplayItem[]
@@ -30,7 +29,6 @@ interface NodeTypeConfigSectionProps {
 
 export default function NodeTypeConfigSection({
     config,
-    prompts,
     modelResources,
     derivedTargetInputs,
     inboundBindings,
@@ -52,7 +50,6 @@ export default function NodeTypeConfigSection({
             ) : config.type === 'prompt' ? (
                 <PromptNodeConfigForm
                     config={config}
-                    prompts={prompts}
                     modelResources={modelResources}
                     derivedTargetInputs={derivedTargetInputs}
                     inboundBindings={inboundBindings}

@@ -85,8 +85,6 @@ class PromptSuccessExecutionStep(BaseExecutionStep):
     node_type: Literal["prompt"] = "prompt"
     status: Literal["success"] = "success"
 
-    prompt_mode: Literal["template", "inline"]
-    prompt_ref: Optional[str] = None
     bound_inputs: Dict[str, Any] = Field(default_factory=dict)
     rendered_prompt: str
     raw_output_text: str
@@ -102,8 +100,6 @@ class PromptFailedExecutionStep(BaseExecutionStep):
     node_type: Literal["prompt"] = "prompt"
     status: Literal["failed"] = "failed"
 
-    prompt_mode: Literal["template", "inline"]
-    prompt_ref: Optional[str] = None
     bound_inputs: Dict[str, Any] = Field(default_factory=dict)
     rendered_prompt: Optional[str] = None
     error_message: str

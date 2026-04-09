@@ -103,9 +103,7 @@ export function createInitialWorkflowNodeConfig(
 
   const config: PromptNodeConfig = {
     type: 'prompt',
-    promptMode: 'template',
-    prompt: '',
-    inlinePrompt: '',
+    promptText: '',
     comment: '',
     modelResourceId: '',
     llm: getDefaultLLMConfig(),

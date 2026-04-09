@@ -11,7 +11,9 @@ from api.workflow_converter import editor_schema_to_yaml
 from api.workflow_loader import (
     delete_canvas_files,
     delete_canvas_sidecar_if_exists,
+    delete_orphan_canvas_prompt_files,
     dump_canvas_metadata,
+    dump_canvas_prompt_files,
     dump_canvas_sidecar,
     dump_canvas_workflow,
     get_canvas_metadata_path,
@@ -27,6 +29,27 @@ from api.workflow_validator import validate_workflow_editor_data
 from api.routes.route_helpers import split_save_workflow_payload
 
 router = APIRouter()
+
+
+def _collect_prompt_node_ids(workflow) -> list[str]:
+    """
+    从当前合法 canonical workflow 中提取仍然存在的 prompt 节点 id。
+
+    当前用途：
+    - save 完成后清理 workflows/<canvas_id>/prompts/ 下已失效的 orphan 文件
+    """
+
+    result: list[str] = []
+
+    for node in list(getattr(workflow, "nodes", []) or []):
+        node_id = str(getattr(node, "id", "") or "").strip()
+        config = getattr(node, "config", None)
+        node_type = str(getattr(config, "type", "") or "").strip()
+
+        if node_type == "prompt" and node_id:
+            result.append(node_id)
+
+    return result
 
 
 @router.get("/workflows")
@@ -71,8 +94,19 @@ def save_workflow(
 
         metadata_path = get_canvas_metadata_path(normalized_canvas_id)
 
+        # 正式顺序：
+        # 1) 先写当前 prompt 节点正文文件
+        # 2) 再写 workflow.yaml
+        # 3) 再清理不再被当前 workflow 引用的 orphan .prompt.md
+        dump_canvas_prompt_files(normalized_canvas_id, normalized_workflow)
+
         yaml_data = editor_schema_to_yaml(normalized_workflow)
         dump_canvas_workflow(normalized_canvas_id, yaml_data)
+
+        delete_orphan_canvas_prompt_files(
+            normalized_canvas_id,
+            keep_node_ids=_collect_prompt_node_ids(normalized_workflow),
+        )
 
         if not os.path.exists(metadata_path):
             dump_canvas_metadata(

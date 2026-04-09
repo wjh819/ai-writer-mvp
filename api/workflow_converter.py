@@ -30,7 +30,7 @@ workflow persistent YAML shape 与 canonical raw shape 的转换层。
 
 当前限制 / 待收口点：
 - 当前持久化 nodes 为 dict，而 canonical nodes 为 list；如持久化布局变化，本文件必须联动
-- converter 不理解 config 内部业务语义；只抽出 position，其余 config 字段原样交给 normalize 阶段处理
+- converter 不理解 config 内部业务语义；只抽出 position，其余 config 字段按节点类型白名单收口后交给 normalize 阶段处理
 """
 
 
@@ -70,7 +70,8 @@ def yaml_to_editor_schema(data: Any) -> dict:
     正式口径：
     - 只接受当前正式 YAML shape
     - 顶层必须显式包含 nodes / edges / contextLinks
-    - 不再兼容旧的 prompt.context 残留 shape
+    - prompt 正文不再属于 workflow.yaml
+    - 不再兼容旧的 promptMode / prompt / inlinePrompt 残留 shape
     - 不静默跳过非法 node / edge / contextLink / 顶层结构
 
     不负责：
@@ -121,9 +122,52 @@ def yaml_to_editor_schema(data: Any) -> dict:
                 f"Workflow node '{node_id_str}' position must be an object"
             )
 
-        # 当前持久化节点结构将 position 放在节点顶层，其余字段视为 raw config。
-        # converter 只拆出 position，不在此处理解 config 内部业务语义。
-        config = {k: v for k, v in raw_node.items() if k != "position"}
+        node_type = _require_string(
+            raw_node.get("type"),
+            f"Workflow node '{node_id_str}'.type",
+        )
+
+        if node_type == "input":
+            config = {
+                "type": "input",
+                "inputKey": raw_node.get("inputKey"),
+                "outputs": raw_node.get("outputs"),
+                "defaultValue": raw_node.get("defaultValue"),
+                "comment": raw_node.get("comment"),
+            }
+
+        elif node_type == "prompt":
+            invalid_prompt_keys = [
+                key
+                for key in ("promptMode", "prompt", "inlinePrompt", "promptText")
+                if key in raw_node
+            ]
+            if invalid_prompt_keys:
+                raise ValueError(
+                    f"Workflow node '{node_id_str}' prompt config contains invalid persisted fields: "
+                    f"{', '.join(invalid_prompt_keys)}"
+                )
+
+            config = {
+                "type": "prompt",
+                "promptText": "",
+                "comment": raw_node.get("comment"),
+                "modelResourceId": raw_node.get("modelResourceId"),
+                "llm": raw_node.get("llm"),
+                "outputs": raw_node.get("outputs"),
+            }
+
+        elif node_type == "output":
+            config = {
+                "type": "output",
+                "outputs": raw_node.get("outputs"),
+                "comment": raw_node.get("comment"),
+            }
+
+        else:
+            raise ValueError(
+                f"Workflow node '{node_id_str}' has unsupported type: {node_type}"
+            )
 
         nodes.append(
             {
@@ -210,6 +254,7 @@ def editor_schema_to_yaml(workflow: WorkflowEditorData) -> dict:
     职责：
     - 只做 shape 转换
     - 按节点类型写回各自合法字段
+    - prompt 正文不写入 workflow.yaml
     - edges 只写 data edge
     - contextLinks 单独写顶层窗口关系
 
@@ -246,9 +291,6 @@ def editor_schema_to_yaml(workflow: WorkflowEditorData) -> dict:
             node_data["defaultValue"] = config.defaultValue
 
         elif config.type == "prompt":
-            node_data["promptMode"] = config.promptMode
-            node_data["prompt"] = config.prompt
-            node_data["inlinePrompt"] = config.inlinePrompt
             node_data["modelResourceId"] = config.modelResourceId
             node_data["llm"] = config.llm.model_dump()
 

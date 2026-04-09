@@ -6,7 +6,7 @@ import type {
   StepNodeType,
   StepStatus,
 } from '../../run/runTypes'
-import type { PromptMode, WorkflowState } from '../../shared/workflowSharedTypes'
+import type { WorkflowState } from '../../shared/workflowSharedTypes'
 
 /**
  * run display model 层。
@@ -66,10 +66,6 @@ export interface DisplayStep {
   startedAt?: string
   finishedAt?: string
   durationMs?: number
-
-  promptMode?: PromptMode
-  promptRef?: string
-  promptDisplayText?: string
 
   inputs?: Record<string, unknown>
   renderedPrompt?: string

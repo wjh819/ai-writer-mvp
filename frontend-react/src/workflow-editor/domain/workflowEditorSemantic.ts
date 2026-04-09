@@ -41,9 +41,7 @@ function isSamePromptSemantic(
   nextConfig: PromptNodeConfig
 ): boolean {
   return (
-    previousConfig.promptMode === nextConfig.promptMode &&
-    previousConfig.prompt === nextConfig.prompt &&
-    previousConfig.inlinePrompt === nextConfig.inlinePrompt &&
+    previousConfig.promptText === nextConfig.promptText &&
     previousConfig.modelResourceId === nextConfig.modelResourceId &&
     previousConfig.llm.temperature === nextConfig.llm.temperature &&
     previousConfig.llm.timeout === nextConfig.llm.timeout &&
@@ -63,7 +61,8 @@ function isSameOutputSemantic(
  * 比较两个节点 config 是否语义等价。
  *
  * 正式规则：
- * - comment 不计入 semantic version
+ * - prompt 节点语义变化现在看 promptText / modelResourceId / llm / outputs
+ * comment 仍不计入 semantic version
  * - input.inputKey 计入 semantic version
  * - input.defaultValue 计入 semantic version
  * - outputs[] 计入 semantic version

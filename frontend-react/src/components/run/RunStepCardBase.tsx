@@ -7,7 +7,7 @@ import { formatDuration } from './runFormatters'
  *
  * 职责：
  * - 统一展示单步基础元信息：node、status、type、outputKey
- * - 条件展示 prompt 相关字段、时序字段、inputs、renderedPrompt、output / failure
+ * - 条件展示时序字段、inputs、renderedPrompt、window 信息、output / failure
  * - 作为步骤卡片通用壳，允许外部通过 children 在中间插入额外展示区
  *
  * 边界：
@@ -184,32 +184,17 @@ export default function RunStepCardBase({
         </div>
       ) : null}
 
-      <div
-        style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: 8,
-          fontSize: 13,
-          color: '#444',
-          marginBottom: 10,
-        }}
-      >
-        <div>
-          <strong>type:</strong> {step.type}
-        </div>
-
-        {step.promptMode && (
-          <div>
-            <strong>prompt mode:</strong> {step.promptMode}
-          </div>
-        )}
-
-        {step.promptDisplayText && (
-          <div>
-            <strong>prompt source:</strong> {step.promptDisplayText}
-          </div>
-        )}
-      </div>
+<div
+  style={{
+    fontSize: 13,
+    color: '#444',
+    marginBottom: 10,
+  }}
+>
+  <div>
+    <strong>type:</strong> {step.type}
+  </div>
+</div>
 
       {hasTiming && (
         <div

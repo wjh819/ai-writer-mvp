@@ -11,7 +11,6 @@ from contracts.workflow_contracts import (
     WorkflowEditorData,
 )
 from core.model_resource_registry import load_model_resource_registry
-from utils.prompt_loader import load_prompt
 
 
 """
@@ -25,7 +24,7 @@ workflow 合法性裁决层。
 - 节点 / 边 / contextLinks 结构规则
 - output / stateKey / binding 规则
 - 联合执行关系图无环检查
-- modelResourceId / prompt template / 模板变量绑定依赖检查
+- modelResourceId / promptText 变量绑定依赖检查
 - subgraph test 边界节点对当前 canonical workflow 的最小校验
 
 不负责：
@@ -40,10 +39,13 @@ workflow 合法性裁决层。
 - 下游由 save/load/run 主链消费裁决结果
 
 当前限制 / 待收口点：
-- dependency validation 会访问外部资源（model registry / prompt 文件），不是纯内存函数
+- dependency validation 会访问外部资源（model registry），不是纯内存函数
 - context source outbound 规则当前实现重点是“最多一个 continue”，可能弱于完整业务目标；修改时须同时核对前端 validator 与 graph 层
 - validator 与 engine 之间存在部分防御性规则重复，用于防止上游绕过校验后错误下沉到执行期
 """
+
+
+NODE_ID_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 
 
 def _trim(value: str | None) -> str:
@@ -98,19 +100,37 @@ def validate_identifier(value: str, label: str):
         )
 
 
-def extract_template_variables(template_text: str) -> set[str]:
+def validate_node_id(value: str, label: str):
     """
-    从 prompt 模板文本中提取顶层变量名集合。
+    node id 合法性校验。
+
+    当前规则：
+    - 必须非空
+    - 必须匹配 ^[A-Za-z0-9][A-Za-z0-9_-]*$
+    """
+
+    if not value:
+        raise InvalidInputError(f"{label} cannot be empty")
+
+    if not NODE_ID_PATTERN.match(value):
+        raise InvalidInputError(
+            f"{label} must match ^[A-Za-z0-9][A-Za-z0-9_-]*$"
+        )
+
+
+def extract_template_variables(prompt_text: str) -> set[str]:
+    """
+    从 promptText 中提取顶层变量名集合。
 
     注意：
     - 这里只提取 format field 的根变量名
-    - 不负责校验模板语义是否合理
+    - 不负责校验 prompt 语义是否合理
     - 结果仅用于与 data edge inbound bindings 做对齐检查
     """
 
     variables: set[str] = set()
 
-    for _, field_name, _, _ in Formatter().parse(template_text or ""):
+    for _, field_name, _, _ in Formatter().parse(prompt_text or ""):
         if not field_name:
             continue
 
@@ -129,7 +149,7 @@ def _build_incoming_data_edges_by_target(
 
     只负责：
     - 收集普通 data edges
-    - 供 dependency validation 做模板变量绑定检查
+    - 供 dependency validation 做 promptText 变量绑定检查
 
     不负责：
     - contextLinks 收集
@@ -270,8 +290,7 @@ def _collect_node_maps(workflow: WorkflowEditorData) -> tuple[dict[str, object],
 
     for node in workflow.nodes:
         node_id = _trim(node.id)
-        if not node_id:
-            raise InvalidInputError("Node id cannot be empty")
+        validate_node_id(node_id, "Node id")
         if node_id in node_ids:
             raise InvalidInputError(f"Duplicate node id: {node_id}")
 
@@ -381,7 +400,7 @@ def validate_workflow_structure(
 
     负责：
     - nodes / edges / contextLinks 顶层结构
-    - node id 唯一性
+    - node id 唯一性与 node id 正式格式
     - outputs / stateKey / output name 规则
     - edge binding 结构合法性
     - input 节点禁止 inbound data edge
@@ -394,9 +413,8 @@ def validate_workflow_structure(
     - 联合执行关系图 cycle 检查
 
     不负责：
-    - prompt 模板是否真实存在
     - modelResourceId 是否真实可解析
-    - 模板变量是否与 data edge bindings 对齐
+    - promptText 变量是否与 data edge bindings 对齐
 
     注意：
     - editor load 路径可以通过 enforce_source_outbound_rules=False
@@ -415,8 +433,7 @@ def validate_workflow_structure(
     # 第一遍：收集 node ids
     for node in workflow.nodes:
         node_id = _trim(node.id)
-        if not node_id:
-            raise InvalidInputError("Node id cannot be empty")
+        validate_node_id(node_id, "Node id")
 
         if node_id in node_ids:
             raise InvalidInputError(f"Duplicate node id: {node_id}")
@@ -493,7 +510,6 @@ def validate_workflow_structure(
             continue
 
         if isinstance(config, PromptNodeConfig):
-            prompt_mode = _trim(config.promptMode)
             model_resource_id = _trim(config.modelResourceId)
 
             if not model_resource_id:
@@ -506,27 +522,10 @@ def validate_workflow_structure(
                     f"Prompt node '{node_id}' must declare llm config"
                 )
 
-            if prompt_mode == "template":
-                if not _trim(config.prompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must select a prompt"
-                    )
-
-                if _trim(config.inlinePrompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must not declare inlinePrompt in template mode"
-                    )
-
-            if prompt_mode == "inline":
-                if not _trim(config.inlinePrompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must provide inline prompt text"
-                    )
-
-                if _trim(config.prompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must not declare prompt name in inline mode"
-                    )
+            if not _trim(config.promptText):
+                raise InvalidInputError(
+                    f"Prompt node '{node_id}' must provide promptText"
+                )
 
             continue
 
@@ -686,13 +685,12 @@ def validate_workflow_dependencies(workflow: WorkflowEditorData):
 
     负责：
     - modelResourceId 是否存在
-    - prompt 模板是否可加载
-    - 模板变量与 data edge inbound bindings 是否匹配
+    - promptText 中声明的变量与 data edge inbound bindings 是否匹配
 
     注意：
     - 这里的变量绑定检查只看普通 data edges
     - contextLinks 不参与结构化输入变量绑定
-    - 本函数会访问外部资源（model registry / prompt 文件），不是纯内存 validator
+    - 本函数会访问外部资源（model registry），不是纯内存 validator
     """
 
     prompt_nodes = [
@@ -721,17 +719,7 @@ def validate_workflow_dependencies(workflow: WorkflowEditorData):
                 f"'{model_resource_id}'"
             )
 
-        if config.promptMode == "inline":
-            template_text = config.inlinePrompt or ""
-        else:
-            try:
-                template_text = load_prompt(config.prompt)
-            except Exception as exc:
-                raise InvalidInputError(
-                    f"Prompt node '{node_id}' prompt template load failed: {exc}"
-                ) from exc
-
-        required_variables = extract_template_variables(template_text)
+        required_variables = extract_template_variables(config.promptText or "")
         bound_target_inputs = {
             _trim(edge.targetInput)
             for edge in incoming_edges_by_target.get(node_id, [])
@@ -911,7 +899,6 @@ def validate_partial_execution_workflow(
             continue
 
         if isinstance(config, PromptNodeConfig):
-            prompt_mode = _trim(config.promptMode)
             model_resource_id = _trim(config.modelResourceId)
 
             if not model_resource_id:
@@ -924,27 +911,10 @@ def validate_partial_execution_workflow(
                     f"Prompt node '{node_id}' must declare llm config"
                 )
 
-            if prompt_mode == "template":
-                if not _trim(config.prompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must select a prompt"
-                    )
-
-                if _trim(config.inlinePrompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must not declare inlinePrompt in template mode"
-                    )
-
-            if prompt_mode == "inline":
-                if not _trim(config.inlinePrompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must provide inline prompt text"
-                    )
-
-                if _trim(config.prompt):
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' must not declare prompt name in inline mode"
-                    )
+            if not _trim(config.promptText):
+                raise InvalidInputError(
+                    f"Prompt node '{node_id}' must provide promptText"
+                )
 
             continue
 
@@ -1150,17 +1120,7 @@ def validate_partial_execution_workflow(
                     f"'{model_resource_id}'"
                 )
 
-            if config.promptMode == "inline":
-                template_text = config.inlinePrompt or ""
-            else:
-                try:
-                    template_text = load_prompt(config.prompt)
-                except Exception as exc:
-                    raise InvalidInputError(
-                        f"Prompt node '{node_id}' prompt template load failed: {exc}"
-                    ) from exc
-
-            required_variables = extract_template_variables(template_text)
+            required_variables = extract_template_variables(config.promptText or "")
             bound_target_inputs = {
                 _trim(edge.targetInput)
                 for edge in incoming_edges_by_target.get(node_id, [])

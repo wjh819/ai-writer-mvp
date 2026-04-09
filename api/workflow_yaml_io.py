@@ -35,6 +35,10 @@ def load_yaml_workflow(path: str) -> dict[str, Any]:
 def dump_yaml_workflow(path: str, workflow: dict[str, Any]) -> None:
     """
     将原始 YAML object 写回指定路径。
+
+    注意：
+    - 本文件只负责 workflow.yaml 本体 IO
+    - 不负责 prompts/ 下独立 prompt 正文文件的读写
     """
 
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -58,6 +62,11 @@ def dump_canvas_workflow(canvas_id: str, workflow: dict[str, Any]) -> None:
 def delete_canvas_files(canvas_id: str) -> None:
     """
     删除指定 canvas 的正式目录内容。
+
+    当前行为：
+    - 直接删除 workflows/<canvas_id>/ 整个目录
+    - 因此其下 workflow.yaml / metadata.yaml / sidecar.yaml / outputs/ / prompts/
+      都会一并删除
     """
 
     workflow_path = get_canvas_workflow_path(canvas_id)

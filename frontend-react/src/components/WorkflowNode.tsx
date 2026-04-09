@@ -823,58 +823,51 @@ export default function WorkflowNode({
         </>
       )}
 
-      {nodeType === 'prompt' && config.type === 'prompt' && (
-        <>
-          <div style={{ fontSize: 12, marginBottom: 4 }}>
-            mode: {config.promptMode}
-          </div>
+{nodeType === 'prompt' && config.type === 'prompt' && (
+  <>
+    <div style={{ fontSize: 12, marginBottom: 4 }}>
+      prompt text: {config.promptText ? '(configured)' : '-'}
+    </div>
 
-          <div style={{ fontSize: 12, marginBottom: 4 }}>
-            prompt:{' '}
-            {config.promptMode === 'inline' ? '(inline)' : config.prompt || '-'}
-          </div>
+    <div style={{ fontSize: 12, marginBottom: 4 }}>
+      model resource: {config.modelResourceId || '-'}
+    </div>
 
-          <div style={{ fontSize: 12, marginBottom: 4 }}>
-            model resource: {config.modelResourceId || '-'}
-          </div>
+    <div style={{ fontSize: 12, marginBottom: 4 }}>
+      outputs: {formatOutputs(outputs)}
+    </div>
 
-          <div style={{ fontSize: 12, marginBottom: 4 }}>
-            outputs: {formatOutputs(outputs)}
-          </div>
+    {renderPromptWindowSummary(data)}
+    {renderInboundBindingsBlock(inboundBindings)}
 
-          {renderPromptWindowSummary(data)}
-          {renderInboundBindingsBlock(inboundBindings)}
+    <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 4 }}>
+      prompt variable hints (text-derived, not authoritative):
+    </div>
+    <div
+      style={{
+        fontSize: 12,
+        background: 'rgba(255,255,255,0.55)',
+        borderRadius: 6,
+        padding: 6,
+        marginBottom: 6,
+        wordBreak: 'break-word',
+      }}
+    >
+      {promptVariableHints.join(', ') || '-'}
+    </div>
 
-          <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 4 }}>
-            prompt variable hints (text-derived, not authoritative):
-          </div>
-          <div
-            style={{
-              fontSize: 12,
-              background: 'rgba(255,255,255,0.55)',
-              borderRadius: 6,
-              padding: 6,
-              marginBottom: 6,
-              wordBreak: 'break-word',
-            }}
-          >
-            {config.promptMode === 'inline'
-              ? promptVariableHints.join(', ') || '-'
-              : 'unavailable in template mode'}
-          </div>
-
-          {isExecuted && (
-            <>
-              {renderPreviewBlock('last inputs', data.runtimeInputs)}
-              {renderPreviewBlock('last raw output', data.runtimeOutput)}
-              {renderPreviewBlock(
-                'last published state',
-                data.runtimePublishedState
-              )}
-            </>
-          )}
-        </>
-      )}
+    {isExecuted && (
+      <>
+        {renderPreviewBlock('last inputs', data.runtimeInputs)}
+        {renderPreviewBlock('last raw output', data.runtimeOutput)}
+        {renderPreviewBlock(
+          'last published state',
+          data.runtimePublishedState
+        )}
+      </>
+    )}
+  </>
+)}
 
       {nodeType === 'output' && config.type === 'output' && (
         <>

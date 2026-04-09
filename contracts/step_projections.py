@@ -32,10 +32,8 @@ class InputFailedStepProjection(BaseStepProjection):
 class PromptSuccessStepProjection(BaseStepProjection):
     type: Literal["prompt"]
     status: Literal["success"]
-    prompt_mode: Literal["template", "inline"]
-    prompt_ref: Optional[str] = None
     inputs: Dict[str, Any] = Field(default_factory=dict)
-    rendered_prompt: Optional[str] = None
+    rendered_prompt: str
     output: str
     published_state: Dict[str, Any] = Field(default_factory=dict)
 
@@ -48,8 +46,6 @@ class PromptSuccessStepProjection(BaseStepProjection):
 class PromptFailedStepProjection(BaseStepProjection):
     type: Literal["prompt"]
     status: Literal["failed"]
-    prompt_mode: Literal["template", "inline"]
-    prompt_ref: Optional[str] = None
     inputs: Dict[str, Any] = Field(default_factory=dict)
     rendered_prompt: Optional[str] = None
     error_message: str

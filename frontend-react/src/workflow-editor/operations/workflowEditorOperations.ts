@@ -11,7 +11,6 @@
  */
 
 export type {
-    FetchPromptListResult,
     FetchModelResourceListResult,
     FetchWorkflowListResult,
     FetchWorkflowBootstrapResult,
@@ -27,7 +26,6 @@ export type {
 export { EMPTY_WORKFLOW_SIDECAR } from './operationResultHelpers'
 
 export {
-    fetchPromptListResult,
     fetchModelResourceListResult,
     fetchWorkflowListResult,
     fetchWorkflowBootstrapResult,

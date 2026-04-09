@@ -140,10 +140,6 @@ function isSameSemanticNodeConfig(
         return false
     }
 
-    if (previousConfig.comment !== nextConfig.comment) {
-        return false
-    }
-
     if (
         JSON.stringify(previousConfig.outputs || []) !==
         JSON.stringify(nextConfig.outputs || [])
@@ -160,9 +156,7 @@ function isSameSemanticNodeConfig(
 
     if (previousConfig.type === 'prompt' && nextConfig.type === 'prompt') {
         return (
-            previousConfig.promptMode === nextConfig.promptMode &&
-            previousConfig.prompt === nextConfig.prompt &&
-            previousConfig.inlinePrompt === nextConfig.inlinePrompt &&
+            previousConfig.promptText === nextConfig.promptText &&
             previousConfig.modelResourceId === nextConfig.modelResourceId &&
             JSON.stringify(previousConfig.llm) === JSON.stringify(nextConfig.llm)
         )

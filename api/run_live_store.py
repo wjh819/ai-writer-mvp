@@ -16,10 +16,7 @@ def _copy_state(value: dict[str, Any] | None) -> dict[str, Any]:
 
 
 def _map_steps(steps: Iterable[Any] | None) -> list[Any]:
-    return [
-        map_execution_step_to_run_step(step)
-        for step in list(steps or [])
-    ]
+    return [map_execution_step_to_run_step(step) for step in list(steps or [])]
 
 
 class RunLiveStore:
@@ -203,9 +200,7 @@ class RunLiveStore:
                 return
 
             self._active_run_id = None
-            safe_partial_state = (
-                _copy_state(partial_state) if partial_state is not None else None
-            )
+            safe_partial_state = _copy_state(partial_state) if partial_state is not None else None
 
             self._snapshot = LiveRunSnapshot(
                 **{

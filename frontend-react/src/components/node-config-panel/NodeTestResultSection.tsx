@@ -234,23 +234,19 @@ export default function NodeTestResultSection({
                         </span>
                                             </div>
 
-                                            <div
-                                                style={{
-                                                    fontSize: 12,
-                                                    color: '#475569',
-                                                    marginBottom: 4,
-                                                    whiteSpace: 'pre-wrap',
-                                                }}
-                                            >
-                                                {step.type}
-                                                {step.promptMode ? ` · ${step.promptMode}` : ''}
-                                                {step.promptDisplayText
-                                                    ? ` · ${step.promptDisplayText}`
-                                                    : ''}
-                                                {typeof step.durationMs === 'number'
-                                                    ? ` · ${step.durationMs} ms`
-                                                    : ''}
-                                            </div>
+<div
+    style={{
+        fontSize: 12,
+        color: '#475569',
+        marginBottom: 4,
+        whiteSpace: 'pre-wrap',
+    }}
+>
+    {step.type}
+    {typeof step.durationMs === 'number'
+        ? ` · ${step.durationMs} ms`
+        : ''}
+</div>
 
                                             {step.errorMessage ? (
                                                 <div

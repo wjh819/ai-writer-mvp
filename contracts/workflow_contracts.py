@@ -114,6 +114,7 @@ class PromptNodeConfig(StrictBaseModel):
 
     当前规则：
     - prompt 节点通过 data edges 获取结构化输入变量
+    - promptText 是 prompt 正文的唯一 canonical 字段
     - outputs 支持单输出或多输出
     - 模型选择只允许通过 modelResourceId 指向后端统一托管的共享 resource
     - llm 只承载运行参数
@@ -122,13 +123,12 @@ class PromptNodeConfig(StrictBaseModel):
 
     不负责：
     - 保存 graph-derived inputs
+    - 保存旧的 promptMode / prompt / inlinePrompt
     - 保存旧的 prompt.context / sourcePromptNodeId / forkMode 一类历史字段
     """
 
     type: Literal["prompt"]
-    promptMode: Literal["template", "inline"]
-    prompt: str = ""
-    inlinePrompt: str = ""
+    promptText: str
     comment: str = ""
     modelResourceId: str
     llm: LLMConfig

@@ -1,4 +1,4 @@
-import type { PromptMode, WorkflowState } from '../shared/workflowSharedTypes'
+import type { WorkflowState } from '../shared/workflowSharedTypes'
 import type { WorkflowEditorData } from '../workflow-editor/workflowEditorTypes'
 
 /**
@@ -59,8 +59,6 @@ export interface InputFailedStepProjection extends BaseStepProjection {
 export interface PromptSuccessStepProjection extends BaseStepProjection {
   type: 'prompt'
   status: 'success'
-  prompt_mode: PromptMode
-  prompt_ref?: string | null
   inputs: Record<string, unknown>
   rendered_prompt: string
   output: string
@@ -75,8 +73,6 @@ export interface PromptSuccessStepProjection extends BaseStepProjection {
 export interface PromptFailedStepProjection extends BaseStepProjection {
   type: 'prompt'
   status: 'failed'
-  prompt_mode: PromptMode
-  prompt_ref?: string | null
   inputs: Record<string, unknown>
   rendered_prompt: string | null
   error_message: string

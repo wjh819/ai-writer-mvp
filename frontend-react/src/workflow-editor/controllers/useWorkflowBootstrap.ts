@@ -15,7 +15,6 @@ export interface CanvasSummary {
 
 export function useWorkflowBootstrap() {
     const [canvasList, setCanvasList] = useState<CanvasSummary[]>([])
-    const [prompts, setPrompts] = useState<string[]>([])
     const [modelResources, setModelResources] = useState<ModelResourceListItem[]>(
         []
     )
@@ -62,12 +61,10 @@ export function useWorkflowBootstrap() {
                 return
             }
 
-            setPrompts(result.prompts)
             setModelResources(result.modelResources)
             setCanvasList(result.canvasList)
 
             const bootstrapErrors = [
-                result.promptErrorMessage,
                 result.modelResourceErrorMessage,
                 result.canvasListErrorMessage,
             ].filter(Boolean)
@@ -84,7 +81,6 @@ export function useWorkflowBootstrap() {
 
     return {
         canvasList,
-        prompts,
         modelResources,
         bootstrapErrorMessage,
         refreshWorkflowList,

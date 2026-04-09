@@ -34,7 +34,6 @@ interface NodeConfigPanelProps {
 
     onChange: (node: WorkflowEditorNode) => void
     onDelete: (nodeId: string) => void
-    prompts: string[]
     modelResources: ModelResourceListItem[]
 
     pinnedInputDraftTexts: Record<string, string>
@@ -72,7 +71,6 @@ export default function NodeConfigPanel({
 
     onChange,
     onDelete,
-    prompts,
     modelResources,
 
     pinnedInputDraftTexts,
@@ -186,7 +184,6 @@ export default function NodeConfigPanel({
 
                 <NodeTypeConfigSection
                     config={config}
-                    prompts={prompts}
                     modelResources={modelResources}
                     derivedTargetInputs={derivedTargetInputs}
                     inboundBindings={inboundBindings}

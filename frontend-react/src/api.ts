@@ -33,8 +33,6 @@ export {
     getActiveLiveRun,
 } from './api/runApi'
 
-export { getPrompts } from './api/promptApi'
-
 export {
     getModelResources,
     getModelResourcesStatus,

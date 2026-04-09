@@ -35,22 +35,22 @@ import {
  * 当前限制 / 待收口点：
  * - 只返回首个错误
  * - 最终保存以后端 normalize + validator 为准
- * - prompt 模板存在性 / model resource 存在性等依赖问题不在这里处理
+ * - model resource 存在性等依赖问题不在这里处理
  */
 
 /**
  * prompt 节点前端轻量规则检查。
  *
  * 负责：
- * - promptMode 合法性
  * - modelResourceId 必填
  * - llm 运行参数字段存在且为 number
- * - template / inline 两种模式下 prompt 与 inlinePrompt 的互斥关系
+ * - promptText 必填
  *
  * 不负责：
- * - prompt 模板实际是否存在
+ * - prompt 文件实际是否存在
  * - model resource 实际是否可解析
  * - prompt 变量与 inbound bindings 的依赖匹配
+ * - prompt sidecar 文件路径与清理语义裁决
  */
 export function validatePromptNodeRules(nodes: WorkflowEditorNode[] = []): string {
   for (const node of nodes) {
@@ -61,15 +61,10 @@ export function validatePromptNodeRules(nodes: WorkflowEditorNode[] = []): strin
       continue
     }
 
-    const promptMode =
-      typeof config.promptMode === 'string' ? config.promptMode.trim() : ''
-
-    if (!['template', 'inline'].includes(promptMode)) {
-      return `Prompt node '${node.id}' has invalid prompt mode: ${promptMode || '(empty)'}`
-    }
-
     const modelResourceId =
-      typeof config.modelResourceId === 'string' ? config.modelResourceId.trim() : ''
+      typeof config.modelResourceId === 'string'
+        ? config.modelResourceId.trim()
+        : ''
     if (!modelResourceId) {
       return `Prompt node '${node.id}' must select a model resource`
     }
@@ -92,30 +87,10 @@ export function validatePromptNodeRules(nodes: WorkflowEditorNode[] = []): strin
       return `Prompt node '${node.id}' must declare llm.max_retries`
     }
 
-    if (promptMode === 'template') {
-      const promptName = typeof config.prompt === 'string' ? config.prompt.trim() : ''
-      if (!promptName) {
-        return `Prompt node '${node.id}' must select a prompt`
-      }
-
-      const inlinePrompt =
-        typeof config.inlinePrompt === 'string' ? config.inlinePrompt.trim() : ''
-      if (inlinePrompt) {
-        return `Prompt node '${node.id}' must not declare inline prompt in template mode`
-      }
-    }
-
-    if (promptMode === 'inline') {
-      const inlinePrompt =
-        typeof config.inlinePrompt === 'string' ? config.inlinePrompt.trim() : ''
-      if (!inlinePrompt) {
-        return `Prompt node '${node.id}' must provide inline prompt text`
-      }
-      const promptName =
-        typeof config.prompt === 'string' ? config.prompt.trim() : ''
-      if (promptName) {
-        return `Prompt node '${node.id}' must not declare prompt in inline mode`
-      }
+    const promptText =
+      typeof config.promptText === 'string' ? config.promptText.trim() : ''
+    if (!promptText) {
+      return `Prompt node '${node.id}' must provide prompt text`
     }
   }
 

@@ -1,4 +1,3 @@
-import type { PromptMode } from '../shared/workflowSharedTypes'
 
 /**
  * 前端 workflow canonical mirror type 层。
@@ -57,9 +56,7 @@ export interface InputNodeConfig {
 
 export interface PromptNodeConfig {
     type: 'prompt'
-    promptMode: PromptMode
-    prompt: string
-    inlinePrompt: string
+    promptText: string
     comment: string
     modelResourceId: string
     llm: LLMConfig

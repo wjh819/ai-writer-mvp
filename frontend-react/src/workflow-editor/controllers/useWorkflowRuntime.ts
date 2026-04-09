@@ -19,7 +19,7 @@ import { useWorkflowSubgraphTestStore } from './useWorkflowSubgraphTestStore'
  *
  * 负责：
  * - 维持既有 useWorkflowRuntime() 外部调用面不变
- * - 统一组装 workflow 列表、prompt/model resource、save/run/load、sidecar 与 subgraph test 能力
+ * - 统一组装 workflow 列表、model resource、save/run/load、sidecar 与 subgraph test 能力
  *
  * 不负责：
  * - 图规则与 graph 同步
@@ -33,7 +33,7 @@ import { useWorkflowSubgraphTestStore } from './useWorkflowSubgraphTestStore'
  */
 export function useWorkflowRuntime(): {
     canvasList: ReturnType<typeof useWorkflowBootstrap>['canvasList']
-    prompts: ReturnType<typeof useWorkflowBootstrap>['prompts']
+
     modelResources: ReturnType<typeof useWorkflowBootstrap>['modelResources']
     runInputs: ReturnType<typeof useWorkflowRunInputs>['runInputs']
     workflowSidecar: ReturnType<typeof useWorkflowSidecarStore>['workflowSidecar']
@@ -93,7 +93,7 @@ export function useWorkflowRuntime(): {
 
     return {
         canvasList: bootstrap.canvasList,
-        prompts: bootstrap.prompts,
+
         modelResources: bootstrap.modelResources,
         runInputs: runInputs.runInputs,
         workflowSidecar: sidecar.workflowSidecar,

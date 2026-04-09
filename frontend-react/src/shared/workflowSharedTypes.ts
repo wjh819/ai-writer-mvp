@@ -23,4 +23,3 @@
  * - PromptMode 为前端共享枚举镜像，需与后端 contract 保持同步
  */
 export type WorkflowState = Record<string, unknown>
-export type PromptMode = 'template' | 'inline'

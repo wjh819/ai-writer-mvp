@@ -15,11 +15,6 @@ import type {
     WorkflowSidecarData,
 } from '../workflowEditorUiTypes'
 
-export interface FetchPromptListResult {
-    prompts: string[]
-    errorMessage?: string
-}
-
 export interface FetchModelResourceListResult {
     modelResources: ModelResourceListItem[]
     errorMessage?: string
@@ -31,8 +26,6 @@ export interface FetchWorkflowListResult {
 }
 
 export interface FetchWorkflowBootstrapResult {
-    prompts: string[]
-    promptErrorMessage: string
     modelResources: ModelResourceListItem[]
     modelResourceErrorMessage: string
     canvasList: CanvasSummary[]

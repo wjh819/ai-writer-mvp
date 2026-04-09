@@ -62,7 +62,7 @@ export function buildDisplayNodes(
         const inboundBindings = buildInboundBindings(node.id, edges)
         const promptVariableHints =
             config.type === 'prompt'
-                ? extractPromptVariableHints(config.promptMode, config.inlinePrompt)
+                ? extractPromptVariableHints(config.promptText)
                 : []
 
         const runtimeFields = buildRuntimeFields(node, latestStep)

@@ -6,6 +6,7 @@ from typing import Any
 from app_errors import WorkflowLoadError, WorkflowSidecarLoadError
 from api.workflow_converter import yaml_to_editor_schema
 from api.workflow_normalizer import normalize_workflow_editor_data
+from api.workflow_prompt_io import attach_prompt_texts_to_raw_editor_shape
 from api.workflow_paths import (
     ensure_workflow_exists,
     get_canvas_workflow_path,
@@ -34,7 +35,6 @@ def _build_warning(
     message: str,
     node_id: str | None = None,
     resource_id: str | None = None,
-    prompt_name: str | None = None,
 ) -> dict[str, Any]:
     warning: dict[str, Any] = {
         "code": code,
@@ -46,8 +46,6 @@ def _build_warning(
         warning["nodeId"] = node_id
     if resource_id:
         warning["resourceId"] = resource_id
-    if prompt_name:
-        warning["promptName"] = prompt_name
 
     return warning
 
@@ -56,13 +54,20 @@ def load_workflow_for_editor(
     path: str,
 ) -> tuple[WorkflowEditorData, WorkflowSidecarData, list[dict[str, Any]]]:
     """
-    从 YAML 文件加载 workflow，返回 editor load response 所需内容。
+    从 workflow.yaml + prompts/ 目录加载 workflow，返回 editor load response 所需内容。
+
+    正式主链：
+    - 先读 workflow.yaml
+    - converter 产出 canonical raw shape
+    - 再从独立 .prompt.md 文件回填 promptText
+    - 再进入 normalize / structure validate
     """
 
     raw_data = load_yaml_workflow(path)
 
     try:
         raw_shape = yaml_to_editor_schema(raw_data)
+        raw_shape = attach_prompt_texts_to_raw_editor_shape(raw_shape, path)
         workflow = normalize_workflow_editor_data(raw_shape)
 
         validate_workflow_structure(

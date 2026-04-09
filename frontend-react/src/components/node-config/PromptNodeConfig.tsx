@@ -12,7 +12,7 @@ import type {
  * - 展示与 prompt 节点相关的 graph-derived 只读提示信息
  *
  * 负责：
- * - 编辑 promptMode / prompt / inlinePrompt
+ * - 编辑 promptText
  * - 编辑 modelResourceId
  * - 编辑 llm 运行参数
  * - 展示窗口关系摘要、inbound bindings、prompt variable hints
@@ -24,14 +24,13 @@ import type {
  * - contextLinks 管理
  *
  * 上下游：
- * - 上游由 NodeConfigPanel 传入 config、prompts、modelResources 与 graph-derived 展示信息
+ * - 上游由 NodeConfigPanel 传入 config、modelResources 与 graph-derived 展示信息
  * - 下游把 nextConfig 回传给上层，由 actions/controller 决定是否接受
  *
  * 当前限制 / 待收口点：
  * - graphWindow* 仅是来自 contextLinks 的图关系摘要，不是运行态 window identity
  * - inboundBindings 是权威输入来源展示，但并不在本组件中直接创建/修改 bindings
  * - promptVariableHints 仅是 text-derived hint，不等于正式输入语义
- * - template 模式下当前 UI 拿不到模板正文，因此不提供变量 hint
  */
 interface InboundBindingDisplayItem {
   sourceNodeId: string
@@ -41,7 +40,6 @@ interface InboundBindingDisplayItem {
 
 interface PromptNodeConfigProps {
   config: PromptNodeConfigType
-  prompts: string[]
   modelResources: ModelResourceListItem[]
   derivedTargetInputs?: string[]
   inboundBindings?: InboundBindingDisplayItem[]
@@ -96,7 +94,6 @@ function buildWindowRelationSummary(params: {
 
 export default function PromptNodeConfigForm({
   config,
-  prompts,
   modelResources,
   derivedTargetInputs = [],
   inboundBindings = [],
@@ -118,7 +115,7 @@ export default function PromptNodeConfigForm({
    *
    * 不负责：
    * - 对 nextConfig 做 normalize
-   * - 校验 promptMode 与 prompt/inlinePrompt 的最终合法性
+   * - 校验 promptText / modelResourceId / llm 的最终合法性
    */
   function updateConfig(patch: Partial<PromptNodeConfigType>) {
     onConfigChange({
@@ -146,58 +143,17 @@ export default function PromptNodeConfigForm({
   return (
     <>
       <div style={{ marginBottom: 12 }}>
-        <label style={{ display: 'block', marginBottom: 4 }}>Prompt Mode</label>
-        <select
-          value={config.promptMode}
+        <label style={{ display: 'block', marginBottom: 4 }}>
+          Prompt Text
+        </label>
+        <textarea
+          value={config.promptText}
           disabled={disabled}
-          onChange={e =>
-            updateConfig({
-              promptMode: e.target.value as PromptNodeConfigType['promptMode'],
-              ...(e.target.value === 'template'
-                ? { inlinePrompt: '' }
-                : { prompt: '' }),
-            })
-          }
-          style={{ width: '100%' }}
-        >
-          <option value='template'>Template</option>
-          <option value='inline'>Inline</option>
-        </select>
+          onChange={e => updateConfig({ promptText: e.target.value })}
+          style={{ width: '100%', minHeight: 140 }}
+          placeholder='Write prompt text here...'
+        />
       </div>
-
-      {config.promptMode === 'template' ? (
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>
-            Prompt Template
-          </label>
-          <select
-            value={config.prompt}
-            disabled={disabled}
-            onChange={e => updateConfig({ prompt: e.target.value })}
-            style={{ width: '100%' }}
-          >
-            <option value=''>Select a prompt template</option>
-            {prompts.map(promptName => (
-              <option key={promptName} value={promptName}>
-                {promptName}
-              </option>
-            ))}
-          </select>
-        </div>
-      ) : (
-        <div style={{ marginBottom: 12 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>
-            Inline Prompt
-          </label>
-          <textarea
-            value={config.inlinePrompt}
-            disabled={disabled}
-            onChange={e => updateConfig({ inlinePrompt: e.target.value })}
-            style={{ width: '100%', minHeight: 100 }}
-            placeholder='Write inline prompt text here...'
-          />
-        </div>
-      )}
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>
@@ -354,10 +310,8 @@ export default function PromptNodeConfigForm({
             recognizes inbound bindings from edges.
           </div>
 
-          {config.promptMode !== 'inline' ? (
-            <div>Hints are unavailable in template mode in the current UI.</div>
-          ) : promptVariableHints.length === 0 ? (
-            <div>No variable hints parsed from inline prompt.</div>
+          {promptVariableHints.length === 0 ? (
+            <div>No variable hints parsed from prompt text.</div>
           ) : (
             promptVariableHints.map(name => (
               <div key={name} style={{ marginBottom: 4 }}>

@@ -70,7 +70,6 @@ def _normalize_optional_text(value: Any, label: str) -> str:
 
     适用场景：
     - comment
-    - inactive branch prompt / inlinePrompt
 
     规则：
     - None -> ""
@@ -83,6 +82,25 @@ def _normalize_optional_text(value: Any, label: str) -> str:
     if not isinstance(value, str):
         raise ValueError(f"{label} must be a string")
     return value.strip()
+
+
+def _normalize_prompt_text(value: Any, label: str) -> str:
+    """
+    prompt 正文收敛。
+
+    规则：
+    - 必须原本就是 str
+    - 不做 strip
+    - 不在 normalize 阶段裁决“是否为空白正文”
+
+    注意：
+    - promptText 属于正文内容，不应在 normalize 阶段静默改写首尾空白
+    - “正文是否为空 / 是否只有空白”由 validator 做正式裁决
+    """
+
+    if not isinstance(value, str):
+        raise ValueError(f"{label} must be a string")
+    return value
 
 
 def _normalize_position(raw_position: Any) -> Position:
@@ -195,15 +213,15 @@ def _normalize_node_config(raw_config: Any):
     - config 必须是 dict
     - 只做字段级 shape 收敛与最小文本规范化
     - 不修正非法 type
-    - 不修正非法 promptMode
     - 不补默认 outputs
     - 不补默认 llm
     - 不补 defaultValue
+    - 不补 promptText
     - 不补窗口关系默认值
 
     注意：
     - 这里会直接实例化 canonical model
-    - 因此 type / promptMode 等枚举字段的 shape-level 合法值
+    - 因此 type 等枚举字段的 shape-level 合法值
       也会在 normalize 阶段被裁决
     - validator 负责的是结构关系、业务规则和依赖规则
     """
@@ -239,19 +257,14 @@ def _normalize_node_config(raw_config: Any):
         )
 
     if node_type == "prompt":
+        if "promptText" not in raw_config:
+            raise ValueError("Prompt node promptText must be explicitly provided")
+
         return PromptNodeConfig(
             type="prompt",
-            promptMode=_require_trimmed_string(
-                raw_config.get("promptMode"),
-                "Prompt node promptMode",
-            ),
-            prompt=_normalize_optional_text(
-                raw_config.get("prompt"),
-                "Prompt node prompt",
-            ),
-            inlinePrompt=_normalize_optional_text(
-                raw_config.get("inlinePrompt"),
-                "Prompt node inlinePrompt",
+            promptText=_normalize_prompt_text(
+                raw_config.get("promptText"),
+                "Prompt node promptText",
             ),
             comment=_normalize_optional_text(
                 raw_config.get("comment"),

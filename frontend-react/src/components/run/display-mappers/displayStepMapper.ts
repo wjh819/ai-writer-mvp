@@ -16,22 +16,6 @@ function buildDisplayStepId(node: string, index: number) {
     return `${node}-${index}`
 }
 
-function derivePromptDisplayText(step: RawDisplayStep): string | undefined {
-    if (
-        'prompt_ref' in step &&
-        typeof step.prompt_ref === 'string' &&
-        step.prompt_ref.trim()
-    ) {
-        return step.prompt_ref.trim()
-    }
-
-    if ('prompt_mode' in step && step.prompt_mode === 'inline') {
-        return '(inline)'
-    }
-
-    return undefined
-}
-
 export function buildDisplayStepsFromRawSteps(
     inputState: WorkflowState,
     steps: RawDisplayStep[]
@@ -62,9 +46,7 @@ export function buildDisplayStepsFromRawSteps(
             startedAt: step.started_at,
             finishedAt: step.finished_at,
             durationMs: step.duration_ms,
-            promptMode: 'prompt_mode' in step ? step.prompt_mode : undefined,
-            promptRef: 'prompt_ref' in step ? step.prompt_ref ?? undefined : undefined,
-            promptDisplayText: derivePromptDisplayText(step),
+
             inputs: 'inputs' in step ? step.inputs : undefined,
             renderedPrompt:
                 'rendered_prompt' in step ? step.rendered_prompt ?? undefined : undefined,
