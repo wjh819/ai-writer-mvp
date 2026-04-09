@@ -20,6 +20,8 @@ export {
     getPublishedState,
     buildLatestStepMap,
     buildExecutedNodeMap,
+    findLastFailedStep,
+    getActiveNodeId,
 } from './runStepSelectors'
 
 export { buildRuntimeFields } from './runtimeFieldDerivers'

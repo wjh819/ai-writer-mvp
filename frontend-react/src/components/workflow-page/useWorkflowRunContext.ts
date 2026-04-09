@@ -115,6 +115,24 @@ export function useWorkflowRunContext({
         ]
     )
 
+    const commitFinalRunResult = useCallback(
+        (nextRunResult: RunResult) => {
+            clearPageError()
+            setRunContext({
+                canvasId: activeCanvasId,
+                workflowContextId: activeWorkflowContextId,
+                graphSemanticVersion,
+                runResult: nextRunResult,
+            })
+        },
+        [
+            clearPageError,
+            activeCanvasId,
+            activeWorkflowContextId,
+            graphSemanticVersion,
+        ]
+    )
+
     return {
         runContext,
         clearRunState,
@@ -124,5 +142,6 @@ export function useWorkflowRunContext({
         displayRun,
         hasVisibleRunResult,
         runWorkflow,
+        commitFinalRunResult,
     }
 }

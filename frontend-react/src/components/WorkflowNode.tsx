@@ -8,6 +8,7 @@ import {
   CONTEXT_TARGET_HANDLE_ID,
   CREATE_BINDING_HANDLE_ID,
   type InboundBindingDisplayItem,
+  type LiveRunDisplayStatus,
   type WorkflowNodeData,
 } from '../workflow-editor/workflowEditorGraphTypes'
 
@@ -32,7 +33,7 @@ const TYPE_STYLES = {
     border: '1px solid #ccc',
     color: '#333',
   },
-}
+} as const
 
 function trim(value: unknown): string {
   if (value === null || typeof value === 'undefined') {
@@ -151,7 +152,7 @@ function getInboundBindings(data: WorkflowNodeData): InboundBindingDisplayItem[]
   return Array.isArray(data.inboundBindings) ? data.inboundBindings : []
 }
 
-function renderTargetHandles(handleIds: string[]) {
+function renderTargetHandles(handleIds: string[], isLocked: boolean) {
   if (!handleIds.length) {
     return null
   }
@@ -188,7 +189,7 @@ function renderTargetHandles(handleIds: string[]) {
           id={handleId}
           type='target'
           position={Position.Top}
-          isConnectable={true}
+          isConnectable={!isLocked}
           style={{
             left: '50%',
             top: 0,
@@ -198,7 +199,8 @@ function renderTargetHandles(handleIds: string[]) {
             background: '#ffffff',
             border: '2px solid #64748b',
             boxShadow: '0 0 0 2px rgba(100,116,139,0.14)',
-            cursor: 'crosshair',
+            opacity: isLocked ? 0.5 : 1,
+            cursor: isLocked ? 'not-allowed' : 'crosshair',
           }}
         />
       </div>
@@ -206,7 +208,7 @@ function renderTargetHandles(handleIds: string[]) {
   })
 }
 
-function renderCreateBindingHandle() {
+function renderCreateBindingHandle(isLocked: boolean) {
   return (
     <div
       key='target-create-binding'
@@ -235,7 +237,7 @@ function renderCreateBindingHandle() {
         id={CREATE_BINDING_HANDLE_ID}
         type='target'
         position={Position.Top}
-        isConnectable={true}
+        isConnectable={!isLocked}
         style={{
           left: '50%',
           top: 0,
@@ -245,14 +247,17 @@ function renderCreateBindingHandle() {
           background: '#ffffff',
           border: '2px dashed #64748b',
           boxShadow: '0 0 0 2px rgba(100,116,139,0.14)',
-          cursor: 'crosshair',
+          opacity: isLocked ? 0.5 : 1,
+          cursor: isLocked ? 'not-allowed' : 'crosshair',
         }}
       />
     </div>
   )
 }
 
-function renderInboundBindingsBlock(inboundBindings: InboundBindingDisplayItem[]) {
+function renderInboundBindingsBlock(
+  inboundBindings: InboundBindingDisplayItem[]
+) {
   return (
     <>
       <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 6 }}>
@@ -287,19 +292,20 @@ function renderInboundBindingsBlock(inboundBindings: InboundBindingDisplayItem[]
   )
 }
 
-function renderSourceHandles(outputs: NodeOutputSpec[]) {
+function renderSourceHandles(outputs: NodeOutputSpec[], isLocked: boolean) {
   if (!outputs.length) {
     return (
       <Handle
         type='source'
         position={Position.Bottom}
-        isConnectable={true}
+        isConnectable={!isLocked}
         style={{
           width: 12,
           height: 12,
           background: '#ffffff',
           border: '2px solid #64748b',
-          cursor: 'crosshair',
+          opacity: isLocked ? 0.5 : 1,
+          cursor: isLocked ? 'not-allowed' : 'crosshair',
         }}
       />
     )
@@ -324,7 +330,7 @@ function renderSourceHandles(outputs: NodeOutputSpec[]) {
           id={handleId}
           type='source'
           position={Position.Bottom}
-          isConnectable={true}
+          isConnectable={!isLocked}
           style={{
             left: '50%',
             bottom: 0,
@@ -334,7 +340,8 @@ function renderSourceHandles(outputs: NodeOutputSpec[]) {
             background: '#ffffff',
             border: '2px solid #64748b',
             boxShadow: '0 0 0 2px rgba(100,116,139,0.14)',
-            cursor: 'crosshair',
+            opacity: isLocked ? 0.5 : 1,
+            cursor: isLocked ? 'not-allowed' : 'crosshair',
           }}
         />
 
@@ -394,7 +401,7 @@ function renderPromptWindowSummary(data: WorkflowNodeData) {
   )
 }
 
-function renderContextTargetHandle() {
+function renderContextTargetHandle(isLocked: boolean) {
   return (
     <div
       style={{
@@ -424,7 +431,7 @@ function renderContextTargetHandle() {
         id={CONTEXT_TARGET_HANDLE_ID}
         type='target'
         position={Position.Left}
-        isConnectable={true}
+        isConnectable={!isLocked}
         style={{
           left: 0,
           top: '50%',
@@ -434,14 +441,15 @@ function renderContextTargetHandle() {
           background: '#8b5cf6',
           border: '2px solid #5b21b6',
           boxShadow: '0 0 0 2px rgba(139,92,246,0.18)',
-          cursor: 'crosshair',
+          opacity: isLocked ? 0.5 : 1,
+          cursor: isLocked ? 'not-allowed' : 'crosshair',
         }}
       />
     </div>
   )
 }
 
-function renderContextSourceHandle() {
+function renderContextSourceHandle(isLocked: boolean) {
   return (
     <div
       style={{
@@ -471,7 +479,7 @@ function renderContextSourceHandle() {
         id={CONTEXT_SOURCE_HANDLE_ID}
         type='source'
         position={Position.Right}
-        isConnectable={true}
+        isConnectable={!isLocked}
         style={{
           right: 0,
           top: '50%',
@@ -481,7 +489,8 @@ function renderContextSourceHandle() {
           background: '#8b5cf6',
           border: '2px solid #5b21b6',
           boxShadow: '0 0 0 2px rgba(139,92,246,0.18)',
-          cursor: 'crosshair',
+          opacity: isLocked ? 0.5 : 1,
+          cursor: isLocked ? 'not-allowed' : 'crosshair',
         }}
       />
     </div>
@@ -532,6 +541,20 @@ export default function WorkflowNode({
     typeof data.onRequestSubgraphTest === 'function'
   const isSubgraphTestRunning = Boolean(data.isSubgraphTestRunning)
 
+  const isRunActive = Boolean(data?.isRunActive || data?.isRunRunning)
+  const isRunFailed = Boolean(data?.isRunFailed)
+  const isNodeInteractionLocked = Boolean(data?.isNodeInteractionLocked)
+  const liveStatus: LiveRunDisplayStatus =
+    data?.liveStatus ??
+    (isRunActive
+      ? 'running'
+      : isRunFailed
+        ? 'failed'
+        : isExecuted
+          ? 'success'
+          : 'idle')
+  const liveErrorMessage = trim(data?.liveErrorMessage)
+
   const inputPublishedStateEntry =
     nodeType === 'input'
       ? getSinglePublishedStateEntry(data.runtimePublishedState)
@@ -551,48 +574,81 @@ export default function WorkflowNode({
     outputs.map(output => trim(output.name)).join('|'),
     trim(data.graphWindowMode),
     trim(data.graphWindowSourceNodeId),
-    (data.graphWindowTargetNodeIds || []).join('|'),
+    (data.graphWindowTargetNodeIds || []).map(trim).filter(Boolean).join('|'),
   ])
+
+  const cardBorder = isRunFailed
+    ? '1px solid #ef4444'
+    : isRunActive
+      ? '1px solid #3b82f6'
+      : style.border
+
+  const cardBoxShadow = isRunActive
+    ? '0 0 0 3px rgba(59, 130, 246, 0.30), 0 4px 14px rgba(0,0,0,0.12)'
+    : isRunFailed
+      ? '0 0 0 3px rgba(239, 68, 68, 0.22), 0 4px 14px rgba(0,0,0,0.12)'
+      : isExecuted
+        ? '0 0 0 3px rgba(251, 191, 36, 0.35), 0 4px 14px rgba(0,0,0,0.12)'
+        : selected
+          ? '0 0 0 2px rgba(59, 130, 246, 0.25), 0 2px 8px rgba(0,0,0,0.08)'
+          : '0 2px 8px rgba(0,0,0,0.08)'
+
+  const liveStatusChip =
+    liveStatus === 'running'
+      ? { label: 'RUNNING', background: '#dbeafe', color: '#1d4ed8' }
+      : liveStatus === 'failed'
+        ? { label: 'FAILED', background: '#fee2e2', color: '#991b1b' }
+        : liveStatus === 'success'
+          ? { label: 'EXECUTED', background: '#fef3c7', color: '#92400e' }
+          : null
+
+  const topRightBadge = isRunActive
+    ? { text: 'RUN', background: '#2563eb' }
+    : isRunFailed
+      ? { text: '!', background: '#dc2626' }
+      : isExecuted
+        ? {
+            text: typeof stepIndex === 'number' ? String(stepIndex + 1) : '✓',
+            background: '#f59e0b',
+          }
+        : null
 
   return (
     <div
       style={{
+        ...style,
         minWidth: 240,
         maxWidth: 360,
         borderRadius: 10,
         padding: 12,
-        boxShadow: isExecuted
-          ? '0 0 0 3px rgba(251, 191, 36, 0.35), 0 4px 14px rgba(0,0,0,0.12)'
-          : selected
-            ? '0 0 0 2px rgba(59, 130, 246, 0.25), 0 2px 8px rgba(0,0,0,0.08)'
-            : '0 2px 8px rgba(0,0,0,0.08)',
         position: 'relative',
         marginTop: nodeType === 'input' ? 4 : 24,
         marginBottom: 28,
-        ...style,
+        border: cardBorder,
+        boxShadow: cardBoxShadow,
       }}
     >
       {nodeType !== 'input' && (
         <>
-          {renderTargetHandles(targetInputHandles)}
-          {renderCreateBindingHandle()}
+          {renderTargetHandles(targetInputHandles, isNodeInteractionLocked)}
+          {renderCreateBindingHandle(isNodeInteractionLocked)}
         </>
       )}
 
       {nodeType === 'prompt' && (
         <>
-          {renderContextTargetHandle()}
-          {renderContextSourceHandle()}
+          {renderContextTargetHandle(isNodeInteractionLocked)}
+          {renderContextSourceHandle(isNodeInteractionLocked)}
         </>
       )}
 
-      {isExecuted && (
+      {topRightBadge && (
         <div
           style={{
             position: 'absolute',
             top: -10,
             right: -10,
-            background: '#f59e0b',
+            background: topRightBadge.background,
             color: '#fff',
             borderRadius: 999,
             minWidth: 24,
@@ -602,10 +658,11 @@ export default function WorkflowNode({
             justifyContent: 'center',
             fontSize: 12,
             fontWeight: 700,
+            padding: '0 8px',
             boxShadow: '0 2px 6px rgba(0,0,0,0.18)',
           }}
         >
-          {typeof stepIndex === 'number' ? stepIndex + 1 : '✓'}
+          {topRightBadge.text}
         </div>
       )}
 
@@ -631,6 +688,22 @@ export default function WorkflowNode({
           }}
         >
           <div style={{ fontWeight: 700 }}>{id || 'Unnamed Node'}</div>
+
+          {liveStatusChip ? (
+            <span
+              style={{
+                fontSize: 10,
+                lineHeight: 1,
+                padding: '4px 6px',
+                borderRadius: 999,
+                background: liveStatusChip.background,
+                color: liveStatusChip.color,
+                fontWeight: 700,
+              }}
+            >
+              {liveStatusChip.label}
+            </span>
+          ) : null}
         </div>
 
         {canRequestSubgraphTest && (
@@ -654,20 +727,63 @@ export default function WorkflowNode({
               event.stopPropagation()
               data.onRequestSubgraphTest?.(id)
             }}
-            disabled={isSubgraphTestRunning}
+            disabled={isSubgraphTestRunning || isNodeInteractionLocked}
             style={{
               fontSize: 12,
               padding: '4px 8px',
               borderRadius: 6,
               border: '1px solid #cbd5e1',
-              background: isSubgraphTestRunning ? '#e2e8f0' : '#ffffff',
-              cursor: isSubgraphTestRunning ? 'default' : 'pointer',
+              background:
+                isSubgraphTestRunning || isNodeInteractionLocked
+                  ? '#e2e8f0'
+                  : '#ffffff',
+              cursor:
+                isSubgraphTestRunning || isNodeInteractionLocked
+                  ? 'default'
+                  : 'pointer',
             }}
           >
-            {isSubgraphTestRunning ? 'Running...' : 'Test'}
+            {isSubgraphTestRunning
+              ? 'Running...'
+              : isNodeInteractionLocked
+                ? 'Locked'
+                : 'Test'}
           </button>
         )}
       </div>
+
+      {isRunActive ? (
+        <div
+          style={{
+            marginBottom: 8,
+            padding: 8,
+            borderRadius: 8,
+            border: '1px solid #bfdbfe',
+            background: '#eff6ff',
+            color: '#1d4ed8',
+            fontSize: 12,
+            fontWeight: 600,
+          }}
+        >
+          This node is currently executing in the active live run.
+        </div>
+      ) : null}
+
+      {isRunFailed && liveErrorMessage ? (
+        <div
+          style={{
+            marginBottom: 8,
+            padding: 8,
+            borderRadius: 8,
+            border: '1px solid #fecaca',
+            background: '#fef2f2',
+            color: '#991b1b',
+            fontSize: 12,
+          }}
+        >
+          Live failure: {liveErrorMessage.split('\n')[0]}
+        </div>
+      ) : null}
 
       {nodeType === 'input' && config.type === 'input' && (
         <>
@@ -793,7 +909,20 @@ export default function WorkflowNode({
         </>
       )}
 
-      {renderSourceHandles(outputs)}
+      {isNodeInteractionLocked ? (
+        <div
+          style={{
+            marginTop: 8,
+            fontSize: 11,
+            color: '#475569',
+            opacity: 0.9,
+          }}
+        >
+          Graph editing is locked while the live run is active.
+        </div>
+      ) : null}
+
+      {renderSourceHandles(outputs, isNodeInteractionLocked)}
     </div>
   )
 }

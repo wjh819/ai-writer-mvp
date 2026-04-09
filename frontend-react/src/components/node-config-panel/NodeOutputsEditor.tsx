@@ -12,6 +12,7 @@ interface NodeOutputsEditorProps {
     onConfigChange: (
         nextConfig: InputNodeConfig | PromptNodeConfig | OutputNodeConfig
     ) => void
+    disabled?: boolean
 }
 
 function buildNextOutputSpec(
@@ -31,17 +32,22 @@ function buildNextOutputSpec(
 }
 
 export default function NodeOutputsEditor({
-                                              nodeId,
-                                              config,
-                                              onConfigChange,
-                                          }: NodeOutputsEditorProps) {
+    nodeId,
+    config,
+    onConfigChange,
+    disabled = false,
+}: NodeOutputsEditorProps) {
     function updateOutput(index: number, patch: Partial<NodeOutputSpec>) {
+        if (disabled) {
+            return
+        }
+
         const nextOutputs = (config.outputs || []).map((output, outputIndex) =>
             outputIndex === index
                 ? {
-                    ...output,
-                    ...patch,
-                }
+                      ...output,
+                      ...patch,
+                  }
                 : output
         )
 
@@ -52,6 +58,10 @@ export default function NodeOutputsEditor({
     }
 
     function addOutput() {
+        if (disabled) {
+            return
+        }
+
         const nextOutput = buildNextOutputSpec(nodeId, config)
 
         onConfigChange({
@@ -61,6 +71,10 @@ export default function NodeOutputsEditor({
     }
 
     function removeOutput(index: number) {
+        if (disabled) {
+            return
+        }
+
         if ((config.outputs || []).length <= 1) {
             return
         }
@@ -85,7 +99,7 @@ export default function NodeOutputsEditor({
                         padding: 10,
                         border: '1px solid #e5e7eb',
                         borderRadius: 8,
-                        background: '#fff',
+                        background: disabled ? '#f8fafc' : '#fff',
                     }}
                 >
                     <div style={{ marginBottom: 8 }}>
@@ -98,6 +112,7 @@ export default function NodeOutputsEditor({
                             value={output.name}
                             onChange={e => updateOutput(index, { name: e.target.value })}
                             style={{ width: '100%' }}
+                            disabled={disabled}
                         />
                     </div>
 
@@ -109,22 +124,25 @@ export default function NodeOutputsEditor({
                         </label>
                         <input
                             value={output.stateKey}
-                            onChange={e => updateOutput(index, { stateKey: e.target.value })}
+                            onChange={e =>
+                                updateOutput(index, { stateKey: e.target.value })
+                            }
                             style={{ width: '100%' }}
+                            disabled={disabled}
                         />
                     </div>
 
                     <button
                         type='button'
                         onClick={() => removeOutput(index)}
-                        disabled={(config.outputs || []).length <= 1}
+                        disabled={disabled || (config.outputs || []).length <= 1}
                     >
                         Remove Output
                     </button>
                 </div>
             ))}
 
-            <button type='button' onClick={addOutput}>
+            <button type='button' onClick={addOutput} disabled={disabled}>
                 Add Output
             </button>
         </div>

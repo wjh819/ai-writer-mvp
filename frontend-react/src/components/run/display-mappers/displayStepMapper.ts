@@ -1,4 +1,4 @@
-import type { StepProjection } from '../../../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../../../run/runTypes'
 import type { WorkflowState } from '../../../shared/workflowSharedTypes'
 import type { DisplayRun, DisplayStep } from '../runDisplayModels'
 import { getErrorText } from '../runFailure'
@@ -8,11 +8,15 @@ import {
     getPublishedState,
 } from './writebackReplay'
 
+type RawDisplayStep =
+    | RunResult['steps'][number]
+    | LiveRunSnapshot['steps'][number]
+
 function buildDisplayStepId(node: string, index: number) {
     return `${node}-${index}`
 }
 
-function derivePromptDisplayText(step: StepProjection): string | undefined {
+function derivePromptDisplayText(step: RawDisplayStep): string | undefined {
     if (
         'prompt_ref' in step &&
         typeof step.prompt_ref === 'string' &&
@@ -30,7 +34,7 @@ function derivePromptDisplayText(step: StepProjection): string | undefined {
 
 export function buildDisplayStepsFromRawSteps(
     inputState: WorkflowState,
-    steps: StepProjection[]
+    steps: RawDisplayStep[]
 ): DisplayStep[] {
     const workingState: WorkflowState = { ...(inputState || {}) }
 
@@ -88,20 +92,23 @@ export function buildDisplayRunBase(params: {
         run_scope: DisplayRun['runScope']
         failure_stage?: DisplayRun['failureStage']
         input_state?: WorkflowState
+        current_state?: WorkflowState
         final_state?: WorkflowState
         partial_state?: WorkflowState | null
-        steps?: StepProjection[]
+        steps?: RawDisplayStep[]
     }
 }) {
     const { runResult } = params
 
     const inputState = runResult.input_state || {}
+    const currentState = runResult.current_state || {}
     const finalState = runResult.final_state || {}
     const partialState = runResult.partial_state || null
     const steps = buildDisplayStepsFromRawSteps(inputState, runResult.steps || [])
 
     return {
         inputState,
+        currentState,
         finalState,
         partialState,
         steps,

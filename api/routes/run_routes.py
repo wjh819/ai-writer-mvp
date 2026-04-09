@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, status
 
 from app_errors import AppError
 from api.error_translator import to_http_exception
@@ -12,9 +12,24 @@ from api.workflow_validator import (
     validate_partial_execution_workflow,
     validate_workflow_editor_data,
 )
+from api.run_http_schemas import (
+    LiveRunSnapshot,
+    LiveRunStartResponse,
+    RunDraftRequest,
+    SubgraphTestRequest,
+)
+from api.run_live_store import (
+    LiveRunAlreadyActiveError,
+    get_run_live_store,
+)
+from api.workflow_run_service import (
+    execute_draft_workflow,
+    execute_partial_workflow,
+    start_live_draft_workflow,
+)
 
 router = APIRouter()
-
+_live_store = get_run_live_store()
 
 @router.post("/workflows/{canvas_id}/run-draft")
 def run_workflow_draft(canvas_id: str, req: RunDraftRequest):
@@ -62,3 +77,33 @@ def test_workflow_subgraph(canvas_id: str, req: SubgraphTestRequest):
         raise to_http_exception(exc) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@router.post("/workflows/{canvas_id}/run-live", status_code=status.HTTP_202_ACCEPTED)
+def run_workflow_live(canvas_id: str, req: RunDraftRequest):
+    try:
+        normalized_workflow = normalize_workflow_editor_data(req.workflow)
+        validate_workflow_editor_data(normalized_workflow)
+
+        response = start_live_draft_workflow(
+            canvas_id=canvas_id,
+            workflow=normalized_workflow,
+            input_state=dict(req.input_state or {}),
+            prompt_overrides=dict(req.prompt_overrides or {}),
+            live_store=_live_store,
+        )
+        return response.model_dump()
+
+    except LiveRunAlreadyActiveError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=str(exc),
+        ) from exc
+    except AppError as exc:
+        raise to_http_exception(exc) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+
+@router.get("/runs/active")
+def get_active_live_run():
+    snapshot = _live_store.get_active_snapshot()
+    return snapshot.model_dump()

@@ -17,20 +17,24 @@ interface WorkflowDialogsProps {
     pendingBindingRequest: PendingBindingRequest | null
     onCancelPendingBinding: () => void
     onConfirmPendingBinding: (targetInput: string) => boolean
+
+    isGraphEditingLocked: boolean
 }
 
 export default function WorkflowDialogs({
-                                            isCreateCanvasDialogOpen,
-                                            draftCanvasId,
-                                            createCanvasErrorMessage,
-                                            onDraftCanvasIdChange,
-                                            onCloseCreateCanvasDialog,
-                                            onConfirmCreateCanvas,
+    isCreateCanvasDialogOpen,
+    draftCanvasId,
+    createCanvasErrorMessage,
+    onDraftCanvasIdChange,
+    onCloseCreateCanvasDialog,
+    onConfirmCreateCanvas,
 
-                                            pendingBindingRequest,
-                                            onCancelPendingBinding,
-                                            onConfirmPendingBinding,
-                                        }: WorkflowDialogsProps) {
+    pendingBindingRequest,
+    onCancelPendingBinding,
+    onConfirmPendingBinding,
+
+    isGraphEditingLocked,
+}: WorkflowDialogsProps) {
     const createCanvasInputRef = useRef<HTMLInputElement | null>(null)
     const pendingTargetInputRef = useRef<HTMLInputElement | null>(null)
     const [pendingTargetInput, setPendingTargetInput] = useState('')
@@ -49,6 +53,27 @@ export default function WorkflowDialogs({
 
         pendingTargetInputRef.current?.focus()
     }, [pendingBindingRequest])
+
+    useEffect(() => {
+        if (!isGraphEditingLocked) {
+            return
+        }
+
+        if (isCreateCanvasDialogOpen) {
+            onCloseCreateCanvasDialog()
+        }
+
+        if (pendingBindingRequest) {
+            onCancelPendingBinding()
+            setPendingTargetInput('')
+        }
+    }, [
+        isGraphEditingLocked,
+        isCreateCanvasDialogOpen,
+        pendingBindingRequest,
+        onCloseCreateCanvasDialog,
+        onCancelPendingBinding,
+    ])
 
     return (
         <>
@@ -104,6 +129,7 @@ export default function WorkflowDialogs({
                                 }}
                                 style={{ width: '100%' }}
                                 placeholder='e.g. article_draft_2'
+                                disabled={isGraphEditingLocked}
                             />
                         </div>
 
@@ -125,10 +151,18 @@ export default function WorkflowDialogs({
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                            <button type='button' onClick={onCloseCreateCanvasDialog}>
+                            <button
+                                type='button'
+                                onClick={onCloseCreateCanvasDialog}
+                                disabled={isGraphEditingLocked}
+                            >
                                 Cancel
                             </button>
-                            <button type='button' onClick={onConfirmCreateCanvas}>
+                            <button
+                                type='button'
+                                onClick={onConfirmCreateCanvas}
+                                disabled={isGraphEditingLocked}
+                            >
                                 Create
                             </button>
                         </div>
@@ -196,6 +230,7 @@ export default function WorkflowDialogs({
                                 }}
                                 style={{ width: '100%' }}
                                 placeholder='e.g. topic / outline / draft'
+                                disabled={isGraphEditingLocked}
                             />
                         </div>
 
@@ -206,6 +241,7 @@ export default function WorkflowDialogs({
                                     onCancelPendingBinding()
                                     setPendingTargetInput('')
                                 }}
+                                disabled={isGraphEditingLocked}
                             >
                                 Cancel
                             </button>
@@ -217,6 +253,7 @@ export default function WorkflowDialogs({
                                         setPendingTargetInput('')
                                     }
                                 }}
+                                disabled={isGraphEditingLocked}
                             >
                                 Confirm
                             </button>

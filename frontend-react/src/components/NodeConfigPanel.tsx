@@ -29,6 +29,9 @@ interface NodeConfigPanelProps {
     graphWindowTargetNodeIds: string[]
     isSubgraphTestRunning: boolean
 
+    isGraphEditingLocked: boolean
+    isNodeTestLocked: boolean
+
     onChange: (node: WorkflowEditorNode) => void
     onDelete: (nodeId: string) => void
     prompts: string[]
@@ -55,35 +58,38 @@ interface NodeConfigPanelProps {
 }
 
 export default function NodeConfigPanel({
-                                            node,
-                                            derivedTargetInputs,
-                                            inboundBindings,
-                                            promptVariableHints,
-                                            graphWindowMode,
-                                            graphWindowSourceNodeId,
-                                            graphWindowTargetNodeIds,
-                                            isSubgraphTestRunning,
+    node,
+    derivedTargetInputs,
+    inboundBindings,
+    promptVariableHints,
+    graphWindowMode,
+    graphWindowSourceNodeId,
+    graphWindowTargetNodeIds,
+    isSubgraphTestRunning,
 
-                                            onChange,
-                                            onDelete,
-                                            prompts,
-                                            modelResources,
+    isGraphEditingLocked,
+    isNodeTestLocked,
 
-                                            pinnedInputDraftTexts,
-                                            onPinnedInputDraftChange,
+    onChange,
+    onDelete,
+    prompts,
+    modelResources,
 
-                                            isSubgraphTestExpanded,
-                                            onSetSubgraphTestExpanded,
+    pinnedInputDraftTexts,
+    onPinnedInputDraftChange,
 
-                                            effectiveSubgraphTestInputItems,
-                                            onRunSubgraphTest,
-                                            onClearSubgraphTestResult,
-                                            onResetSubgraphTestContext,
+    isSubgraphTestExpanded,
+    onSetSubgraphTestExpanded,
 
-                                            selectedSubgraphTestDisplayRun,
-                                            subgraphTestErrorMessage,
-                                            subgraphTestInfoMessage,
-                                        }: NodeConfigPanelProps) {
+    effectiveSubgraphTestInputItems,
+    onRunSubgraphTest,
+    onClearSubgraphTestResult,
+    onResetSubgraphTestContext,
+
+    selectedSubgraphTestDisplayRun,
+    subgraphTestErrorMessage,
+    subgraphTestInfoMessage,
+}: NodeConfigPanelProps) {
     if (!node) {
         return (
             <div style={{ padding: 16, color: '#666', fontSize: 13 }}>
@@ -98,6 +104,10 @@ export default function NodeConfigPanel({
     function updateNode(
         nextConfig: InputNodeConfig | PromptNodeConfig | OutputNodeConfig
     ) {
+        if (isGraphEditingLocked) {
+            return
+        }
+
         onChange({
             ...selectedNode,
             data: {
@@ -138,6 +148,22 @@ export default function NodeConfigPanel({
             >
                 <div style={{ fontWeight: 700, marginBottom: 12 }}>Node Config</div>
 
+                {isGraphEditingLocked ? (
+                    <div
+                        style={{
+                            marginBottom: 12,
+                            padding: 10,
+                            borderRadius: 8,
+                            border: '1px solid #bfdbfe',
+                            background: '#eff6ff',
+                            color: '#1d4ed8',
+                            fontSize: 12,
+                        }}
+                    >
+                        Live run is active. Node config editing is locked.
+                    </div>
+                ) : null}
+
                 <NodeConfigSection
                     nodeId={selectedNode.id}
                     configType={config.type}
@@ -148,12 +174,14 @@ export default function NodeConfigPanel({
                     }
                     onCommentChange={handleCommentChange}
                     onDelete={onDelete}
+                    disabled={isGraphEditingLocked}
                 />
 
                 <NodeOutputsEditor
                     nodeId={selectedNode.id}
                     config={config}
                     onConfigChange={updateNode}
+                    disabled={isGraphEditingLocked}
                 />
 
                 <NodeTypeConfigSection
@@ -167,6 +195,7 @@ export default function NodeConfigPanel({
                     graphWindowSourceNodeId={graphWindowSourceNodeId}
                     graphWindowTargetNodeIds={graphWindowTargetNodeIds}
                     onConfigChange={updateNode}
+                    disabled={isGraphEditingLocked}
                 />
             </div>
 
@@ -197,26 +226,54 @@ export default function NodeConfigPanel({
 
                 {isSubgraphTestExpanded ? (
                     <div style={{ padding: '0 12px 12px 12px' }}>
-                        <NodeTestInputSection
-                            nodeId={selectedNode.id}
-                            effectiveSubgraphTestInputItems={effectiveSubgraphTestInputItems}
-                            pinnedInputDraftTexts={pinnedInputDraftTexts}
-                            onPinnedInputDraftChange={onPinnedInputDraftChange}
-                        />
+                        {isNodeTestLocked ? (
+                            <div
+                                style={{
+                                    marginBottom: 12,
+                                    padding: 10,
+                                    borderRadius: 8,
+                                    border: '1px solid #fde68a',
+                                    background: '#fffbeb',
+                                    color: '#92400e',
+                                    fontSize: 12,
+                                }}
+                            >
+                                Node test is disabled while a full live run is active.
+                            </div>
+                        ) : (
+                            <>
+                                <NodeTestInputSection
+                                    nodeId={selectedNode.id}
+                                    effectiveSubgraphTestInputItems={
+                                        effectiveSubgraphTestInputItems
+                                    }
+                                    pinnedInputDraftTexts={pinnedInputDraftTexts}
+                                    onPinnedInputDraftChange={onPinnedInputDraftChange}
+                                />
 
-                        <NodeTestResultSection
-                            isSubgraphTestRunning={isSubgraphTestRunning}
-                            selectedSubgraphTestDisplayRun={selectedSubgraphTestDisplayRun}
-                            subgraphTestErrorMessage={subgraphTestErrorMessage}
-                            subgraphTestInfoMessage={subgraphTestInfoMessage}
-                            onRunSubgraphTest={onRunSubgraphTest}
-                            onClearSubgraphTestResult={onClearSubgraphTestResult}
-                            onResetSubgraphTestContext={onResetSubgraphTestContext}
-                        />
+                                <NodeTestResultSection
+                                    isSubgraphTestRunning={isSubgraphTestRunning}
+                                    selectedSubgraphTestDisplayRun={
+                                        selectedSubgraphTestDisplayRun
+                                    }
+                                    subgraphTestErrorMessage={subgraphTestErrorMessage}
+                                    subgraphTestInfoMessage={subgraphTestInfoMessage}
+                                    onRunSubgraphTest={onRunSubgraphTest}
+                                    onClearSubgraphTestResult={
+                                        onClearSubgraphTestResult
+                                    }
+                                    onResetSubgraphTestContext={
+                                        onResetSubgraphTestContext
+                                    }
+                                />
+                            </>
+                        )}
 
-                        <NodeTestRawJsonSection
-                            displayRun={selectedSubgraphTestDisplayRun}
-                        />
+                        {selectedSubgraphTestDisplayRun ? (
+                            <NodeTestRawJsonSection
+                                displayRun={selectedSubgraphTestDisplayRun}
+                            />
+                        ) : null}
                     </div>
                 ) : null}
             </div>

@@ -6,17 +6,32 @@ interface RunInputsSectionProps {
     runInputs: WorkflowState
     onRunInputChange: (key: string, value: string) => void
     getRunInputKey: (node: WorkflowEditorNode) => string
+    isGraphEditingLocked: boolean
 }
 
 export default function RunInputsSection({
-                                             inputNodes,
-                                             runInputs,
-                                             onRunInputChange,
-                                             getRunInputKey,
-                                         }: RunInputsSectionProps) {
+    inputNodes,
+    runInputs,
+    onRunInputChange,
+    getRunInputKey,
+    isGraphEditingLocked,
+}: RunInputsSectionProps) {
     return (
         <>
             <h4 style={{ marginTop: 0 }}>Run Inputs</h4>
+
+            {isGraphEditingLocked ? (
+                <div
+                    style={{
+                        marginBottom: 12,
+                        fontSize: 12,
+                        color: '#92400e',
+                        whiteSpace: 'pre-wrap',
+                    }}
+                >
+                    Live run in progress. Run inputs are temporarily locked.
+                </div>
+            ) : null}
 
             {inputNodes.length === 0 ? (
                 <div style={{ color: '#666', fontSize: 13 }}>No input nodes found</div>
@@ -31,6 +46,7 @@ export default function RunInputsSection({
                                 value={String(runInputs[key] ?? '')}
                                 onChange={e => onRunInputChange(key, e.target.value)}
                                 style={{ width: '100%' }}
+                                disabled={isGraphEditingLocked}
                             />
                         </div>
                     )

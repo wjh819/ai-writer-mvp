@@ -1,11 +1,19 @@
 import type { WorkflowState } from '../../../shared/workflowSharedTypes'
 
 export function buildPrimaryState(params: {
-    status: 'success' | 'failed'
+    status: 'running' | 'success' | 'failed'
+    currentState: WorkflowState
     finalState: WorkflowState
     partialState: WorkflowState | null | undefined
 }) {
-    const { status, finalState, partialState } = params
+    const { status, currentState, finalState, partialState } = params
+
+    if (status === 'running') {
+        return {
+            primaryState: currentState || {},
+            primaryStateTitle: 'Current Live State',
+        }
+    }
 
     if (status === 'success') {
         return {

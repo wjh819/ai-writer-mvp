@@ -26,11 +26,13 @@ import type { InputNodeConfig } from '../../workflow-editor/workflowEditorTypes'
 interface InputNodeConfigProps {
   config: InputNodeConfig
   onConfigChange: (nextConfig: InputNodeConfig) => void
+  disabled?: boolean
 }
 
 export default function InputNodeConfigForm({
   config,
   onConfigChange,
+  disabled = false,
 }: InputNodeConfigProps) {
   return (
     <div style={{ marginBottom: 12 }}>
@@ -39,6 +41,7 @@ export default function InputNodeConfigForm({
       </label>
       <input
         value={config.defaultValue}
+        disabled={disabled}
         onChange={e =>
           onConfigChange({
             ...config,

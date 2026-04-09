@@ -25,26 +25,29 @@ interface NodeTypeConfigSectionProps {
     onConfigChange: (
         nextConfig: InputNodeConfig | PromptNodeConfig | OutputNodeConfig
     ) => void
+    disabled?: boolean
 }
 
 export default function NodeTypeConfigSection({
-                                                  config,
-                                                  prompts,
-                                                  modelResources,
-                                                  derivedTargetInputs,
-                                                  inboundBindings,
-                                                  promptVariableHints,
-                                                  graphWindowMode,
-                                                  graphWindowSourceNodeId,
-                                                  graphWindowTargetNodeIds,
-                                                  onConfigChange,
-                                              }: NodeTypeConfigSectionProps) {
+    config,
+    prompts,
+    modelResources,
+    derivedTargetInputs,
+    inboundBindings,
+    promptVariableHints,
+    graphWindowMode,
+    graphWindowSourceNodeId,
+    graphWindowTargetNodeIds,
+    onConfigChange,
+    disabled = false,
+}: NodeTypeConfigSectionProps) {
     return (
         <div style={{ marginBottom: 16 }}>
             {config.type === 'input' ? (
                 <InputNodeConfigForm
                     config={config}
                     onConfigChange={nextConfig => onConfigChange(nextConfig)}
+                    disabled={disabled}
                 />
             ) : config.type === 'prompt' ? (
                 <PromptNodeConfigForm
@@ -58,9 +61,13 @@ export default function NodeTypeConfigSection({
                     graphWindowSourceNodeId={graphWindowSourceNodeId}
                     graphWindowTargetNodeIds={graphWindowTargetNodeIds}
                     onConfigChange={nextConfig => onConfigChange(nextConfig)}
+                    disabled={disabled}
                 />
             ) : (
-                <OutputNodeConfigForm derivedTargetInputs={derivedTargetInputs} />
+                <OutputNodeConfigForm
+                    derivedTargetInputs={derivedTargetInputs}
+                    disabled={disabled}
+                />
             )}
         </div>
     )

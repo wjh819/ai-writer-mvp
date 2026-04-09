@@ -1,13 +1,19 @@
 import { useCallback, useState } from 'react'
 
 import type { SaveWorkflowOptions } from '../../api'
-import type { RunResult } from '../../run/runTypes'
+import type {
+    LiveRunSnapshot,
+    LiveRunStartResponse,
+    RunResult,
+} from '../../run/runTypes'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
 import {
     deleteWorkflowResult,
+    fetchActiveLiveRunResult,
     fetchWorkflowDetailResult,
     runDraftWorkflowResult,
     saveWorkflowResult,
+    startLiveRunResult,
 } from '../operations/workflowEditorOperations'
 import type {
     WorkflowEditorEdge,
@@ -19,6 +25,14 @@ import type {
     RuntimeActionResult,
     WorkflowSidecarData,
 } from '../workflowEditorUiTypes'
+
+export interface StartLiveRunActionResult extends RuntimeActionResult {
+    liveRunStart?: LiveRunStartResponse
+}
+
+export interface FetchActiveLiveRunActionResult extends RuntimeActionResult {
+    liveRunSnapshot?: LiveRunSnapshot
+}
 
 export interface RunWorkflowActionResult extends RuntimeActionResult {
     runResult?: RunResult
@@ -133,6 +147,48 @@ export function useWorkflowPersistence() {
         []
     )
 
+    const handleStartLiveRun = useCallback(
+        async (
+            canvasId: string,
+            nodes: WorkflowEditorNode[],
+            edges: WorkflowEditorEdge[],
+            contextLinks: WorkflowContextLink[],
+            nextRunInputs: WorkflowState
+        ): Promise<StartLiveRunActionResult> => {
+            setIsRunning(true)
+
+            try {
+                const result = await startLiveRunResult(
+                    nodes,
+                    edges,
+                    contextLinks,
+                    nextRunInputs,
+                    canvasId
+                )
+
+                return {
+                    liveRunStart: result.liveRunStart,
+                    successMessage: result.successMessage,
+                    errorMessage: result.errorMessage,
+                }
+            } finally {
+                setIsRunning(false)
+            }
+        },
+        []
+    )
+
+    const handleFetchActiveLiveRun = useCallback(
+        async (): Promise<FetchActiveLiveRunActionResult> => {
+            const result = await fetchActiveLiveRunResult()
+
+            return {
+                liveRunSnapshot: result.liveRunSnapshot,
+                errorMessage: result.errorMessage,
+            }
+        },
+        []
+    )
     return {
         isSaving,
         isRunning,
@@ -142,5 +198,7 @@ export function useWorkflowPersistence() {
         handleSave,
         handleRun,
         handleDeleteCanvas,
+        handleStartLiveRun,
+        handleFetchActiveLiveRun,
     }
 }

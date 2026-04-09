@@ -1,4 +1,4 @@
-import type { RunResult } from '../../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../../run/runTypes'
 import { extractPromptVariableHints } from '../domain/promptVariableHints'
 import type {
     ExecutedNodeMap,
@@ -13,11 +13,16 @@ import {
     buildPromptGraphWindowFacts,
 } from './graphFactDerivers'
 import { buildRuntimeFields } from './runtimeFieldDerivers'
-import { buildLatestStepMap } from './runStepSelectors'
+import {
+    buildLatestStepMap,
+    findLastFailedStep,
+    getActiveNodeId,
+} from './runStepSelectors'
 
 interface BuildDisplayNodesOptions {
     onRequestSubgraphTest?: (nodeId: string) => void
     runningSubgraphTestNodeId?: string | null
+    liveRunSnapshot?: LiveRunSnapshot | null
 }
 
 /**
@@ -42,9 +47,12 @@ export function buildDisplayNodes(
     contextLinks: WorkflowContextLink[],
     executedNodeMap: ExecutedNodeMap,
     runResult: RunResult | null,
+    liveRunSnapshot: LiveRunSnapshot | null,
     options?: BuildDisplayNodesOptions
 ): WorkflowEditorNode[] {
-    const latestStepMap = buildLatestStepMap(runResult)
+    const latestStepMap = buildLatestStepMap(liveRunSnapshot || runResult)
+    const activeNodeId = getActiveNodeId(liveRunSnapshot)
+    const lastFailedStep = findLastFailedStep(liveRunSnapshot || runResult)
 
     return (nodes || []).map(node => {
         const config = node.data.config
@@ -72,14 +80,33 @@ export function buildDisplayNodes(
                     graphWindowTargetNodeIds: undefined,
                 }
 
+        const isNodeExecuted = Object.prototype.hasOwnProperty.call(
+            executedNodeMap,
+            node.id
+        )
+
+        const isRunActive =
+            activeNodeId === node.id && liveRunSnapshot?.status === 'running'
+        const isRunFailed =
+            liveRunSnapshot?.status === 'failed' &&
+            lastFailedStep?.node === node.id
+
+        const liveStatus =
+            isRunActive
+                ? 'running'
+                : isRunFailed
+                    ? 'failed'
+                    : isNodeExecuted
+                        ? 'success'
+                        : 'idle'
+
+        const isNodeInteractionLocked = liveRunSnapshot?.status === 'running'
+
         return {
             ...node,
             data: {
                 ...node.data,
-                isExecuted: Object.prototype.hasOwnProperty.call(
-                    executedNodeMap,
-                    node.id
-                ),
+                isExecuted: isNodeExecuted,
                 stepIndex: executedNodeMap[node.id],
                 runtimeInputs: runtimeFields.runtimeInputs,
                 runtimeOutput: runtimeFields.runtimeOutput,
@@ -92,6 +119,15 @@ export function buildDisplayNodes(
                 graphWindowTargetNodeIds: graphWindowFacts.graphWindowTargetNodeIds,
                 onRequestSubgraphTest: nodeTestFields.onRequestSubgraphTest,
                 isSubgraphTestRunning: nodeTestFields.isSubgraphTestRunning,
+                isRunActive,
+                isRunRunning: isRunActive,
+                isRunFailed,
+                liveStatus,
+                isNodeInteractionLocked,
+                liveErrorMessage:
+                    isRunFailed && lastFailedStep && 'error_message' in lastFailedStep
+                        ? lastFailedStep.error_message
+                        : undefined,
             },
         }
     })

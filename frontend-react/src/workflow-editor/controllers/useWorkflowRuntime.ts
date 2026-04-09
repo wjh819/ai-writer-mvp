@@ -1,7 +1,9 @@
 import { useWorkflowBootstrap } from './useWorkflowBootstrap'
 import {
     useWorkflowPersistence,
+    type FetchActiveLiveRunActionResult,
     type RunWorkflowActionResult,
+    type StartLiveRunActionResult,
 } from './useWorkflowPersistence'
 import { useWorkflowRunInputs } from './useWorkflowRunInputs'
 import { useWorkflowSidecarStore } from './useWorkflowSidecarStore'
@@ -76,6 +78,12 @@ export function useWorkflowRuntime(): {
     pruneSubgraphTestArtifacts: ReturnType<typeof useWorkflowSubgraphTestStore>['pruneSubgraphTestArtifacts']
     resetSubgraphTestState: ReturnType<typeof useWorkflowSubgraphTestStore>['resetSubgraphTestState']
     resetSubgraphTestContext: ReturnType<typeof useWorkflowSubgraphTestStore>['resetSubgraphTestContext']
+    handleStartLiveRun: (
+        ...args: Parameters<ReturnType<typeof useWorkflowPersistence>['handleStartLiveRun']>
+    ) => Promise<StartLiveRunActionResult>
+    handleFetchActiveLiveRun: (
+        ...args: Parameters<ReturnType<typeof useWorkflowPersistence>['handleFetchActiveLiveRun']>
+    ) => Promise<FetchActiveLiveRunActionResult>
 } {
     const bootstrap = useWorkflowBootstrap()
     const persistence = useWorkflowPersistence()
@@ -129,5 +137,7 @@ export function useWorkflowRuntime(): {
         pruneSubgraphTestArtifacts: subgraphTest.pruneSubgraphTestArtifacts,
         resetSubgraphTestState: subgraphTest.resetSubgraphTestState,
         resetSubgraphTestContext: subgraphTest.resetSubgraphTestContext,
+        handleStartLiveRun: persistence.handleStartLiveRun,
+        handleFetchActiveLiveRun: persistence.handleFetchActiveLiveRun,
     }
 }

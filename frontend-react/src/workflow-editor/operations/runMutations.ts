@@ -1,4 +1,9 @@
-import { runDraftWorkflow, runSubgraphTestWorkflow } from '../../api'
+import {
+    getActiveLiveRun,
+    runDraftWorkflow,
+    runSubgraphTestWorkflow,
+    startLiveRun,
+} from '../../api'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
 import { buildEditorPayload } from '../domain/workflowEditorMappers'
 import { getErrorMessage } from '../domain/workflowEditorRequests'
@@ -8,7 +13,9 @@ import type {
 } from '../workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../workflowEditorTypes'
 import type {
+    FetchActiveLiveRunResult,
     RunWorkflowResult,
+    StartLiveRunResult,
     SubgraphTestWorkflowResult,
 } from './operationResultHelpers'
 
@@ -54,6 +61,50 @@ export async function runDraftWorkflowResult(
     } catch (error) {
         return {
             errorMessage: getErrorMessage(error, 'Run failed'),
+        }
+    }
+}
+
+export async function startLiveRunResult(
+    nodes: WorkflowEditorNode[],
+    edges: WorkflowEditorEdge[],
+    contextLinks: WorkflowContextLink[],
+    runInputs: WorkflowState,
+    canvasId: string
+): Promise<StartLiveRunResult> {
+    const inputStateSnapshot: WorkflowState = { ...(runInputs || {}) }
+    const workflow = buildEditorPayload(nodes, edges, contextLinks)
+
+    try {
+        const liveRunStart = await startLiveRun(
+            {
+                workflow,
+                input_state: inputStateSnapshot,
+                prompt_overrides: {},
+            },
+            canvasId
+        )
+
+        return {
+            liveRunStart,
+            successMessage: 'Live run started',
+        }
+    } catch (error) {
+        return {
+            errorMessage: getErrorMessage(error, 'Live run failed to start'),
+        }
+    }
+}
+
+export async function fetchActiveLiveRunResult(): Promise<FetchActiveLiveRunResult> {
+    try {
+        const liveRunSnapshot = await getActiveLiveRun()
+        return {
+            liveRunSnapshot,
+        }
+    } catch (error) {
+        return {
+            errorMessage: getErrorMessage(error, 'Failed to fetch active live run'),
         }
     }
 }

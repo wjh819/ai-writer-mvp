@@ -1,4 +1,4 @@
-import type { RunResult } from '../../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../../run/runTypes'
 import { useWorkflowGraphEvents } from './useWorkflowGraphEvents'
 import { useWorkflowGraphSelection } from './useWorkflowGraphSelection'
 import { useWorkflowGraphState } from './useWorkflowGraphState'
@@ -13,17 +13,22 @@ interface UseWorkflowGraphEditorOptions {
 
     onRequestSubgraphTest?: (nodeId: string) => void
     runningSubgraphTestNodeId?: string | null
+
+    isGraphEditingLocked: boolean
+    liveRunSnapshot: LiveRunSnapshot | null
 }
 
 export function useWorkflowGraphEditor({
-                                           runResult,
-                                           onGraphSemanticChanged,
-                                           onGraphPersistedChanged,
-                                           onGraphError,
-                                           onGraphClearError,
-                                           onRequestSubgraphTest,
-                                           runningSubgraphTestNodeId,
-                                       }: UseWorkflowGraphEditorOptions) {
+    runResult,
+    onGraphSemanticChanged,
+    onGraphPersistedChanged,
+    onGraphError,
+    onGraphClearError,
+    onRequestSubgraphTest,
+    runningSubgraphTestNodeId,
+    isGraphEditingLocked,
+    liveRunSnapshot,
+}: UseWorkflowGraphEditorOptions) {
     const graphState = useWorkflowGraphState()
 
     const graphSelection = useWorkflowGraphSelection({
@@ -38,6 +43,7 @@ export function useWorkflowGraphEditor({
         runResult,
         onRequestSubgraphTest,
         runningSubgraphTestNodeId,
+        liveRunSnapshot,
     })
 
     const pendingBinding = useWorkflowPendingBinding({
@@ -80,6 +86,7 @@ export function useWorkflowGraphEditor({
         onGraphPersistedChanged,
         onGraphError,
         onGraphClearError,
+        isGraphEditingLocked,
     })
 
     return {

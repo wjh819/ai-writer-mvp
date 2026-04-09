@@ -30,8 +30,8 @@ function stableJsonStringify(value: unknown): string {
     return `[${value.map(item => stableJsonStringify(item)).join(',')}]`
   }
 
-  const entries = Object.entries(value as Record<string, unknown>).sort(([a], [b]) =>
-    a.localeCompare(b)
+  const entries = Object.entries(value as Record<string, unknown>).sort(
+    ([a], [b]) => a.localeCompare(b)
   )
 
   return `{${entries
@@ -51,7 +51,9 @@ export default function RunStepCardBase({
   step,
   children,
 }: RunStepCardBaseProps) {
+  const isRunning = step.status === 'running'
   const isFailed = step.status === 'failed'
+
   const hasTiming =
     Boolean(step.startedAt) ||
     Boolean(step.finishedAt) ||
@@ -66,10 +68,32 @@ export default function RunStepCardBase({
 
   const isAggregatedOutputStep =
     step.type === 'output' &&
+    !isRunning &&
     !isFailed &&
     typeof step.output !== 'undefined' &&
     step.inputs &&
     areEquivalentJsonValues(step.inputs, step.output)
+
+  const statusTone = isRunning
+    ? {
+        border: '#93c5fd',
+        dot: '#2563eb',
+        chipBg: '#dbeafe',
+        chipText: '#1d4ed8',
+      }
+    : isFailed
+      ? {
+          border: '#fecaca',
+          dot: '#dc2626',
+          chipBg: '#fee2e2',
+          chipText: '#991b1b',
+        }
+      : {
+          border: '#e5e7eb',
+          dot: '#2563eb',
+          chipBg: '#dcfce7',
+          chipText: '#166534',
+        }
 
   const outputTitle = isAggregatedOutputStep
     ? 'Aggregated Output'
@@ -94,7 +118,7 @@ export default function RunStepCardBase({
     <div
       style={{
         position: 'relative',
-        border: `1px solid ${isFailed ? '#fecaca' : '#e5e7eb'}`,
+        border: `1px solid ${statusTone.border}`,
         borderRadius: 10,
         padding: 12,
         marginBottom: 12,
@@ -109,7 +133,7 @@ export default function RunStepCardBase({
           width: 12,
           height: 12,
           borderRadius: 999,
-          background: isFailed ? '#dc2626' : '#2563eb',
+          background: statusTone.dot,
           border: '2px solid #fff',
           boxShadow: '0 0 0 1px rgba(0,0,0,0.08)',
         }}
@@ -136,40 +160,56 @@ export default function RunStepCardBase({
             fontSize: 12,
             padding: '2px 8px',
             borderRadius: 999,
-            background: isFailed ? '#fee2e2' : '#dcfce7',
-            color: isFailed ? '#991b1b' : '#166534',
+            background: statusTone.chipBg,
+            color: statusTone.chipText,
           }}
         >
           {step.status}
         </span>
       </div>
 
-<div
-  style={{
-    display: 'grid',
-    gridTemplateColumns: '1fr 1fr',
-    gap: 8,
-    fontSize: 13,
-    color: '#444',
-    marginBottom: 10,
-  }}
->
-  <div>
-    <strong>type:</strong> {step.type}
-  </div>
+      {isRunning ? (
+        <div
+          style={{
+            marginBottom: 10,
+            padding: 10,
+            borderRadius: 8,
+            border: '1px solid #bfdbfe',
+            background: '#eff6ff',
+            fontSize: 12,
+            color: '#1d4ed8',
+          }}
+        >
+          This step is currently executing. Intermediate output may not be available yet.
+        </div>
+      ) : null}
 
-  {step.promptMode && (
-    <div>
-      <strong>prompt mode:</strong> {step.promptMode}
-    </div>
-  )}
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: 8,
+          fontSize: 13,
+          color: '#444',
+          marginBottom: 10,
+        }}
+      >
+        <div>
+          <strong>type:</strong> {step.type}
+        </div>
 
-  {step.promptDisplayText && (
-    <div>
-      <strong>prompt source:</strong> {step.promptDisplayText}
-    </div>
-  )}
-</div>
+        {step.promptMode && (
+          <div>
+            <strong>prompt mode:</strong> {step.promptMode}
+          </div>
+        )}
+
+        {step.promptDisplayText && (
+          <div>
+            <strong>prompt source:</strong> {step.promptDisplayText}
+          </div>
+        )}
+      </div>
 
       {hasTiming && (
         <div
@@ -272,7 +312,21 @@ export default function RunStepCardBase({
         <ValueBlock title='Rendered Prompt' value={step.renderedPrompt} />
       )}
 
-      {isFailed ? (
+      {isRunning ? (
+        <div
+          style={{
+            marginBottom: 8,
+            padding: 10,
+            borderRadius: 8,
+            border: '1px solid #bfdbfe',
+            background: '#eff6ff',
+            fontSize: 12,
+            color: '#1d4ed8',
+          }}
+        >
+          Step is still running. Final output will appear after completion.
+        </div>
+      ) : isFailed ? (
         <>
           <div
             style={{

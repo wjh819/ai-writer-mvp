@@ -1,4 +1,5 @@
 interface WorkflowPageBannersProps {
+    liveRunStatusMessage: string
     workflowStatusMessage: string
     temporaryCanvasStatusMessage: string
     topLevelErrorMessage: string
@@ -10,17 +11,36 @@ interface WorkflowPageBannersProps {
 }
 
 export default function WorkflowPageBanners({
-                                                workflowStatusMessage,
-                                                temporaryCanvasStatusMessage,
-                                                topLevelErrorMessage,
-                                                workflowWarningsMessage,
-                                                draftStatusMessage,
-                                                onRevertToSaved,
-                                                disableRevertToSaved,
-                                                revertToSavedTitle,
-                                            }: WorkflowPageBannersProps) {
+    liveRunStatusMessage,
+    workflowStatusMessage,
+    temporaryCanvasStatusMessage,
+    topLevelErrorMessage,
+    workflowWarningsMessage,
+    draftStatusMessage,
+    onRevertToSaved,
+    disableRevertToSaved,
+    revertToSavedTitle,
+}: WorkflowPageBannersProps) {
     return (
         <>
+            {liveRunStatusMessage && (
+                <div
+                    style={{
+                        margin: '8px 12px 0 12px',
+                        padding: 10,
+                        borderRadius: 8,
+                        border: '1px solid #93c5fd',
+                        background: '#eff6ff',
+                        color: '#1d4ed8',
+                        fontSize: 12,
+                        whiteSpace: 'pre-wrap',
+                    }}
+                >
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Live Run</div>
+                    <div>{liveRunStatusMessage}</div>
+                </div>
+            )}
+
             {workflowStatusMessage && (
                 <div
                     style={{

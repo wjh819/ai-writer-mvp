@@ -6,7 +6,7 @@ function findLastFailedStep(steps: DisplayStep[]) {
 }
 
 export function buildDisplayFailureInfo(params: {
-    status?: 'success' | 'failed'
+    status?: 'running' | 'success' | 'failed'
     steps: DisplayStep[]
     errorType?: string
     errorMessage?: string

@@ -6,17 +6,19 @@ interface NodeConfigSectionProps {
     onInputKeyChange?: (value: string) => void
     onCommentChange: (value: string) => void
     onDelete: (nodeId: string) => void
+    disabled?: boolean
 }
 
 export default function NodeConfigSection({
-                                              nodeId,
-                                              configType,
-                                              inputKey = '',
-                                              comment = '',
-                                              onInputKeyChange,
-                                              onCommentChange,
-                                              onDelete,
-                                          }: NodeConfigSectionProps) {
+    nodeId,
+    configType,
+    inputKey = '',
+    comment = '',
+    onInputKeyChange,
+    onCommentChange,
+    onDelete,
+    disabled = false,
+}: NodeConfigSectionProps) {
     return (
         <>
             <div style={{ marginBottom: 16 }}>
@@ -28,9 +30,10 @@ export default function NodeConfigSection({
                         padding: '8px 10px',
                         border: '1px solid #ddd',
                         borderRadius: 6,
-                        background: '#fff',
+                        background: '#f8fafc',
                         fontSize: 13,
                         wordBreak: 'break-all',
+                        color: '#475569',
                     }}
                 >
                     {nodeId}
@@ -46,8 +49,9 @@ export default function NodeConfigSection({
                         padding: '8px 10px',
                         border: '1px solid #ddd',
                         borderRadius: 6,
-                        background: '#fff',
+                        background: '#f8fafc',
                         fontSize: 13,
+                        color: '#475569',
                     }}
                 >
                     {configType}
@@ -56,22 +60,28 @@ export default function NodeConfigSection({
 
             {configType === 'input' && onInputKeyChange ? (
                 <div style={{ marginBottom: 16 }}>
-                    <label style={{ display: 'block', marginBottom: 4 }}>Input Key</label>
+                    <label style={{ display: 'block', marginBottom: 4 }}>
+                        Input Key
+                    </label>
                     <input
                         value={inputKey}
                         onChange={e => onInputKeyChange(e.target.value)}
                         style={{ width: '100%' }}
+                        disabled={disabled}
                     />
                 </div>
             ) : null}
 
             <div style={{ marginBottom: 16 }}>
-                <label style={{ display: 'block', marginBottom: 4 }}>Comment</label>
+                <label style={{ display: 'block', marginBottom: 4 }}>
+                    Comment
+                </label>
                 <textarea
                     value={comment}
                     onChange={e => onCommentChange(e.target.value)}
                     rows={3}
                     style={{ width: '100%', resize: 'vertical' }}
+                    disabled={disabled}
                 />
             </div>
 
@@ -79,6 +89,7 @@ export default function NodeConfigSection({
                 type='button'
                 onClick={() => onDelete(nodeId)}
                 style={{ color: '#b91c1c' }}
+                disabled={disabled}
             >
                 Delete Node
             </button>

@@ -1,6 +1,10 @@
 import type { CanvasSummary } from '../../api'
 import type { ModelResourceListItem } from '../../model-resources/modelResourceTypes'
-import type { RunResult } from '../../run/runTypes'
+import type {
+    LiveRunSnapshot,
+    LiveRunStartResponse,
+    RunResult,
+} from '../../run/runTypes'
 import type {
     WorkflowEditorEdge,
     WorkflowEditorNode,
@@ -68,4 +72,15 @@ export interface SubgraphTestWorkflowResult {
 
 export const EMPTY_WORKFLOW_SIDECAR: WorkflowSidecarData = {
     nodes: {},
+}
+
+export interface StartLiveRunResult {
+    liveRunStart?: LiveRunStartResponse
+    successMessage?: string
+    errorMessage?: string
+}
+
+export interface FetchActiveLiveRunResult {
+    liveRunSnapshot?: LiveRunSnapshot
+    errorMessage?: string
 }

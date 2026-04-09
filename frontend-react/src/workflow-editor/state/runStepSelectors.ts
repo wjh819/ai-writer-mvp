@@ -1,8 +1,14 @@
-import type { RunResult } from '../../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../../run/runTypes'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
 import type { ExecutedNodeMap } from '../workflowEditorGraphTypes'
 
-export type WorkflowStep = RunResult['steps'][number]
+export type WorkflowStep =
+    | RunResult['steps'][number]
+    | LiveRunSnapshot['steps'][number]
+
+type StepContainer = {
+    steps?: WorkflowStep[]
+} | null
 
 export function trim(value: unknown): string {
     if (value === null || typeof value === 'undefined') {
@@ -47,11 +53,11 @@ export function getPublishedState(
 }
 
 export function buildLatestStepMap(
-    runResult: RunResult | null
+    stepContainer: StepContainer
 ): Record<string, WorkflowStep | undefined> {
     const result: Record<string, WorkflowStep | undefined> = {}
 
-    ;(runResult?.steps || []).forEach(step => {
+    ;(stepContainer?.steps || []).forEach(step => {
         const nodeId = trim(step.node)
         if (!nodeId) {
             return
@@ -63,11 +69,11 @@ export function buildLatestStepMap(
 }
 
 export function buildExecutedNodeMap(
-    runResult: RunResult | null
+    stepContainer: StepContainer
 ): ExecutedNodeMap {
     const result: ExecutedNodeMap = {}
 
-    ;(runResult?.steps || []).forEach((step, index) => {
+    ;(stepContainer?.steps || []).forEach((step, index) => {
         const nodeId = trim(step.node)
         if (!nodeId) {
             return
@@ -76,4 +82,19 @@ export function buildExecutedNodeMap(
     })
 
     return result
+}
+
+export function findLastFailedStep(
+    stepContainer: StepContainer
+): WorkflowStep | undefined {
+    return [...(stepContainer?.steps || [])]
+        .reverse()
+        .find(step => step.status === 'failed')
+}
+
+export function getActiveNodeId(
+    liveRunSnapshot: LiveRunSnapshot | null
+): string | null {
+    const value = trim(liveRunSnapshot?.active_node_id)
+    return value || null
 }

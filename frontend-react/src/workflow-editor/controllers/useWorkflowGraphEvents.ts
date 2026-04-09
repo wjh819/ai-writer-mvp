@@ -44,11 +44,11 @@ interface GraphActionLike {
 function isGraphActionLike(value: unknown): value is GraphActionLike {
     return Boolean(
         value &&
-        typeof value === 'object' &&
-        'nextNodes' in value &&
-        'nextEdges' in value &&
-        'nextContextLinks' in value &&
-        'didChangeSemanticGraph' in value
+            typeof value === 'object' &&
+            'nextNodes' in value &&
+            'nextEdges' in value &&
+            'nextContextLinks' in value &&
+            'didChangeSemanticGraph' in value
     )
 }
 
@@ -61,20 +61,20 @@ function isContextSelectionEdge(
 ): edge is { relationType: 'context'; contextLinkId: string } {
     return Boolean(
         edge &&
-        typeof edge === 'object' &&
-        'relationType' in edge &&
-        (edge as { relationType?: unknown }).relationType === 'context' &&
-        'contextLinkId' in edge &&
-        typeof (edge as { contextLinkId?: unknown }).contextLinkId === 'string'
+            typeof edge === 'object' &&
+            'relationType' in edge &&
+            (edge as { relationType?: unknown }).relationType === 'context' &&
+            'contextLinkId' in edge &&
+            typeof (edge as { contextLinkId?: unknown }).contextLinkId === 'string'
     )
 }
 
 function hasEdgeId(edge: unknown): edge is { id: string } {
     return Boolean(
         edge &&
-        typeof edge === 'object' &&
-        'id' in edge &&
-        typeof (edge as { id?: unknown }).id === 'string'
+            typeof edge === 'object' &&
+            'id' in edge &&
+            typeof (edge as { id?: unknown }).id === 'string'
     )
 }
 
@@ -100,33 +100,40 @@ interface UseWorkflowGraphEventsOptions {
     onGraphPersistedChanged: () => void
     onGraphError?: (message: string) => void
     onGraphClearError?: () => void
+
+    isGraphEditingLocked: boolean
 }
 
 export function useWorkflowGraphEvents({
-                                           nodes,
-                                           edges,
-                                           contextLinks,
-                                           selectedNodeId,
-                                           selectedEdgeId,
-                                           selectedContextLinkId,
-                                           setNodes,
-                                           setEdges,
-                                           setContextLinks,
-                                           setSelectedNodeId,
-                                           setSelectedEdgeId,
-                                           setSelectedContextLinkId,
-                                           setPendingBindingRequest,
-                                           onGraphSemanticChanged,
-                                           onGraphPersistedChanged,
-                                           onGraphError,
-                                           onGraphClearError,
-                                       }: UseWorkflowGraphEventsOptions) {
+    nodes,
+    edges,
+    contextLinks,
+    selectedNodeId,
+    selectedEdgeId,
+    selectedContextLinkId,
+    setNodes,
+    setEdges,
+    setContextLinks,
+    setSelectedNodeId,
+    setSelectedEdgeId,
+    setSelectedContextLinkId,
+    setPendingBindingRequest,
+    onGraphSemanticChanged,
+    onGraphPersistedChanged,
+    onGraphError,
+    onGraphClearError,
+    isGraphEditingLocked,
+}: UseWorkflowGraphEventsOptions) {
     const isSemanticNodeChange = useCallback((change: NodeChange) => {
         return change.type === 'remove'
     }, [])
 
     const handleNodesChange = useCallback(
         (changes: NodeChange[]) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             const semanticChanges = (changes || []).filter(isSemanticNodeChange)
             const viewChanges = (changes || []).filter(
                 change => !isSemanticNodeChange(change)
@@ -178,6 +185,7 @@ export function useWorkflowGraphEvents({
             onGraphPersistedChanged()
         },
         [
+            isGraphEditingLocked,
             isSemanticNodeChange,
             nodes,
             edges,
@@ -199,6 +207,10 @@ export function useWorkflowGraphEvents({
 
     const onConnect = useCallback(
         (params: Connection) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             if (
                 params.source &&
                 params.target &&
@@ -234,6 +246,7 @@ export function useWorkflowGraphEvents({
             }
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,
@@ -254,6 +267,10 @@ export function useWorkflowGraphEvents({
             target: string
             mode: 'continue' | 'branch'
         }): boolean => {
+            if (isGraphEditingLocked) {
+                return false
+            }
+
             const result = buildConnectContextLinkResult(
                 nodes,
                 edges,
@@ -284,6 +301,7 @@ export function useWorkflowGraphEvents({
             return true
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,
@@ -302,6 +320,10 @@ export function useWorkflowGraphEvents({
 
     const handleEdgesChange = useCallback(
         (changes: EdgeChange[]) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             const dataEdgeChanges = (changes || []).filter(change => {
                 if (!hasChangeId(change)) {
                     return false
@@ -333,6 +355,7 @@ export function useWorkflowGraphEvents({
             }
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,
@@ -347,6 +370,10 @@ export function useWorkflowGraphEvents({
 
     const addNodeByType = useCallback(
         (type: WorkflowNodeType) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             const result = buildAddNodeResult(nodes, type)
 
             setNodes(result.nextNodes)
@@ -362,6 +389,7 @@ export function useWorkflowGraphEvents({
             }
         },
         [
+            isGraphEditingLocked,
             nodes,
             setNodes,
             setSelectedNodeId,
@@ -376,6 +404,10 @@ export function useWorkflowGraphEvents({
 
     const updateNode = useCallback(
         (updatedNode: WorkflowEditorNode) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             const result = buildUpdateNodeResult(
                 nodes,
                 edges,
@@ -405,6 +437,7 @@ export function useWorkflowGraphEvents({
             onGraphPersistedChanged()
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,
@@ -423,6 +456,10 @@ export function useWorkflowGraphEvents({
 
     const deleteNode = useCallback(
         (nodeId: string) => {
+            if (isGraphEditingLocked) {
+                return
+            }
+
             const result = buildDeleteNodeResult(
                 nodes,
                 edges,
@@ -445,6 +482,7 @@ export function useWorkflowGraphEvents({
             }
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,
@@ -462,6 +500,10 @@ export function useWorkflowGraphEvents({
     )
 
     const deleteSelectedEdge = useCallback(() => {
+        if (isGraphEditingLocked) {
+            return
+        }
+
         const result = buildDeleteSelectedEdgeResult(
             nodes,
             edges,
@@ -484,6 +526,7 @@ export function useWorkflowGraphEvents({
             onGraphPersistedChanged()
         }
     }, [
+        isGraphEditingLocked,
         nodes,
         edges,
         contextLinks,
@@ -498,6 +541,10 @@ export function useWorkflowGraphEvents({
     ])
 
     const deleteSelectedContextLink = useCallback(() => {
+        if (isGraphEditingLocked) {
+            return
+        }
+
         const result = buildDeleteSelectedContextLinkResult(
             nodes,
             edges,
@@ -520,6 +567,7 @@ export function useWorkflowGraphEvents({
             onGraphPersistedChanged()
         }
     }, [
+        isGraphEditingLocked,
         nodes,
         edges,
         contextLinks,
@@ -596,6 +644,10 @@ export function useWorkflowGraphEvents({
 
     const updateSelectedContextLinkMode = useCallback(
         (nextMode: 'continue' | 'branch'): boolean => {
+            if (isGraphEditingLocked) {
+                return false
+            }
+
             const result = buildUpdateSelectedContextLinkModeResult(
                 nodes,
                 edges,
@@ -625,6 +677,7 @@ export function useWorkflowGraphEvents({
             return true
         },
         [
+            isGraphEditingLocked,
             nodes,
             edges,
             contextLinks,

@@ -16,56 +16,70 @@ interface WorkflowSidebarProps {
     temporaryCanvasId?: string | null
     modelResources: ModelResourceListItem[]
     isSwitchingWorkflow: boolean
+    isGraphEditingLocked: boolean
+    isLiveRunActive: boolean
+
     onRequestCanvasChange: (canvasId: string) => void
     onRefreshWorkflowList: () => void
     onOpenCreateCanvas: () => void
     onDeleteCurrentCanvas: () => void | Promise<void>
     onAddNodeByType: (type: WorkflowNodeType) => void
+
     inputNodes: WorkflowEditorNode[]
     runInputs: WorkflowState
     onRunInputChange: (key: string, value: string) => void
+
     onSave: (event?: { preventDefault?: () => void }) => void | Promise<void>
     onRun: () => void | Promise<void>
     onClearRunState: () => void
     onOpenModelResources: () => void
+
     isSaving: boolean
     isRunning: boolean
     isDeleting: boolean
     hasRunResult: boolean
     hasAnyNodes: boolean
     canDeleteCurrentCanvas: boolean
+
     getRunInputKey: (node: WorkflowEditorNode) => string
 }
 
 export default function WorkflowSidebar({
-                                            requestedCanvasId,
-                                            activeCanvasId,
-                                            canvasList,
-                                            temporaryCanvasId = null,
-                                            modelResources,
-                                            isSwitchingWorkflow,
-                                            onRequestCanvasChange,
-                                            onRefreshWorkflowList,
-                                            onOpenCreateCanvas,
-                                            onDeleteCurrentCanvas,
-                                            onAddNodeByType,
-                                            inputNodes,
-                                            runInputs,
-                                            onRunInputChange,
-                                            onSave,
-                                            onRun,
-                                            onClearRunState,
-                                            onOpenModelResources,
-                                            isSaving,
-                                            isRunning,
-                                            isDeleting,
-                                            hasRunResult,
-                                            hasAnyNodes,
-                                            canDeleteCurrentCanvas,
-                                            getRunInputKey,
-                                        }: WorkflowSidebarProps) {
+    requestedCanvasId,
+    activeCanvasId,
+    canvasList,
+    temporaryCanvasId = null,
+    modelResources,
+    isSwitchingWorkflow,
+    isGraphEditingLocked,
+    isLiveRunActive,
+
+    onRequestCanvasChange,
+    onRefreshWorkflowList,
+    onOpenCreateCanvas,
+    onDeleteCurrentCanvas,
+    onAddNodeByType,
+
+    inputNodes,
+    runInputs,
+    onRunInputChange,
+
+    onSave,
+    onRun,
+    onClearRunState,
+    onOpenModelResources,
+
+    isSaving,
+    isRunning,
+    isDeleting,
+    hasRunResult,
+    hasAnyNodes,
+    canDeleteCurrentCanvas,
+    getRunInputKey,
+}: WorkflowSidebarProps) {
     const isShowingCanvasSwitchingState =
         isSwitchingWorkflow && requestedCanvasId !== activeCanvasId
+
     const isActiveCanvasTemporary = temporaryCanvasId === activeCanvasId
 
     const effectiveCanvasList = [...canvasList]
@@ -93,6 +107,9 @@ export default function WorkflowSidebar({
     ensureCanvasOption(activeCanvasId, activeCanvasId)
     ensureCanvasOption(requestedCanvasId, requestedCanvasId)
 
+    const disableGraphEditingActions =
+        isSwitchingWorkflow || isDeleting || isGraphEditingLocked
+
     return (
         <div
             style={{
@@ -110,6 +127,7 @@ export default function WorkflowSidebar({
                 effectiveCanvasList={effectiveCanvasList}
                 isShowingCanvasSwitchingState={isShowingCanvasSwitchingState}
                 isSwitchingWorkflow={isSwitchingWorkflow}
+                isGraphEditingLocked={isGraphEditingLocked}
                 onRequestCanvasChange={onRequestCanvasChange}
             />
 
@@ -118,6 +136,7 @@ export default function WorkflowSidebar({
                     modelResourceCount={modelResources.length}
                     isSwitchingWorkflow={isSwitchingWorkflow}
                     isDeleting={isDeleting}
+                    isGraphEditingLocked={isGraphEditingLocked}
                     canDeleteCurrentCanvas={canDeleteCurrentCanvas}
                     isActiveCanvasTemporary={isActiveCanvasTemporary}
                     onOpenCreateCanvas={onOpenCreateCanvas}
@@ -128,20 +147,28 @@ export default function WorkflowSidebar({
             </div>
 
             <button
+                type='button'
                 onClick={() => onAddNodeByType('input')}
                 style={{ display: 'block', width: '100%', marginBottom: 8 }}
+                disabled={disableGraphEditingActions}
             >
                 + Input Node
             </button>
+
             <button
+                type='button'
                 onClick={() => onAddNodeByType('prompt')}
                 style={{ display: 'block', width: '100%', marginBottom: 8 }}
+                disabled={disableGraphEditingActions}
             >
                 + Prompt Node
             </button>
+
             <button
+                type='button'
                 onClick={() => onAddNodeByType('output')}
                 style={{ display: 'block', width: '100%' }}
+                disabled={disableGraphEditingActions}
             >
                 + Output Node
             </button>
@@ -153,6 +180,7 @@ export default function WorkflowSidebar({
                 runInputs={runInputs}
                 onRunInputChange={onRunInputChange}
                 getRunInputKey={getRunInputKey}
+                isGraphEditingLocked={isGraphEditingLocked}
             />
 
             <hr style={{ margin: '16px 0' }} />
@@ -162,6 +190,8 @@ export default function WorkflowSidebar({
                 isRunning={isRunning}
                 isSwitchingWorkflow={isSwitchingWorkflow}
                 isDeleting={isDeleting}
+                isGraphEditingLocked={isGraphEditingLocked}
+                isLiveRunActive={isLiveRunActive}
                 hasRunResult={hasRunResult}
                 hasAnyNodes={hasAnyNodes}
                 onSave={onSave}

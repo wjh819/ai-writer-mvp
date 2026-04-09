@@ -145,6 +145,7 @@ class WorkflowEngine:
         workflow_data: WorkflowEditorData,
         prompt_overrides: dict[str, str] | None = None,
         output_exporter: WorkflowOutputExporter | None = None,
+        progress_callback: Any | None = None,
     ):
         if not isinstance(workflow_data, WorkflowEditorData):
             raise ValueError("workflow_data must be WorkflowEditorData")
@@ -173,6 +174,7 @@ class WorkflowEngine:
 
         self._build_graph()
         self.output_exporter = output_exporter
+        self.progress_callback = progress_callback
     def _build_graph(self) -> None:
         for node in self.nodes:
             self.graph[node.id] = []
@@ -479,6 +481,57 @@ class WorkflowEngine:
         step.finished_at = finished_at
         step.duration_ms = duration_ms
         return step
+
+    def _notify_node_started(
+            self,
+            *,
+            node_id: str,
+            current_state: dict[str, Any],
+            steps,
+    ) -> None:
+        callback = getattr(self.progress_callback, "on_node_started", None)
+        if callable(callback):
+            callback(
+                node_id=node_id,
+                current_state=dict(current_state or {}),
+                steps=list(steps or []),
+            )
+
+    def _notify_node_succeeded(
+            self,
+            *,
+            current_state: dict[str, Any],
+            steps,
+    ) -> None:
+        callback = getattr(self.progress_callback, "on_node_succeeded", None)
+        if callable(callback):
+            callback(
+                current_state=dict(current_state or {}),
+                steps=list(steps or []),
+            )
+
+    def _notify_node_failed(
+            self,
+            *,
+            node_id: str,
+            current_state: dict[str, Any] | None,
+            steps,
+            error_type: str | None,
+            error_message: str | None,
+            error_detail: str | None,
+            failure_stage: str | None,
+    ) -> None:
+        callback = getattr(self.progress_callback, "on_node_failed", None)
+        if callable(callback):
+            callback(
+                node_id=node_id,
+                current_state=dict(current_state or {}) if current_state is not None else None,
+                steps=list(steps or []),
+                error_type=error_type,
+                error_message=error_message,
+                error_detail=error_detail,
+                failure_stage=failure_stage,
+            )
 
     def _resolve_prompt_window_runtime(
         self,
@@ -828,6 +881,12 @@ class WorkflowEngine:
             started_at = utc_now_iso()
             start_perf = time.perf_counter()
 
+            self._notify_node_started(
+                node_id=node.id,
+                current_state=current_state,
+                steps=steps,
+            )
+
             try:
                 step_info, named_outputs = self.run_node(
                     node,
@@ -847,6 +906,10 @@ class WorkflowEngine:
 
                 self._publish_named_outputs(node, named_outputs, current_state)
                 steps.append(step_info)
+                self._notify_node_succeeded(
+                    current_state=current_state,
+                    steps=steps,
+                )
 
             except WorkflowDefinitionError as exc:
                 finished_at = utc_now_iso()
@@ -867,6 +930,15 @@ class WorkflowEngine:
                     duration_ms=duration_ms,
                 )
                 steps.append(failed_step)
+                self._notify_node_failed(
+                    node_id=node.id,
+                    current_state=current_state,
+                    steps=steps,
+                    error_type="workflow_definition_error",
+                    error_message=str(exc),
+                    error_detail=str(exc),
+                    failure_stage="definition",
+                )
 
                 raise WorkflowRunError(
                     str(exc),
@@ -896,6 +968,15 @@ class WorkflowEngine:
                     duration_ms=duration_ms,
                 )
                 steps.append(failed_step)
+                self._notify_node_failed(
+                    node_id=node.id,
+                    current_state=current_state,
+                    steps=steps,
+                    error_type=exc.error_type,
+                    error_message=str(exc),
+                    error_detail=exc.error_detail,
+                    failure_stage="execution",
+                )
 
                 raise WorkflowRunError(
                     str(exc),
@@ -925,6 +1006,15 @@ class WorkflowEngine:
                     duration_ms=duration_ms,
                 )
                 steps.append(failed_step)
+                self._notify_node_failed(
+                    node_id=node.id,
+                    current_state=current_state,
+                    steps=steps,
+                    error_type="node_execution_failed",
+                    error_message=str(exc),
+                    error_detail=str(exc),
+                    failure_stage="execution",
+                )
 
                 raise WorkflowRunError(
                     str(exc),

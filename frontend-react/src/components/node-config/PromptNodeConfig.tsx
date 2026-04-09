@@ -50,6 +50,7 @@ interface PromptNodeConfigProps {
   graphWindowSourceNodeId?: string | null
   graphWindowTargetNodeIds?: string[]
   onConfigChange: (nextConfig: PromptNodeConfigType) => void
+  disabled?: boolean
 }
 
 function getResourceOptionLabel(resource: ModelResourceListItem): string {
@@ -104,6 +105,7 @@ export default function PromptNodeConfigForm({
   graphWindowSourceNodeId = null,
   graphWindowTargetNodeIds = [],
   onConfigChange,
+  disabled = false,
 }: PromptNodeConfigProps) {
   const windowSummary = buildWindowRelationSummary({
     graphWindowMode,
@@ -147,6 +149,7 @@ export default function PromptNodeConfigForm({
         <label style={{ display: 'block', marginBottom: 4 }}>Prompt Mode</label>
         <select
           value={config.promptMode}
+          disabled={disabled}
           onChange={e =>
             updateConfig({
               promptMode: e.target.value as PromptNodeConfigType['promptMode'],
@@ -169,6 +172,7 @@ export default function PromptNodeConfigForm({
           </label>
           <select
             value={config.prompt}
+            disabled={disabled}
             onChange={e => updateConfig({ prompt: e.target.value })}
             style={{ width: '100%' }}
           >
@@ -187,6 +191,7 @@ export default function PromptNodeConfigForm({
           </label>
           <textarea
             value={config.inlinePrompt}
+            disabled={disabled}
             onChange={e => updateConfig({ inlinePrompt: e.target.value })}
             style={{ width: '100%', minHeight: 100 }}
             placeholder='Write inline prompt text here...'
@@ -200,6 +205,7 @@ export default function PromptNodeConfigForm({
         </label>
         <select
           value={config.modelResourceId}
+          disabled={disabled}
           onChange={e => updateConfig({ modelResourceId: e.target.value })}
           style={{ width: '100%' }}
         >
@@ -375,6 +381,7 @@ export default function PromptNodeConfigForm({
             type='number'
             step='0.1'
             value={config.llm.temperature}
+            disabled={disabled}
             onChange={e =>
               updateLLM('temperature', Number(e.target.value || 0))
             }
@@ -387,6 +394,7 @@ export default function PromptNodeConfigForm({
           <input
             type='number'
             value={config.llm.timeout}
+            disabled={disabled}
             onChange={e => updateLLM('timeout', Number(e.target.value || 0))}
             style={{ width: '100%' }}
           />
@@ -399,6 +407,7 @@ export default function PromptNodeConfigForm({
           <input
             type='number'
             value={config.llm.max_retries}
+            disabled={disabled}
             onChange={e =>
               updateLLM('max_retries', Number(e.target.value || 0))
             }

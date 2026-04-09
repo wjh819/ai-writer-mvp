@@ -123,3 +123,35 @@ class RunResult(BaseModel):
     error_message: Optional[str] = None
     error_detail: Optional[str] = None
     failure_stage: Optional[Literal["request", "definition", "execution"]] = None
+
+LiveRunStatus = Literal["idle", "running", "success", "failed"]
+
+
+class LiveRunStartResponse(BaseModel):
+    run_id: str
+    status: Literal["running"] = "running"
+
+
+class LiveRunSnapshot(BaseModel):
+    run_id: Optional[str] = None
+    canvas_id: Optional[str] = None
+
+    status: LiveRunStatus
+    run_scope: Literal["full"] = "full"
+
+    active_node_id: Optional[str] = None
+
+    input_state: Dict[str, Any] = Field(default_factory=dict)
+    current_state: Dict[str, Any] = Field(default_factory=dict)
+    final_state: Dict[str, Any] = Field(default_factory=dict)
+    partial_state: Optional[Dict[str, Any]] = None
+
+    steps: List[RunStep] = Field(default_factory=list)
+
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+    error_detail: Optional[str] = None
+    failure_stage: Optional[Literal["request", "definition", "execution"]] = None
+
+    started_at: Optional[str] = None
+    finished_at: Optional[str] = None

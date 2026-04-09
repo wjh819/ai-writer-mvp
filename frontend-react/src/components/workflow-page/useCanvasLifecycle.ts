@@ -66,6 +66,8 @@ interface UseCanvasLifecycleOptions {
         nextContextLinks: WorkflowContextLink[],
         nextSidecar: WorkflowSidecarData
     ) => void
+
+    isGraphEditingLocked: boolean
 }
 
 function buildCanvasSwitchErrorMessage(params: {
@@ -100,37 +102,43 @@ function validateCanvasId(value: string): string {
     return ''
 }
 
+function getLiveRunLockedMessage(): string {
+    return 'Canvas actions are disabled while a full live run is active.'
+}
+
 export function useCanvasLifecycle({
-                                       requestedCanvasId,
-                                       setRequestedCanvasId,
-                                       activeCanvasId,
-                                       setActiveCanvasId,
-                                       setActiveWorkflowContextId,
-                                       temporaryCanvasId,
-                                       setTemporaryCanvasId,
+    requestedCanvasId,
+    setRequestedCanvasId,
+    activeCanvasId,
+    setActiveCanvasId,
+    setActiveWorkflowContextId,
+    temporaryCanvasId,
+    setTemporaryCanvasId,
 
-                                       canvasList,
-                                       nodes,
-                                       edges,
-                                       contextLinks,
-                                       workflowSidecar,
+    canvasList,
+    nodes,
+    edges,
+    contextLinks,
+    workflowSidecar,
 
-                                       graphPersistedVersion,
-                                       isGraphDirty,
+    graphPersistedVersion,
+    isGraphDirty,
 
-                                       clearPageError,
-                                       setPageErrorMessage,
-                                       setWorkflowWarnings,
-                                       setIsSwitchingWorkflow,
-                                       setCommittedGraphPersistedVersion,
+    clearPageError,
+    setPageErrorMessage,
+    setWorkflowWarnings,
+    setIsSwitchingWorkflow,
+    setCommittedGraphPersistedVersion,
 
-                                       loadCurrentWorkflow,
-                                       refreshWorkflowList,
-                                       handleDeleteCanvas,
-                                       handleSave,
+    loadCurrentWorkflow,
+    refreshWorkflowList,
+    handleDeleteCanvas,
+    handleSave,
 
-                                       resetGraphSideEffectsForCommittedWorkflow,
-                                   }: UseCanvasLifecycleOptions) {
+    resetGraphSideEffectsForCommittedWorkflow,
+
+    isGraphEditingLocked,
+}: UseCanvasLifecycleOptions) {
     const [isCreateCanvasDialogOpen, setIsCreateCanvasDialogOpen] =
         useState(false)
     const [draftCanvasId, setDraftCanvasId] = useState('')
@@ -227,10 +235,10 @@ export function useCanvasLifecycle({
                 setPageErrorMessage(
                     shouldCommitAsActiveCanvas
                         ? buildCanvasSwitchErrorMessage({
-                            targetCanvasId,
-                            activeCanvasId: previousActiveCanvasId,
-                            errorMessage: result.errorMessage,
-                        })
+                              targetCanvasId,
+                              activeCanvasId: previousActiveCanvasId,
+                              errorMessage: result.errorMessage,
+                          })
                         : result.errorMessage
                 )
 
@@ -298,6 +306,11 @@ export function useCanvasLifecycle({
                 return
             }
 
+            if (isGraphEditingLocked) {
+                setPageErrorMessage(getLiveRunLockedMessage())
+                return
+            }
+
             if (!confirmDiscardTemporaryCanvas(nextCanvasId)) {
                 return
             }
@@ -307,6 +320,8 @@ export function useCanvasLifecycle({
         },
         [
             requestedCanvasId,
+            isGraphEditingLocked,
+            setPageErrorMessage,
             confirmDiscardTemporaryCanvas,
             clearPageError,
             setRequestedCanvasId,
@@ -325,11 +340,16 @@ export function useCanvasLifecycle({
     }, [refreshWorkflowList, setPageErrorMessage, clearPageError])
 
     const openCreateCanvasDialog = useCallback(() => {
+        if (isGraphEditingLocked) {
+            setPageErrorMessage(getLiveRunLockedMessage())
+            return
+        }
+
         clearPageError()
         setCreateCanvasErrorMessage('')
         setDraftCanvasId('')
         setIsCreateCanvasDialogOpen(true)
-    }, [clearPageError])
+    }, [isGraphEditingLocked, setPageErrorMessage, clearPageError])
 
     const closeCreateCanvasDialog = useCallback(() => {
         setIsCreateCanvasDialogOpen(false)
@@ -343,6 +363,11 @@ export function useCanvasLifecycle({
     }, [])
 
     const confirmCreateCanvas = useCallback(() => {
+        if (isGraphEditingLocked) {
+            setPageErrorMessage(getLiveRunLockedMessage())
+            return
+        }
+
         const nextCanvasId = normalizeCanvasId(draftCanvasId)
         const validationMessage = validateCanvasId(nextCanvasId)
 
@@ -384,6 +409,8 @@ export function useCanvasLifecycle({
         activeCanvasId,
         requestedCanvasId,
         temporaryCanvasId,
+        isGraphEditingLocked,
+        setPageErrorMessage,
         confirmDiscardTemporaryCanvas,
         closeCreateCanvasDialog,
         clearPageError,
@@ -428,6 +455,11 @@ export function useCanvasLifecycle({
     }, [isActiveCanvasTemporary, activeCanvasId, isGraphDirty])
 
     const handleDeleteCurrentCanvas = useCallback(async () => {
+        if (isGraphEditingLocked) {
+            setPageErrorMessage(getLiveRunLockedMessage())
+            return
+        }
+
         if (!canDeleteCurrentCanvas) {
             setPageErrorMessage('At least one formal saved canvas must remain')
             return
@@ -468,6 +500,8 @@ export function useCanvasLifecycle({
 
         setRequestedCanvasId(nextCanvasId)
     }, [
+        isGraphEditingLocked,
+        setPageErrorMessage,
         canDeleteCurrentCanvas,
         isActiveCanvasTemporary,
         formalCanvasIds,
@@ -479,10 +513,14 @@ export function useCanvasLifecycle({
         handleDeleteCanvas,
         activeCanvasId,
         refreshWorkflowList,
-        setPageErrorMessage,
     ])
 
     const handleSaveWorkflow = useCallback(async () => {
+        if (isGraphEditingLocked) {
+            setPageErrorMessage(getLiveRunLockedMessage())
+            return
+        }
+
         const result = await handleSave(
             activeCanvasId,
             nodes,
@@ -516,6 +554,8 @@ export function useCanvasLifecycle({
 
         clearPageError()
     }, [
+        isGraphEditingLocked,
+        setPageErrorMessage,
         handleSave,
         activeCanvasId,
         nodes,
@@ -523,7 +563,6 @@ export function useCanvasLifecycle({
         contextLinks,
         workflowSidecar,
         isActiveCanvasTemporary,
-        setPageErrorMessage,
         setCommittedGraphPersistedVersion,
         graphPersistedVersion,
         setWorkflowWarnings,
@@ -533,6 +572,11 @@ export function useCanvasLifecycle({
     ])
 
     const handleRevertToSaved = useCallback(async () => {
+        if (isGraphEditingLocked) {
+            setPageErrorMessage(getLiveRunLockedMessage())
+            return
+        }
+
         if (isActiveCanvasTemporary) {
             return
         }
@@ -553,10 +597,11 @@ export function useCanvasLifecycle({
             result.sidecar
         )
     }, [
+        isGraphEditingLocked,
+        setPageErrorMessage,
         isActiveCanvasTemporary,
         loadCurrentWorkflow,
         activeCanvasId,
-        setPageErrorMessage,
         clearPageError,
         setWorkflowWarnings,
         resetGraphSideEffectsForCommittedWorkflow,

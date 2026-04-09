@@ -3,6 +3,8 @@ interface SidebarRunActionsProps {
     isRunning: boolean
     isSwitchingWorkflow: boolean
     isDeleting: boolean
+    isGraphEditingLocked: boolean
+    isLiveRunActive: boolean
     hasRunResult: boolean
     hasAnyNodes: boolean
     onSave: (event?: { preventDefault?: () => void }) => void | Promise<void>
@@ -11,16 +13,21 @@ interface SidebarRunActionsProps {
 }
 
 export default function SidebarRunActions({
-                                              isSaving,
-                                              isRunning,
-                                              isSwitchingWorkflow,
-                                              isDeleting,
-                                              hasRunResult,
-                                              hasAnyNodes,
-                                              onSave,
-                                              onRun,
-                                              onClearRunState,
-                                          }: SidebarRunActionsProps) {
+    isSaving,
+    isRunning,
+    isSwitchingWorkflow,
+    isDeleting,
+    isGraphEditingLocked,
+    isLiveRunActive,
+    hasRunResult,
+    hasAnyNodes,
+    onSave,
+    onRun,
+    onClearRunState,
+}: SidebarRunActionsProps) {
+    const isActionLocked =
+        isSwitchingWorkflow || isDeleting || isGraphEditingLocked
+
     return (
         <>
             {!hasAnyNodes ? (
@@ -29,27 +36,39 @@ export default function SidebarRunActions({
                 </div>
             ) : null}
 
+            {isLiveRunActive ? (
+                <div style={{ marginBottom: 12, fontSize: 12, color: '#92400e' }}>
+                    Live run in progress. Save, run, and clear actions are temporarily locked.
+                </div>
+            ) : null}
+
             <button
                 type='button'
                 onClick={onSave}
                 style={{ width: '100%', marginBottom: 8 }}
-                disabled={isSaving || isSwitchingWorkflow || isDeleting || !hasAnyNodes}
+                disabled={isSaving || isActionLocked || !hasAnyNodes}
             >
                 {isSaving ? 'Saving...' : 'Save'}
             </button>
 
             <button
+                type='button'
                 onClick={onRun}
                 style={{ width: '100%', marginBottom: 8 }}
-                disabled={isRunning || isSwitchingWorkflow || isDeleting || !hasAnyNodes}
+                disabled={isRunning || isActionLocked || !hasAnyNodes}
             >
-                {isRunning ? 'Running...' : 'Run Draft'}
+                {isRunning
+                    ? 'Starting Run...'
+                    : isLiveRunActive
+                      ? 'Live Run Active...'
+                      : 'Run Draft'}
             </button>
 
             <button
+                type='button'
                 onClick={onClearRunState}
                 style={{ width: '100%' }}
-                disabled={!hasRunResult}
+                disabled={!hasRunResult || isLiveRunActive}
             >
                 Clear Run State
             </button>

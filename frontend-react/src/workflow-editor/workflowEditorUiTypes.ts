@@ -22,4 +22,7 @@ export type {
     LoadWorkflowActionResult,
 } from './runtimeActionTypes'
 
-export type { WorkflowRunContext } from './runContextTypes'
+export type {
+    WorkflowRunContext,
+    WorkflowLiveRunContext,
+} from './runContextTypes'

@@ -1,6 +1,8 @@
 import axios from 'axios'
 
 import type {
+    LiveRunSnapshot,
+    LiveRunStartResponse,
     RunDraftWorkflowPayload,
     RunResult,
     SubgraphTestRequestPayload,
@@ -25,6 +27,24 @@ export async function runSubgraphTestWorkflow(
     const res = await axios.post<RunResult>(
         `${API_BASE}/workflows/${canvasId}/test-subgraph`,
         payload
+    )
+    return res.data
+}
+
+export async function startLiveRun(
+    payload: RunDraftWorkflowPayload,
+    canvasId: string = DEFAULT_CANVAS_ID
+): Promise<LiveRunStartResponse> {
+    const res = await axios.post<LiveRunStartResponse>(
+        `${API_BASE}/workflows/${canvasId}/run-live`,
+        payload
+    )
+    return res.data
+}
+
+export async function getActiveLiveRun(): Promise<LiveRunSnapshot> {
+    const res = await axios.get<LiveRunSnapshot>(
+        `${API_BASE}/runs/active`
     )
     return res.data
 }

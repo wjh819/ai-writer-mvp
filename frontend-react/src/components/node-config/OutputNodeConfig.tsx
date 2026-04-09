@@ -1,5 +1,6 @@
 interface OutputNodeConfigProps {
   derivedTargetInputs?: string[]
+  disabled?: boolean
 }
 
 /**
@@ -26,17 +27,17 @@ interface OutputNodeConfigProps {
  */
 export default function OutputNodeConfigForm({
   derivedTargetInputs = [],
+  disabled = false,
 }: OutputNodeConfigProps) {
-  // output 节点的 target inputs 完全来自当前图关系，不允许在 config 表单中直接编辑。
   return (
     <>
       <div style={{ marginBottom: 12 }}>
         <label>Derived Inputs</label>
 
-        {/* 这里只展示当前 incoming bindings 推导出的 targetInput 列表，不提供编辑能力，也不会写回节点 config。 */}
         <input
           value={derivedTargetInputs.join(', ')}
           readOnly
+          disabled={disabled}
           style={{ width: '100%', background: '#f5f5f5', color: '#666' }}
           placeholder='Derived from current incoming bindings (may be empty)'
         />

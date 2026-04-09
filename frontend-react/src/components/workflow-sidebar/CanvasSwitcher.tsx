@@ -6,17 +6,24 @@ interface CanvasSwitcherProps {
     effectiveCanvasList: CanvasSummary[]
     isShowingCanvasSwitchingState: boolean
     isSwitchingWorkflow: boolean
+    isGraphEditingLocked: boolean
     onRequestCanvasChange: (canvasId: string) => void
 }
 
 export default function CanvasSwitcher({
-                                           requestedCanvasId,
-                                           activeCanvasId,
-                                           effectiveCanvasList,
-                                           isShowingCanvasSwitchingState,
-                                           isSwitchingWorkflow,
-                                           onRequestCanvasChange,
-                                       }: CanvasSwitcherProps) {
+    requestedCanvasId,
+    activeCanvasId,
+    effectiveCanvasList,
+    isShowingCanvasSwitchingState,
+    isSwitchingWorkflow,
+    isGraphEditingLocked,
+    onRequestCanvasChange,
+}: CanvasSwitcherProps) {
+    const isSelectDisabled =
+        isSwitchingWorkflow ||
+        isGraphEditingLocked ||
+        effectiveCanvasList.length === 0
+
     return (
         <>
             <div style={{ marginBottom: 12 }}>
@@ -25,7 +32,7 @@ export default function CanvasSwitcher({
                     value={requestedCanvasId}
                     onChange={e => onRequestCanvasChange(e.target.value)}
                     style={{ width: '100%' }}
-                    disabled={isSwitchingWorkflow || effectiveCanvasList.length === 0}
+                    disabled={isSelectDisabled}
                 >
                     {effectiveCanvasList.length === 0 ? (
                         <option value={requestedCanvasId}>{requestedCanvasId}</option>
@@ -46,6 +53,10 @@ export default function CanvasSwitcher({
             {isShowingCanvasSwitchingState ? (
                 <div style={{ fontSize: 12, color: '#1d4ed8', marginBottom: 12 }}>
                     Requested: {requestedCanvasId}
+                </div>
+            ) : isGraphEditingLocked ? (
+                <div style={{ fontSize: 12, color: '#92400e', marginBottom: 12 }}>
+                    Live run in progress. Canvas switching is temporarily locked.
                 </div>
             ) : (
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>

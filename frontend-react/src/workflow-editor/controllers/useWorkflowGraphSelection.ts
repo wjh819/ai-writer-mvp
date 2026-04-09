@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 
-import type { RunResult } from '../../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../../run/runTypes'
 import { buildInputNodes } from '../state/workflowEditorRunInputs'
 import { buildSelectedNode } from '../state/workflowEditorSelection'
 import {
@@ -27,36 +27,48 @@ interface UseWorkflowGraphSelectionOptions {
     runResult: RunResult | null
     onRequestSubgraphTest?: (nodeId: string) => void
     runningSubgraphTestNodeId?: string | null
+
+    liveRunSnapshot: LiveRunSnapshot | null
 }
 
 export function useWorkflowGraphSelection({
-                                              nodes,
-                                              edges,
-                                              contextLinks,
-                                              selectedNodeId,
-                                              selectedEdgeId,
-                                              selectedContextLinkId,
-                                              runResult,
-                                              onRequestSubgraphTest,
-                                              runningSubgraphTestNodeId,
-                                          }: UseWorkflowGraphSelectionOptions) {
+    nodes,
+    edges,
+    contextLinks,
+    selectedNodeId,
+    selectedEdgeId,
+    selectedContextLinkId,
+    runResult,
+    onRequestSubgraphTest,
+    runningSubgraphTestNodeId,
+    liveRunSnapshot,
+}: UseWorkflowGraphSelectionOptions) {
     const executedNodeMap = useMemo(
-        () => buildExecutedNodeMap(runResult),
-        [runResult]
+        () => buildExecutedNodeMap(liveRunSnapshot || runResult),
+        [liveRunSnapshot, runResult]
     )
 
     const displayNodes = useMemo(
         () =>
-            buildDisplayNodes(nodes, edges, contextLinks, executedNodeMap, runResult, {
-                onRequestSubgraphTest,
-                runningSubgraphTestNodeId,
-            }),
+            buildDisplayNodes(
+                nodes,
+                edges,
+                contextLinks,
+                executedNodeMap,
+                runResult,
+                liveRunSnapshot,
+                {
+                    onRequestSubgraphTest,
+                    runningSubgraphTestNodeId,
+                }
+            ),
         [
             nodes,
             edges,
             contextLinks,
             executedNodeMap,
             runResult,
+            liveRunSnapshot,
             onRequestSubgraphTest,
             runningSubgraphTestNodeId,
         ]

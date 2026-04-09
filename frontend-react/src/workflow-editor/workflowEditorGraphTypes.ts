@@ -31,6 +31,7 @@ import type { WorkflowNodeConfig } from './workflowEditorTypes'
  */
 
 export type GraphWindowMode = 'new_window' | 'continue' | 'branch'
+export type LiveRunDisplayStatus = 'idle' | 'running' | 'success' | 'failed'
 export type SubgraphTestActionHandler = (nodeId: string) => void
 
 export interface InboundBindingDisplayItem {
@@ -45,6 +46,7 @@ export interface InboundBindingDisplayItem {
  * 分层说明：
  * - config：正式业务 config mirror，属于保存链
  * - runtimeInputs / runtimeOutput / runtimePublishedState：来自最近一次 full run 的只读展示字段
+ * - isRunActive / isRunRunning / isRunFailed / liveStatus / liveErrorMessage：来自当前 live run 的只读展示字段
  * - derivedTargetInputs / inboundBindings / promptVariableHints：graph/text 派生字段，不进入保存态
  * - graphWindow*：来自顶层 contextLinks 的 graph truth 摘要，不是运行态 window instance
  * - 节点测试入口字段只保留最小触发与运行态，不承载结果摘要
@@ -58,6 +60,17 @@ export interface WorkflowNodeData {
   runtimeInputs?: WorkflowState
   runtimeOutput?: unknown
   runtimePublishedState?: WorkflowState
+
+  // live run display fields
+  isRunActive?: boolean
+  isRunRunning?: boolean
+  isRunFailed?: boolean
+  liveStatus?: LiveRunDisplayStatus
+  liveErrorMessage?: string
+
+    // node card interaction lock
+    // true only while a live full run is active; used purely for UI lock display
+    isNodeInteractionLocked?: boolean
 
   // graph-derived display fields
   derivedTargetInputs?: string[]

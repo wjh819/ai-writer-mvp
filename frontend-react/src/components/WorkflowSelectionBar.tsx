@@ -9,6 +9,7 @@ interface WorkflowSelectionBarProps {
   selectedEdge: WorkflowEditorEdge | null
   selectedContextEdge: WorkflowEditorContextEdge | null
   isLoadingWorkflow: boolean
+  isGraphEditingLocked: boolean
   onDeleteSelectedEdge: () => void
   onDeleteSelectedContextEdge: () => void
   onSetSelectedContextEdgeMode: (mode: 'continue' | 'branch') => void
@@ -19,6 +20,7 @@ export default function WorkflowSelectionBar({
   selectedEdge,
   selectedContextEdge,
   isLoadingWorkflow,
+  isGraphEditingLocked,
   onDeleteSelectedEdge,
   onDeleteSelectedContextEdge,
   onSetSelectedContextEdgeMode,
@@ -53,7 +55,7 @@ export default function WorkflowSelectionBar({
           <button
             type='button'
             onClick={onDeleteSelectedEdge}
-            disabled={isLoadingWorkflow}
+            disabled={isLoadingWorkflow || isGraphEditingLocked}
           >
             Delete Edge
           </button>
@@ -73,7 +75,9 @@ export default function WorkflowSelectionBar({
               type='button'
               onClick={() => onSetSelectedContextEdgeMode('continue')}
               disabled={
-                isLoadingWorkflow || selectedContextEdge.mode === 'continue'
+                isLoadingWorkflow ||
+                isGraphEditingLocked ||
+                selectedContextEdge.mode === 'continue'
               }
             >
               Set Continue
@@ -83,7 +87,9 @@ export default function WorkflowSelectionBar({
               type='button'
               onClick={() => onSetSelectedContextEdgeMode('branch')}
               disabled={
-                isLoadingWorkflow || selectedContextEdge.mode === 'branch'
+                isLoadingWorkflow ||
+                isGraphEditingLocked ||
+                selectedContextEdge.mode === 'branch'
               }
             >
               Set Branch
@@ -92,18 +98,20 @@ export default function WorkflowSelectionBar({
             <button
               type='button'
               onClick={onDeleteSelectedContextEdge}
-              disabled={isLoadingWorkflow}
+              disabled={isLoadingWorkflow || isGraphEditingLocked}
             >
               Delete Context Link
             </button>
           </div>
         </>
       ) : (
-<span style={{ color: '#666' }}>
-  {isLoadingWorkflow
-    ? 'Loading...'
-    : 'No node or edge selected. Click a purple context edge to switch continue / branch.'}
-</span>
+        <span style={{ color: '#666' }}>
+          {isLoadingWorkflow
+            ? 'Loading...'
+            : isGraphEditingLocked
+              ? 'Live run is active. Graph editing is locked.'
+              : 'No node or edge selected. Click a purple context edge to switch continue / branch.'}
+        </span>
       )}
     </div>
   )

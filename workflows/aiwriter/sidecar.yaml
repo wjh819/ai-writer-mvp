@@ -1,5 +1,0 @@
-nodes:
-  prompt_node_1:
-    pinnedInputs:
-      topic: 信息收集-项目推荐-自动化环境部署
-    metadata: {}

@@ -16,9 +16,7 @@ import type {
     WorkflowEditorNode,
 } from '../../workflow-editor/workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../../workflow-editor/workflowEditorTypes'
-import type {
-    WorkflowSidecarNodeAssets,
-} from '../../workflow-editor/workflowEditorUiTypes'
+import type { WorkflowSidecarNodeAssets } from '../../workflow-editor/workflowEditorUiTypes'
 import { buildDisplayRunFromDirectRun } from '../run/runDisplayMappers'
 
 interface SemanticGraphSnapshot {
@@ -80,6 +78,7 @@ interface UseWorkflowSubgraphTestPanelOptions {
     pruneSubgraphTestArtifacts: (validNodeIds: string[]) => void
     resetSubgraphTestState: () => void
     resetSubgraphTestContext: () => void
+    isLiveRunActive: boolean
 }
 
 function hasOwn(value: Record<string, unknown>, key: string): boolean {
@@ -480,8 +479,7 @@ export function getEffectiveSourceStyles(source: SubgraphTestInputSource) {
 
 export function buildNextOutputSpec(
     nodeId: string,
-    config:
-    | WorkflowEditorNode['data']['config']
+    config: WorkflowEditorNode['data']['config']
 ) {
     if (config.type === 'prompt') {
         return buildNextPromptOutputSpec(nodeId, config.outputs)
@@ -493,6 +491,9 @@ export function buildNextOutputSpec(
         stateKey: `out_${nodeId}_${nextIndex}`,
     }
 }
+
+const LIVE_RUN_LOCK_MESSAGE =
+    'Node test is disabled while a full live run is active.'
 
 export function useWorkflowSubgraphTestPanel({
                                                  activeCanvasId,
@@ -531,6 +532,7 @@ export function useWorkflowSubgraphTestPanel({
                                                  pruneSubgraphTestArtifacts,
                                                  resetSubgraphTestState,
                                                  resetSubgraphTestContext,
+                                                 isLiveRunActive,
                                              }: UseWorkflowSubgraphTestPanelOptions) {
     const [subgraphTestPanelErrorMessage, setSubgraphTestPanelErrorMessage] =
         useState('')
@@ -545,12 +547,18 @@ export function useWorkflowSubgraphTestPanel({
 
     const requestSubgraphTestFromCanvas = useCallback(
         (nodeId: string) => {
+            if (isLiveRunActive) {
+                setSubgraphTestPanelErrorMessage(LIVE_RUN_LOCK_MESSAGE)
+                return
+            }
+
             setRequestedSubgraphTestNodeId(nodeId)
             setIsSubgraphTestPanelExpanded(true)
             clearSubgraphTestFeedback()
             clearPageError()
         },
         [
+            isLiveRunActive,
             setRequestedSubgraphTestNodeId,
             setIsSubgraphTestPanelExpanded,
             clearSubgraphTestFeedback,
@@ -680,6 +688,11 @@ export function useWorkflowSubgraphTestPanel({
 
     const handlePinnedInputDraftChange = useCallback(
         (nodeId: string, targetInput: string, nextValue: string) => {
+            if (isLiveRunActive) {
+                setSubgraphTestPanelErrorMessage(LIVE_RUN_LOCK_MESSAGE)
+                return
+            }
+
             updateWorkflowSidecarNodeAssets(nodeId, previous => {
                 const nextPinnedInputs = { ...(previous.pinnedInputs || {}) }
                 const parsedValue = parsePinnedInputDraft(nextValue)
@@ -701,6 +714,7 @@ export function useWorkflowSubgraphTestPanel({
             clearSubgraphTestFeedback()
         },
         [
+            isLiveRunActive,
             updateWorkflowSidecarNodeAssets,
             onGraphPersistedChanged,
             markSubgraphTestResultStale,
@@ -709,6 +723,11 @@ export function useWorkflowSubgraphTestPanel({
     )
 
     const handleRunSelectedSubgraphTest = useCallback(async () => {
+        if (isLiveRunActive) {
+            setSubgraphTestPanelErrorMessage(LIVE_RUN_LOCK_MESSAGE)
+            return
+        }
+
         if (!selectedNode) {
             return
         }
@@ -752,6 +771,7 @@ export function useWorkflowSubgraphTestPanel({
 
         setSubgraphTestInfoMessage('Subgraph test completed.')
     }, [
+        isLiveRunActive,
         selectedNode,
         subgraphTestState,
         effectiveSubgraphTestInputItems,
@@ -766,6 +786,11 @@ export function useWorkflowSubgraphTestPanel({
     ])
 
     const handleClearSelectedSubgraphTestResult = useCallback(() => {
+        if (isLiveRunActive) {
+            setSubgraphTestPanelErrorMessage(LIVE_RUN_LOCK_MESSAGE)
+            return
+        }
+
         if (!selectedNode) {
             return
         }
@@ -776,6 +801,7 @@ export function useWorkflowSubgraphTestPanel({
         clearPageError()
         setSubgraphTestInfoMessage('Current cached subgraph test result was cleared.')
     }, [
+        isLiveRunActive,
         selectedNode,
         clearSubgraphTestResult,
         clearSubgraphTestResultStale,
@@ -784,13 +810,23 @@ export function useWorkflowSubgraphTestPanel({
     ])
 
     const handleResetSubgraphTestReusableContext = useCallback(() => {
+        if (isLiveRunActive) {
+            setSubgraphTestPanelErrorMessage(LIVE_RUN_LOCK_MESSAGE)
+            return
+        }
+
         resetSubgraphTestState()
         clearSubgraphTestFeedback()
         clearPageError()
         setSubgraphTestInfoMessage(
             'Reusable subgraph test state was cleared. Cached subgraph test results were kept.'
         )
-    }, [resetSubgraphTestState, clearSubgraphTestFeedback, clearPageError])
+    }, [
+        isLiveRunActive,
+        resetSubgraphTestState,
+        clearSubgraphTestFeedback,
+        clearPageError,
+    ])
 
     useEffect(() => {
         if (!requestedSubgraphTestNodeId) {
@@ -917,5 +953,7 @@ export function useWorkflowSubgraphTestPanel({
         handleRunSelectedSubgraphTest,
         handleClearSelectedSubgraphTestResult,
         handleResetSubgraphTestReusableContext,
+
+        isSubgraphTestLocked: isLiveRunActive,
     }
 }

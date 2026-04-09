@@ -1,4 +1,4 @@
-import type { RunResult } from '../run/runTypes'
+import type { LiveRunSnapshot, RunResult } from '../run/runTypes'
 
 /**
  * direct run / subgraph test 结果在页面层的归属上下文。
@@ -14,4 +14,14 @@ export interface WorkflowRunContext {
     workflowContextId: number
     graphSemanticVersion: number
     runResult: RunResult
+}
+
+export interface WorkflowLiveRunContext {
+    canvasId: string
+    workflowContextId: number
+    graphSemanticVersion: number
+    runId: string | null
+    snapshot: LiveRunSnapshot | null
+    isPolling: boolean
+    lastPollErrorMessage?: string
 }

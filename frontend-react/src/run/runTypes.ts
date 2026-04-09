@@ -134,6 +134,38 @@ export interface RunResult {
   failure_stage?: FailureStage
 }
 
+export type LiveRunStatus = 'idle' | 'running' | 'success' | 'failed'
+
+export interface LiveRunStartResponse {
+    run_id: string
+    status: 'running'
+}
+
+export interface LiveRunSnapshot {
+    run_id: string | null
+    canvas_id?: string | null
+
+    status: LiveRunStatus
+    run_scope: 'full'
+
+    active_node_id?: string | null
+
+    input_state: WorkflowState
+    current_state: WorkflowState
+    final_state: WorkflowState
+    partial_state?: WorkflowState | null
+
+    steps: StepProjection[]
+
+    error_type?: string
+    error_message?: string
+    error_detail?: string
+    failure_stage?: FailureStage
+
+    started_at?: string
+    finished_at?: string
+}
+
 /**
  * 当前画布 workflow 的 direct run 请求体 transport shape。
  *

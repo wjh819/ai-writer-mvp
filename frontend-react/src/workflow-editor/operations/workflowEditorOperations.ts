@@ -20,6 +20,8 @@ export type {
     DeleteWorkflowResult,
     RunWorkflowResult,
     SubgraphTestWorkflowResult,
+    StartLiveRunResult,
+    FetchActiveLiveRunResult,
 } from './operationResultHelpers'
 
 export { EMPTY_WORKFLOW_SIDECAR } from './operationResultHelpers'
@@ -41,4 +43,6 @@ export {
 export {
     runDraftWorkflowResult,
     runSubgraphTestResult,
+    startLiveRunResult,
+    fetchActiveLiveRunResult,
 } from './runMutations'

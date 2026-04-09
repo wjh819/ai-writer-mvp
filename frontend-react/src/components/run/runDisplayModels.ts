@@ -7,6 +7,7 @@ import type {
   StepStatus,
 } from '../../run/runTypes'
 import type { PromptMode, WorkflowState } from '../../shared/workflowSharedTypes'
+
 /**
  * run display model 层。
  *
@@ -16,7 +17,7 @@ import type { PromptMode, WorkflowState } from '../../shared/workflowSharedTypes
  *
  * 负责：
  * - 承载展示友好的运行结果模型
- * - 区分原始 RunResult 与前端解释后的 DisplayRun
+ * - 区分原始 RunResult / LiveRunSnapshot 与前端解释后的 DisplayRun
  *
  * 不负责：
  * - 定义后端 run contract
@@ -31,8 +32,10 @@ import type { PromptMode, WorkflowState } from '../../shared/workflowSharedTypes
  * - DisplayStep.id 是 display-local id，不是稳定业务标识
  * - windowId 等字段当前仅用于单次 run 展示，不应被视为 durable identity
  */
-export type DisplayRunStatus = RunStatus
+export type DisplayRunSource = 'direct' | 'live'
+export type DisplayRunStatus = RunStatus | 'running'
 export type DisplayRunScope = RunScope
+export type DisplayStepStatus = StepStatus | 'running'
 
 export interface DisplayFailureInfo {
   typeLabel: string
@@ -58,7 +61,7 @@ export interface DisplayStep {
 
   node: string
   type: StepNodeType
-  status: StepStatus
+  status: DisplayStepStatus
 
   startedAt?: string
   finishedAt?: string
@@ -83,14 +86,27 @@ export interface DisplayStep {
   writeback?: DisplayWriteback | null
 }
 
+/**
+ * 前端展示层消费的运行结果模型。
+ *
+ * 正式口径：
+ * - primaryState 已由 display mapper 选定
+ *   - running = current_state
+ *   - success = final_state
+ *   - failed = partial_state
+ * - failureInfo 已是前端展示友好的失败摘要
+ * - raw 保留原始 direct run result 或 live snapshot 供调试显示
+ * - isStale 仍是页面层注入的 display 语义
+ */
 export interface DisplayRun {
-  source: 'direct'
+  source: DisplayRunSource
 
   status: DisplayRunStatus
   runScope: DisplayRunScope
   failureStage?: FailureStage
 
   inputState: WorkflowState
+  currentState: WorkflowState
   primaryState: WorkflowState
   primaryStateTitle: string
 
@@ -99,12 +115,8 @@ export interface DisplayRun {
 
   raw: unknown
   isStale?: boolean
+
+  runId?: string
+  activeNodeId?: string | null
+  isLive?: boolean
 }
-  /**
-   * 前端展示层消费的运行结果模型。
-   *
-   * 正式口径：
-   * - primaryState 已由 display mapper 选定（success=final_state, failed=partial_state）
-   * - failureInfo 已是前端展示友好的失败摘要
-   * - raw 保留原始 direct run result 供调试显示
-   */

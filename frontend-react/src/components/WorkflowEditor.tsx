@@ -19,9 +19,11 @@ import WorkflowNode from './WorkflowNode'
 import WorkflowSelectionBar from './WorkflowSelectionBar'
 import WorkflowSidebar from './WorkflowSidebar'
 import RunResultPanel from './run/RunResultPanel'
+import { buildDisplayRunFromLiveSnapshot } from './run/runDisplayMappers'
 import WorkflowDialogs from './workflow-page/WorkflowDialogs'
 import WorkflowPageBanners from './workflow-page/WorkflowPageBanners'
 import { useCanvasLifecycle } from './workflow-page/useCanvasLifecycle'
+import { useLiveRunContext } from './workflow-page/useLiveRunContext'
 import { useWorkflowPageContext } from './workflow-page/useWorkflowPageContext'
 import { useWorkflowRunContext } from './workflow-page/useWorkflowRunContext'
 import { useWorkflowSubgraphTestPanel } from './workflow-page/useWorkflowSubgraphTestPanel'
@@ -34,6 +36,14 @@ const EMPTY_WORKFLOW_SIDECAR: WorkflowSidecarData = {
 
 const nodeTypes = {
     workflowNode: WorkflowNode,
+}
+
+function trim(value: unknown): string {
+    if (value === null || typeof value === 'undefined') {
+        return ''
+    }
+
+    return String(value).trim()
 }
 
 export default function WorkflowEditor() {
@@ -55,7 +65,6 @@ export default function WorkflowEditor() {
         setGraphPersistedVersion,
         handleGraphPersistedChanged,
 
-        committedGraphPersistedVersion,
         setCommittedGraphPersistedVersion,
         isGraphDirty,
 
@@ -121,15 +130,16 @@ export default function WorkflowEditor() {
         pruneSubgraphTestArtifacts,
         resetSubgraphTestState,
         resetSubgraphTestContext,
+
+        handleStartLiveRun,
+        handleFetchActiveLiveRun,
     } = useWorkflowRuntime()
 
     const {
         runContext,
         clearRunState,
-        runResult,
         displayRun,
-        hasVisibleRunResult,
-        runWorkflow,
+        commitFinalRunResult,
     } = useWorkflowRunContext({
         activeCanvasId,
         activeWorkflowContextId,
@@ -138,13 +148,37 @@ export default function WorkflowEditor() {
         handleRun,
     })
 
+    const {
+        liveRunSnapshot,
+        isLiveRunActive,
+        isGraphEditingLocked,
+        lastPollErrorMessage,
+        clearLiveRunState,
+        startLiveRun,
+    } = useLiveRunContext({
+        activeCanvasId,
+        activeWorkflowContextId,
+        graphSemanticVersion,
+        clearPageError,
+        handleStartLiveRun,
+        handleFetchActiveLiveRun,
+        commitFinalRunResult,
+    })
+    const activeLiveRunSnapshot = isLiveRunActive ? liveRunSnapshot : null
     const requestSubgraphTestFromCanvas = useCallback(
         (nodeId: string) => {
+            if (isLiveRunActive) {
+                setPageErrorMessage(
+                    'Node test is disabled while a full live run is active.'
+                )
+                return
+            }
+
             setRequestedSubgraphTestNodeId(nodeId)
             setIsSubgraphTestPanelExpanded(true)
             clearPageError()
         },
-        [clearPageError]
+        [isLiveRunActive, setPageErrorMessage, clearPageError]
     )
 
     const graph = useWorkflowGraphEditor({
@@ -158,6 +192,8 @@ export default function WorkflowEditor() {
         onGraphClearError: clearPageError,
         onRequestSubgraphTest: requestSubgraphTestFromCanvas,
         runningSubgraphTestNodeId,
+        isGraphEditingLocked,
+        liveRunSnapshot: activeLiveRunSnapshot,
     })
 
     const {
@@ -201,7 +237,6 @@ export default function WorkflowEditor() {
     const {
         subgraphTestPanelErrorMessage,
         subgraphTestInfoMessage,
-        clearSubgraphTestFeedback,
         effectiveSubgraphTestInputItems,
         currentPinnedInputDraftTexts,
         selectedSubgraphTestDisplayRun,
@@ -249,6 +284,7 @@ export default function WorkflowEditor() {
         pruneSubgraphTestArtifacts,
         resetSubgraphTestState,
         resetSubgraphTestContext,
+        isLiveRunActive,
     })
 
     const resetGraphSideEffectsForCommittedWorkflow = useCallback(
@@ -267,6 +303,7 @@ export default function WorkflowEditor() {
             setGraphSemanticVersion(0)
             setGraphPersistedVersion(0)
             setCommittedGraphPersistedVersion(0)
+            clearLiveRunState()
             clearRunState()
         },
         [
@@ -279,6 +316,7 @@ export default function WorkflowEditor() {
             setGraphSemanticVersion,
             setGraphPersistedVersion,
             setCommittedGraphPersistedVersion,
+            clearLiveRunState,
             clearRunState,
         ]
     )
@@ -332,6 +370,8 @@ export default function WorkflowEditor() {
         handleSave,
 
         resetGraphSideEffectsForCommittedWorkflow,
+
+        isGraphEditingLocked,
     })
 
     useEffect(() => {
@@ -346,22 +386,33 @@ export default function WorkflowEditor() {
         return edges.find(edge => edge.id === selectedEdgeId) || null
     }, [edges, selectedEdgeId])
 
-    const handleRunWorkflow = useCallback(async () => {
-        const result = await runWorkflow(nodes, edges, contextLinks, runInputs)
+    const liveDisplayRun = useMemo(() => {
+        if (!activeLiveRunSnapshot) {
+            return null
+        }
 
-        if (!result.runResult) {
-            setPageErrorMessage(result.errorMessage || 'Run failed')
+        return buildDisplayRunFromLiveSnapshot(activeLiveRunSnapshot)
+    }, [activeLiveRunSnapshot])
+
+    const effectiveDisplayRun = liveDisplayRun ?? displayRun
+    const hasAnyNodes = nodes.length > 0
+
+    const handleRunWorkflow = useCallback(async () => {
+        const result = await startLiveRun(nodes, edges, contextLinks, runInputs)
+
+        if (!result.liveRunStart) {
+            setPageErrorMessage(
+                result.errorMessage || 'Live run failed to start'
+            )
         }
     }, [
-        runWorkflow,
+        startLiveRun,
         nodes,
         edges,
         contextLinks,
         runInputs,
         setPageErrorMessage,
     ])
-
-    const hasAnyNodes = nodes.length > 0
 
     const workflowWarningsMessage = useMemo(() => {
         if (!workflowWarnings.length) {
@@ -376,7 +427,11 @@ export default function WorkflowEditor() {
             .join('\n')
     }, [workflowWarnings])
 
-    const topLevelErrorMessage = [bootstrapErrorMessage, pageErrorMessage]
+    const topLevelErrorMessage = [
+        bootstrapErrorMessage,
+        pageErrorMessage,
+        lastPollErrorMessage,
+    ]
         .filter(Boolean)
         .join('\n')
 
@@ -392,6 +447,21 @@ export default function WorkflowEditor() {
         return 'Current canvas contains unsaved draft changes.'
     }, [isGraphDirty, pageErrorMessage])
 
+    const liveRunStatusMessage = useMemo(() => {
+        if (!isLiveRunActive) {
+            return ''
+        }
+
+        if (!activeLiveRunSnapshot) {
+            return 'Live run is starting...'
+        }
+
+        const activeNodeId = trim(activeLiveRunSnapshot.active_node_id)
+        return activeNodeId
+            ? `Live run is in progress. Active node: ${activeNodeId}`
+            : 'Live run is in progress.'
+    }, [isLiveRunActive, activeLiveRunSnapshot])
+
     return (
         <div style={{ display: 'flex', height: '100vh' }}>
             <WorkflowSidebar
@@ -401,6 +471,8 @@ export default function WorkflowEditor() {
                 temporaryCanvasId={temporaryCanvasId}
                 modelResources={modelResources}
                 isSwitchingWorkflow={isSwitchingWorkflow}
+                isGraphEditingLocked={isGraphEditingLocked}
+                isLiveRunActive={isLiveRunActive}
                 onRequestCanvasChange={requestCanvasChange}
                 onRefreshWorkflowList={handleRefreshWorkflowList}
                 onOpenCreateCanvas={openCreateCanvasDialog}
@@ -411,12 +483,15 @@ export default function WorkflowEditor() {
                 onRunInputChange={updateRunInput}
                 onSave={handleSaveWorkflow}
                 onRun={handleRunWorkflow}
-                onClearRunState={clearRunState}
+                onClearRunState={() => {
+                    clearLiveRunState()
+                    clearRunState()
+                }}
                 onOpenModelResources={() => setIsModelResourcePanelOpen(true)}
                 isSaving={isSaving}
-                isRunning={isRunning}
+                isRunning={isRunning || isLiveRunActive}
                 isDeleting={isDeleting}
-                hasRunResult={hasVisibleRunResult}
+                hasRunResult={Boolean(effectiveDisplayRun)}
                 hasAnyNodes={hasAnyNodes}
                 canDeleteCurrentCanvas={canDeleteCurrentCanvas}
                 getRunInputKey={getRunInputKey}
@@ -438,13 +513,15 @@ export default function WorkflowEditor() {
                         isSaving ||
                         isSwitchingWorkflow ||
                         isDeleting ||
-                        isActiveCanvasTemporary
+                        isActiveCanvasTemporary ||
+                        isLiveRunActive
                     }
                     revertToSavedTitle={
                         isActiveCanvasTemporary
                             ? 'Unsaved blank canvases do not have a saved version yet'
                             : undefined
                     }
+                    liveRunStatusMessage={liveRunStatusMessage}
                 />
 
                 <WorkflowSelectionBar
@@ -452,6 +529,7 @@ export default function WorkflowEditor() {
                     selectedEdge={selectedEdge}
                     selectedContextEdge={selectedContextEdge}
                     isLoadingWorkflow={isSwitchingWorkflow || isLoadingWorkflow}
+                    isGraphEditingLocked={isGraphEditingLocked}
                     onDeleteSelectedEdge={deleteSelectedEdge}
                     onDeleteSelectedContextEdge={deleteSelectedContextLink}
                     onSetSelectedContextEdgeMode={updateSelectedContextLinkMode}
@@ -481,7 +559,7 @@ export default function WorkflowEditor() {
                     </ReactFlow>
                 </div>
 
-                <RunResultPanel displayRun={displayRun} />
+                <RunResultPanel displayRun={effectiveDisplayRun} />
             </div>
 
             <div
@@ -494,9 +572,15 @@ export default function WorkflowEditor() {
             >
                 <NodeConfigPanel
                     node={selectedNode}
-                    derivedTargetInputs={selectedDisplayNode?.data.derivedTargetInputs ?? []}
-                    inboundBindings={selectedDisplayNode?.data.inboundBindings ?? []}
-                    promptVariableHints={selectedDisplayNode?.data.promptVariableHints ?? []}
+                    derivedTargetInputs={
+                        selectedDisplayNode?.data.derivedTargetInputs ?? []
+                    }
+                    inboundBindings={
+                        selectedDisplayNode?.data.inboundBindings ?? []
+                    }
+                    promptVariableHints={
+                        selectedDisplayNode?.data.promptVariableHints ?? []
+                    }
                     graphWindowMode={selectedDisplayNode?.data.graphWindowMode}
                     graphWindowSourceNodeId={
                         selectedDisplayNode?.data.graphWindowSourceNodeId
@@ -507,6 +591,8 @@ export default function WorkflowEditor() {
                     isSubgraphTestRunning={Boolean(
                         selectedDisplayNode?.data.isSubgraphTestRunning
                     )}
+                    isGraphEditingLocked={isGraphEditingLocked}
+                    isNodeTestLocked={isLiveRunActive}
                     onChange={updateNode}
                     onDelete={deleteNode}
                     prompts={prompts}
@@ -515,11 +601,19 @@ export default function WorkflowEditor() {
                     onPinnedInputDraftChange={handlePinnedInputDraftChange}
                     isSubgraphTestExpanded={isSubgraphTestPanelExpanded}
                     onSetSubgraphTestExpanded={setIsSubgraphTestPanelExpanded}
-                    effectiveSubgraphTestInputItems={effectiveSubgraphTestInputItems}
+                    effectiveSubgraphTestInputItems={
+                        effectiveSubgraphTestInputItems
+                    }
                     onRunSubgraphTest={handleRunSelectedSubgraphTest}
-                    onClearSubgraphTestResult={handleClearSelectedSubgraphTestResult}
-                    onResetSubgraphTestContext={handleResetSubgraphTestReusableContext}
-                    selectedSubgraphTestDisplayRun={selectedSubgraphTestDisplayRun}
+                    onClearSubgraphTestResult={
+                        handleClearSelectedSubgraphTestResult
+                    }
+                    onResetSubgraphTestContext={
+                        handleResetSubgraphTestReusableContext
+                    }
+                    selectedSubgraphTestDisplayRun={
+                        selectedSubgraphTestDisplayRun
+                    }
                     subgraphTestErrorMessage={subgraphTestPanelErrorMessage}
                     subgraphTestInfoMessage={subgraphTestInfoMessage}
                 />
@@ -540,16 +634,17 @@ export default function WorkflowEditor() {
             )}
 
             <WorkflowDialogs
-                isCreateCanvasDialogOpen={isCreateCanvasDialogOpen}
-                draftCanvasId={draftCanvasId}
-                createCanvasErrorMessage={createCanvasErrorMessage}
-                onDraftCanvasIdChange={handleDraftCanvasIdChange}
-                onCloseCreateCanvasDialog={closeCreateCanvasDialog}
-                onConfirmCreateCanvas={confirmCreateCanvas}
-                pendingBindingRequest={pendingBindingRequest}
-                onCancelPendingBinding={cancelPendingBinding}
-                onConfirmPendingBinding={confirmPendingBinding}
-            />
+    isCreateCanvasDialogOpen={isCreateCanvasDialogOpen}
+    draftCanvasId={draftCanvasId}
+    createCanvasErrorMessage={createCanvasErrorMessage}
+    onDraftCanvasIdChange={handleDraftCanvasIdChange}
+    onCloseCreateCanvasDialog={closeCreateCanvasDialog}
+    onConfirmCreateCanvas={confirmCreateCanvas}
+    pendingBindingRequest={pendingBindingRequest}
+    onCancelPendingBinding={cancelPendingBinding}
+    onConfirmPendingBinding={confirmPendingBinding}
+    isGraphEditingLocked={isGraphEditingLocked}
+/>
         </div>
     )
 }

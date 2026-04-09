@@ -2,6 +2,7 @@ interface CanvasActionsProps {
     modelResourceCount: number
     isSwitchingWorkflow: boolean
     isDeleting: boolean
+    isGraphEditingLocked: boolean
     canDeleteCurrentCanvas: boolean
     isActiveCanvasTemporary: boolean
     onOpenCreateCanvas: () => void
@@ -11,23 +12,27 @@ interface CanvasActionsProps {
 }
 
 export default function CanvasActions({
-                                          modelResourceCount,
-                                          isSwitchingWorkflow,
-                                          isDeleting,
-                                          canDeleteCurrentCanvas,
-                                          isActiveCanvasTemporary,
-                                          onOpenCreateCanvas,
-                                          onDeleteCurrentCanvas,
-                                          onRefreshWorkflowList,
-                                          onOpenModelResources,
-                                      }: CanvasActionsProps) {
+    modelResourceCount,
+    isSwitchingWorkflow,
+    isDeleting,
+    isGraphEditingLocked,
+    canDeleteCurrentCanvas,
+    isActiveCanvasTemporary,
+    onOpenCreateCanvas,
+    onDeleteCurrentCanvas,
+    onRefreshWorkflowList,
+    onOpenModelResources,
+}: CanvasActionsProps) {
+    const isActionDisabled =
+        isSwitchingWorkflow || isDeleting || isGraphEditingLocked
+
     return (
         <>
             <button
                 type='button'
                 onClick={onOpenCreateCanvas}
                 style={{ width: '100%', marginTop: 8 }}
-                disabled={isSwitchingWorkflow || isDeleting}
+                disabled={isActionDisabled}
             >
                 Create Blank Canvas
             </button>
@@ -36,7 +41,7 @@ export default function CanvasActions({
                 type='button'
                 onClick={onDeleteCurrentCanvas}
                 style={{ width: '100%', marginTop: 8 }}
-                disabled={isSwitchingWorkflow || isDeleting || !canDeleteCurrentCanvas}
+                disabled={isActionDisabled || !canDeleteCurrentCanvas}
                 title={
                     !canDeleteCurrentCanvas
                         ? 'At least one formal saved canvas must remain'
@@ -48,22 +53,24 @@ export default function CanvasActions({
                         ? 'Discarding...'
                         : 'Deleting...'
                     : isActiveCanvasTemporary
-                        ? 'Discard Current Canvas'
-                        : 'Delete Current Canvas'}
+                      ? 'Discard Current Canvas'
+                      : 'Delete Current Canvas'}
             </button>
 
             <button
+                type='button'
                 onClick={onRefreshWorkflowList}
                 style={{ width: '100%', marginTop: 8 }}
-                disabled={isSwitchingWorkflow || isDeleting}
+                disabled={isActionDisabled}
             >
                 Refresh Canvas List
             </button>
 
             <button
+                type='button'
                 onClick={onOpenModelResources}
                 style={{ width: '100%', marginTop: 8 }}
-                disabled={isSwitchingWorkflow || isDeleting}
+                disabled={isActionDisabled}
             >
                 Model Resources
             </button>
