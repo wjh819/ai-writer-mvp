@@ -10,194 +10,289 @@ import RunInputsSection from './workflow-sidebar/RunInputsSection'
 import SidebarRunActions from './workflow-sidebar/SidebarRunActions'
 
 interface WorkflowSidebarProps {
-    requestedCanvasId: string
-    activeCanvasId: string
-    canvasList: CanvasSummary[]
-    temporaryCanvasId?: string | null
-    modelResources: ModelResourceListItem[]
-    isSwitchingWorkflow: boolean
-    isGraphEditingLocked: boolean
-    isLiveRunActive: boolean
+  requestedCanvasId: string
+  activeCanvasId: string
+  canvasList: CanvasSummary[]
+  temporaryCanvasId?: string | null
+  modelResources: ModelResourceListItem[]
+  isSwitchingWorkflow: boolean
+  isGraphEditingLocked: boolean
+  isLiveRunActive: boolean
+  isBatchRunActive: boolean
+  isBatchCancelRequested: boolean
 
-    onRequestCanvasChange: (canvasId: string) => void
-    onRefreshWorkflowList: () => void
-    onOpenCreateCanvas: () => void
-    onDeleteCurrentCanvas: () => void | Promise<void>
-    onAddNodeByType: (type: WorkflowNodeType) => void
+  onRequestCanvasChange: (canvasId: string) => void
+  onRefreshWorkflowList: () => void
+  onOpenCreateCanvas: () => void
+  onDeleteCurrentCanvas: () => void | Promise<void>
+  onAddNodeByType: (type: WorkflowNodeType) => void
 
-    inputNodes: WorkflowEditorNode[]
-    runInputs: WorkflowState
-    onRunInputChange: (key: string, value: string) => void
+  inputNodes: WorkflowEditorNode[]
+  runInputs: WorkflowState
+  onRunInputChange: (key: string, value: string) => void
 
-    onSave: (event?: { preventDefault?: () => void }) => void | Promise<void>
-    onRun: () => void | Promise<void>
-    onClearRunState: () => void
-    onOpenModelResources: () => void
+  batchInputText: string
+  onBatchInputTextChange: (value: string) => void
+  batchMaxParallel: number
+  onBatchMaxParallelChange: (value: number) => void
 
-    isSaving: boolean
-    isRunning: boolean
-    isDeleting: boolean
-    hasRunResult: boolean
-    hasAnyNodes: boolean
-    canDeleteCurrentCanvas: boolean
+  onSave: (event?: { preventDefault?: () => void }) => void | Promise<void>
+  onRun: () => void | Promise<void>
+  onRunBatch: () => void | Promise<void>
+  onCancelBatch: () => void | Promise<void>
+  onClearRunState: () => void
+  onOpenModelResources: () => void
 
-    getRunInputKey: (node: WorkflowEditorNode) => string
+  isSaving: boolean
+  isRunning: boolean
+  isDeleting: boolean
+  hasRunResult: boolean
+  hasBatchResult: boolean
+  hasAnyNodes: boolean
+  canDeleteCurrentCanvas: boolean
+
+  getRunInputKey: (node: WorkflowEditorNode) => string
 }
 
 export default function WorkflowSidebar({
-    requestedCanvasId,
-    activeCanvasId,
-    canvasList,
-    temporaryCanvasId = null,
-    modelResources,
-    isSwitchingWorkflow,
-    isGraphEditingLocked,
-    isLiveRunActive,
+  requestedCanvasId,
+  activeCanvasId,
+  canvasList,
+  temporaryCanvasId = null,
+  modelResources,
+  isSwitchingWorkflow,
+  isGraphEditingLocked,
+  isLiveRunActive,
+  isBatchRunActive,
+  isBatchCancelRequested,
 
-    onRequestCanvasChange,
-    onRefreshWorkflowList,
-    onOpenCreateCanvas,
-    onDeleteCurrentCanvas,
-    onAddNodeByType,
+  onRequestCanvasChange,
+  onRefreshWorkflowList,
+  onOpenCreateCanvas,
+  onDeleteCurrentCanvas,
+  onAddNodeByType,
 
-    inputNodes,
-    runInputs,
-    onRunInputChange,
+  inputNodes,
+  runInputs,
+  onRunInputChange,
 
-    onSave,
-    onRun,
-    onClearRunState,
-    onOpenModelResources,
+  batchInputText,
+  onBatchInputTextChange,
+  batchMaxParallel,
+  onBatchMaxParallelChange,
 
-    isSaving,
-    isRunning,
-    isDeleting,
-    hasRunResult,
-    hasAnyNodes,
-    canDeleteCurrentCanvas,
-    getRunInputKey,
+  onSave,
+  onRun,
+  onRunBatch,
+  onCancelBatch,
+  onClearRunState,
+  onOpenModelResources,
+
+  isSaving,
+  isRunning,
+  isDeleting,
+  hasRunResult,
+  hasBatchResult,
+  hasAnyNodes,
+  canDeleteCurrentCanvas,
+  getRunInputKey,
 }: WorkflowSidebarProps) {
-    const isShowingCanvasSwitchingState =
-        isSwitchingWorkflow && requestedCanvasId !== activeCanvasId
+  const isShowingCanvasSwitchingState =
+    isSwitchingWorkflow && requestedCanvasId !== activeCanvasId
 
-    const isActiveCanvasTemporary = temporaryCanvasId === activeCanvasId
+  const isActiveCanvasTemporary = temporaryCanvasId === activeCanvasId
 
-    const effectiveCanvasList = [...canvasList]
-    const seenCanvasIds = new Set(effectiveCanvasList.map(item => item.canvas_id))
+  const effectiveCanvasList = [...canvasList]
+  const seenCanvasIds = new Set(effectiveCanvasList.map(item => item.canvas_id))
 
-    const ensureCanvasOption = (
-        canvasId: string | null | undefined,
-        label: string
-    ) => {
-        if (!canvasId || seenCanvasIds.has(canvasId)) {
-            return
-        }
-
-        effectiveCanvasList.unshift({
-            canvas_id: canvasId,
-            label,
-        })
-        seenCanvasIds.add(canvasId)
+  const ensureCanvasOption = (
+    canvasId: string | null | undefined,
+    label: string
+  ) => {
+    if (!canvasId || seenCanvasIds.has(canvasId)) {
+      return
     }
 
-    ensureCanvasOption(
-        temporaryCanvasId,
-        temporaryCanvasId ? `${temporaryCanvasId} (unsaved)` : ''
-    )
-    ensureCanvasOption(activeCanvasId, activeCanvasId)
-    ensureCanvasOption(requestedCanvasId, requestedCanvasId)
+    effectiveCanvasList.unshift({
+      canvas_id: canvasId,
+      label,
+    })
+    seenCanvasIds.add(canvasId)
+  }
 
-    const disableGraphEditingActions =
-        isSwitchingWorkflow || isDeleting || isGraphEditingLocked
+  ensureCanvasOption(
+    temporaryCanvasId,
+    temporaryCanvasId ? `${temporaryCanvasId} (unsaved)` : ''
+  )
+  ensureCanvasOption(activeCanvasId, activeCanvasId)
+  ensureCanvasOption(requestedCanvasId, requestedCanvasId)
 
-    return (
-        <div
+  const disableGraphEditingActions =
+    isSwitchingWorkflow || isDeleting || isGraphEditingLocked
+
+  const singleBatchInputKey =
+    inputNodes.length === 1 ? getRunInputKey(inputNodes[0]) : ''
+
+  return (
+    <div
+      style={{
+        width: 240,
+        borderRight: '1px solid #ddd',
+        padding: 12,
+        background: '#fff',
+        overflowY: 'auto',
+      }}
+    >
+      <h3 style={{ marginTop: 0 }}>Nodes</h3>
+
+      <CanvasSwitcher
+        requestedCanvasId={requestedCanvasId}
+        activeCanvasId={activeCanvasId}
+        effectiveCanvasList={effectiveCanvasList}
+        isShowingCanvasSwitchingState={isShowingCanvasSwitchingState}
+        isSwitchingWorkflow={isSwitchingWorkflow}
+        isGraphEditingLocked={isGraphEditingLocked}
+        onRequestCanvasChange={onRequestCanvasChange}
+      />
+
+      <div style={{ marginBottom: 16 }}>
+        <CanvasActions
+          modelResourceCount={modelResources.length}
+          isSwitchingWorkflow={isSwitchingWorkflow}
+          isDeleting={isDeleting}
+          isGraphEditingLocked={isGraphEditingLocked}
+          canDeleteCurrentCanvas={canDeleteCurrentCanvas}
+          isActiveCanvasTemporary={isActiveCanvasTemporary}
+          onOpenCreateCanvas={onOpenCreateCanvas}
+          onDeleteCurrentCanvas={onDeleteCurrentCanvas}
+          onRefreshWorkflowList={onRefreshWorkflowList}
+          onOpenModelResources={onOpenModelResources}
+        />
+      </div>
+
+      <button
+        type='button'
+        onClick={() => onAddNodeByType('input')}
+        style={{ display: 'block', width: '100%', marginBottom: 8 }}
+        disabled={disableGraphEditingActions}
+      >
+        + Input Node
+      </button>
+
+      <button
+        type='button'
+        onClick={() => onAddNodeByType('prompt')}
+        style={{ display: 'block', width: '100%', marginBottom: 8 }}
+        disabled={disableGraphEditingActions}
+      >
+        + Prompt Node
+      </button>
+
+      <button
+        type='button'
+        onClick={() => onAddNodeByType('output')}
+        style={{ display: 'block', width: '100%' }}
+        disabled={disableGraphEditingActions}
+      >
+        + Output Node
+      </button>
+
+      <hr style={{ margin: '16px 0' }} />
+
+      <RunInputsSection
+        inputNodes={inputNodes}
+        runInputs={runInputs}
+        onRunInputChange={onRunInputChange}
+        getRunInputKey={getRunInputKey}
+        isGraphEditingLocked={isGraphEditingLocked}
+      />
+
+      <hr style={{ margin: '16px 0' }} />
+
+      <div>
+        <h4 style={{ marginTop: 0 }}>Batch Inputs</h4>
+
+        {inputNodes.length !== 1 ? (
+          <div
             style={{
-                width: 240,
-                borderRight: '1px solid #ddd',
-                padding: 12,
-                background: '#fff',
+              marginBottom: 12,
+              fontSize: 12,
+              color: '#92400e',
+              whiteSpace: 'pre-wrap',
             }}
-        >
-            <h3 style={{ marginTop: 0 }}>Nodes</h3>
+          >
+            Batch run currently requires exactly one input node.
+          </div>
+        ) : (
+          <div
+            style={{
+              marginBottom: 8,
+              fontSize: 12,
+              color: '#666',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            Enter one value per line for input key: {singleBatchInputKey}
+          </div>
+        )}
 
-            <CanvasSwitcher
-                requestedCanvasId={requestedCanvasId}
-                activeCanvasId={activeCanvasId}
-                effectiveCanvasList={effectiveCanvasList}
-                isShowingCanvasSwitchingState={isShowingCanvasSwitchingState}
-                isSwitchingWorkflow={isSwitchingWorkflow}
-                isGraphEditingLocked={isGraphEditingLocked}
-                onRequestCanvasChange={onRequestCanvasChange}
-            />
+        {isBatchRunActive && isBatchCancelRequested ? (
+          <div
+            style={{
+              marginBottom: 8,
+              fontSize: 12,
+              color: '#92400e',
+              whiteSpace: 'pre-wrap',
+            }}
+          >
+            Batch cancellation requested. Running items will finish naturally.
+          </div>
+        ) : null}
 
-            <div style={{ marginBottom: 16 }}>
-                <CanvasActions
-                    modelResourceCount={modelResources.length}
-                    isSwitchingWorkflow={isSwitchingWorkflow}
-                    isDeleting={isDeleting}
-                    isGraphEditingLocked={isGraphEditingLocked}
-                    canDeleteCurrentCanvas={canDeleteCurrentCanvas}
-                    isActiveCanvasTemporary={isActiveCanvasTemporary}
-                    onOpenCreateCanvas={onOpenCreateCanvas}
-                    onDeleteCurrentCanvas={onDeleteCurrentCanvas}
-                    onRefreshWorkflowList={onRefreshWorkflowList}
-                    onOpenModelResources={onOpenModelResources}
-                />
-            </div>
+        <textarea
+          value={batchInputText}
+          onChange={e => onBatchInputTextChange(e.target.value)}
+          rows={6}
+          style={{ width: '100%', marginBottom: 8, resize: 'vertical' }}
+          disabled={isGraphEditingLocked}
+          placeholder='One input value per line'
+        />
 
-            <button
-                type='button'
-                onClick={() => onAddNodeByType('input')}
-                style={{ display: 'block', width: '100%', marginBottom: 8 }}
-                disabled={disableGraphEditingActions}
-            >
-                + Input Node
-            </button>
+        <label style={{ display: 'block', marginBottom: 4 }}>Max Parallel</label>
+        <input
+          type='number'
+          min={1}
+          max={4}
+          value={batchMaxParallel}
+          onChange={e => {
+            const nextValue = Number(e.target.value)
+            onBatchMaxParallelChange(Number.isFinite(nextValue) ? nextValue : 4)
+          }}
+          style={{ width: '100%' }}
+          disabled={isGraphEditingLocked}
+        />
+      </div>
 
-            <button
-                type='button'
-                onClick={() => onAddNodeByType('prompt')}
-                style={{ display: 'block', width: '100%', marginBottom: 8 }}
-                disabled={disableGraphEditingActions}
-            >
-                + Prompt Node
-            </button>
+      <hr style={{ margin: '16px 0' }} />
 
-            <button
-                type='button'
-                onClick={() => onAddNodeByType('output')}
-                style={{ display: 'block', width: '100%' }}
-                disabled={disableGraphEditingActions}
-            >
-                + Output Node
-            </button>
-
-            <hr style={{ margin: '16px 0' }} />
-
-            <RunInputsSection
-                inputNodes={inputNodes}
-                runInputs={runInputs}
-                onRunInputChange={onRunInputChange}
-                getRunInputKey={getRunInputKey}
-                isGraphEditingLocked={isGraphEditingLocked}
-            />
-
-            <hr style={{ margin: '16px 0' }} />
-
-            <SidebarRunActions
-                isSaving={isSaving}
-                isRunning={isRunning}
-                isSwitchingWorkflow={isSwitchingWorkflow}
-                isDeleting={isDeleting}
-                isGraphEditingLocked={isGraphEditingLocked}
-                isLiveRunActive={isLiveRunActive}
-                hasRunResult={hasRunResult}
-                hasAnyNodes={hasAnyNodes}
-                onSave={onSave}
-                onRun={onRun}
-                onClearRunState={onClearRunState}
-            />
-        </div>
-    )
+      <SidebarRunActions
+        isSaving={isSaving}
+        isRunning={isRunning}
+        isSwitchingWorkflow={isSwitchingWorkflow}
+        isDeleting={isDeleting}
+        isGraphEditingLocked={isGraphEditingLocked}
+        isLiveRunActive={isLiveRunActive}
+        isBatchRunActive={isBatchRunActive}
+        isBatchCancelRequested={isBatchCancelRequested}
+        hasRunResult={hasRunResult}
+        hasBatchResult={hasBatchResult}
+        hasAnyNodes={hasAnyNodes}
+        onSave={onSave}
+        onRun={onRun}
+        onRunBatch={onRunBatch}
+        onCancelBatch={onCancelBatch}
+        onClearRunState={onClearRunState}
+      />
+    </div>
+  )
 }

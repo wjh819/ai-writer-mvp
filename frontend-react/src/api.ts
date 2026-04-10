@@ -11,32 +11,36 @@
  */
 
 export {
-    API_BASE,
-    DEFAULT_CANVAS_ID,
-    type CanvasSummary,
-    type SaveWorkflowOptions,
-    type SaveWorkflowRequestPayload,
-    type LoadWorkflowResponse,
+  API_BASE,
+  DEFAULT_CANVAS_ID,
+  type CanvasSummary,
+  type SaveWorkflowOptions,
+  type SaveWorkflowRequestPayload,
+  type LoadWorkflowResponse,
 } from './api/core'
 
 export {
-    listWorkflows,
-    loadWorkflow,
-    saveWorkflow,
-    deleteWorkflow,
+  listWorkflows,
+  loadWorkflow,
+  saveWorkflow,
+  deleteWorkflow,
 } from './api/workflowApi'
 
 export {
-    runDraftWorkflow,
-    runSubgraphTestWorkflow,
-    startLiveRun,
-    getActiveLiveRun,
+  runDraftWorkflow,
+  runSubgraphTestWorkflow,
+  startLiveRun,
+  getActiveLiveRun,
+  startBatchRun,
+  getBatchSummary,
+  getBatchItemDetail,
+  cancelBatchRun,
 } from './api/runApi'
 
 export {
-    getModelResources,
-    getModelResourcesStatus,
-    createModelResource,
-    updateModelResource,
-    deleteModelResource,
+  getModelResources,
+  getModelResourcesStatus,
+  createModelResource,
+  updateModelResource,
+  deleteModelResource,
 } from './api/modelResourceApi'

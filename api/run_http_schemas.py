@@ -16,16 +16,20 @@ from contracts.step_projections import (
 
 
 """
-direct run / subgraph test HTTP transport DTO 层。
+direct run / subgraph test / batch run HTTP transport DTO 层。
 
 本文件角色：
-- 定义 direct run / run-draft 与 subgraph test 的请求体与响应体
+- 定义 direct run / run-draft、subgraph test、batch run 的请求体与响应体
 - 作为 API 层 transport contract owner
 
 负责：
 - RunDraftRequest
 - SubgraphTestRequest
 - RunResult / RunStep
+- BatchRunRequest
+- BatchSummaryResponse
+- BatchItemSummary
+- BatchItemDetailResponse
 
 不负责：
 - engine 内部 execution facts
@@ -33,7 +37,7 @@ direct run / subgraph test HTTP transport DTO 层。
 - persisted run detail contract
 
 上下游：
-- 上游由 route / mapper 填充
+- 上游由 route / mapper / store 填充
 - 下游由前端 api.ts / runTypes.ts 消费
 
 当前限制 / 待收口点：
@@ -124,6 +128,7 @@ class RunResult(BaseModel):
     error_detail: Optional[str] = None
     failure_stage: Optional[Literal["request", "definition", "execution"]] = None
 
+
 LiveRunStatus = Literal["idle", "running", "success", "failed"]
 
 
@@ -155,3 +160,93 @@ class LiveRunSnapshot(BaseModel):
 
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
+
+
+BatchRunStatus = Literal["running", "finished", "cancelled"]
+BatchItemStatus = Literal[
+    "queued",
+    "running",
+    "succeeded",
+    "failed",
+    "cancelled",
+]
+
+
+class BatchRunRequest(BaseModel):
+    """
+    batch run 请求体。
+
+    正式口径：
+    - workflow 传的是当前画布的 transport shape
+    - input_values 表示围绕单 input 节点的一批原始输入值
+    - max_parallel 是 batch 调度上限，第一版限制为 1~4
+
+    注意：
+    - 这里只定义 transport shape
+    - workflow 必须且只能有一个 input 节点，由 route / service 正式裁决
+    - input_values 为空是否允许，建议由 service 统一收口为 request_invalid
+    """
+
+    workflow: Dict[str, Any]
+    input_values: List[Any] = Field(default_factory=list)
+    max_parallel: int = Field(default=4, ge=1, le=4)
+
+
+class BatchItemSummary(BaseModel):
+    """
+    batch 单项摘要。
+
+    正式口径：
+    - 只承载 item 级摘要
+    - 不承载完整 RunResult
+    - 列表顺序应按原始输入顺序稳定返回
+    """
+
+    item_id: str
+    index: int
+    status: BatchItemStatus
+
+    started_at: Optional[str] = None
+    finished_at: Optional[str] = None
+
+    error_type: Optional[str] = None
+    error_message: Optional[str] = None
+
+
+class BatchSummaryResponse(BaseModel):
+    """
+    batch 摘要响应体。
+
+    正式口径：
+    - status 只表达 batch 级终态 / 运行态
+    - cancel_requested 用于明确表示“取消已请求，但 running item 仍在自然结束”
+    - completed_count 不在后端返回，由前端派生
+    - items 只返回摘要，不返回完整 RunResult
+    """
+
+    batch_id: str
+    status: BatchRunStatus
+    cancel_requested: bool = False
+
+    total: int
+    queued: int
+    running: int
+    succeeded: int
+    failed: int
+    cancelled: int
+
+    items: List[BatchItemSummary] = Field(default_factory=list)
+
+
+class BatchItemDetailResponse(BaseModel):
+    """
+    batch 单项详情响应体。
+
+    正式口径：
+    - 详情继续复用 single run 的 RunResult
+    - item 元信息与 run_result 分层
+    """
+
+    item_id: str
+    index: int
+    run_result: RunResult

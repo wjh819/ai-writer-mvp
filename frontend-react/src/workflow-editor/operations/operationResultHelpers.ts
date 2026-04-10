@@ -1,79 +1,103 @@
 import type { CanvasSummary } from '../../api'
 import type { ModelResourceListItem } from '../../model-resources/modelResourceTypes'
 import type {
-    LiveRunSnapshot,
-    LiveRunStartResponse,
-    RunResult,
+  BatchItemDetailResponse,
+  BatchSummaryResponse,
+  LiveRunSnapshot,
+  LiveRunStartResponse,
+  RunResult,
 } from '../../run/runTypes'
 import type {
-    WorkflowEditorEdge,
-    WorkflowEditorNode,
+  WorkflowEditorEdge,
+  WorkflowEditorNode,
 } from '../workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../workflowEditorTypes'
 import type {
-    WorkflowLoadWarning,
-    WorkflowSidecarData,
+  WorkflowLoadWarning,
+  WorkflowSidecarData,
 } from '../workflowEditorUiTypes'
 
 export interface FetchModelResourceListResult {
-    modelResources: ModelResourceListItem[]
-    errorMessage?: string
+  modelResources: ModelResourceListItem[]
+  errorMessage?: string
 }
 
 export interface FetchWorkflowListResult {
-    canvasList: CanvasSummary[]
-    errorMessage?: string
+  canvasList: CanvasSummary[]
+  errorMessage?: string
 }
 
 export interface FetchWorkflowBootstrapResult {
-    modelResources: ModelResourceListItem[]
-    modelResourceErrorMessage: string
-    canvasList: CanvasSummary[]
-    canvasListErrorMessage: string
+  modelResources: ModelResourceListItem[]
+  modelResourceErrorMessage: string
+  canvasList: CanvasSummary[]
+  canvasListErrorMessage: string
 }
 
 export interface FetchWorkflowDetailResult {
-    nodes: WorkflowEditorNode[]
-    edges: WorkflowEditorEdge[]
-    contextLinks: WorkflowContextLink[]
-    sidecar: WorkflowSidecarData
-    warnings: WorkflowLoadWarning[]
-    errorMessage?: string
+  nodes: WorkflowEditorNode[]
+  edges: WorkflowEditorEdge[]
+  contextLinks: WorkflowContextLink[]
+  sidecar: WorkflowSidecarData
+  warnings: WorkflowLoadWarning[]
+  errorMessage?: string
 }
 
 export interface SaveWorkflowResult {
-    successMessage?: string
-    errorMessage?: string
+  successMessage?: string
+  errorMessage?: string
 }
 
 export interface DeleteWorkflowResult {
-    successMessage?: string
-    errorMessage?: string
+  successMessage?: string
+  errorMessage?: string
 }
 
 export interface RunWorkflowResult {
-    runResult?: RunResult
-    successMessage?: string
-    errorMessage?: string
+  runResult?: RunResult
+  successMessage?: string
+  errorMessage?: string
 }
 
 export interface SubgraphTestWorkflowResult {
-    subgraphTestResult?: RunResult
-    successMessage?: string
-    errorMessage?: string
+  subgraphTestResult?: RunResult
+  successMessage?: string
+  errorMessage?: string
 }
 
 export const EMPTY_WORKFLOW_SIDECAR: WorkflowSidecarData = {
-    nodes: {},
+  nodes: {},
 }
 
 export interface StartLiveRunResult {
-    liveRunStart?: LiveRunStartResponse
-    successMessage?: string
-    errorMessage?: string
+  liveRunStart?: LiveRunStartResponse
+  successMessage?: string
+  errorMessage?: string
 }
 
 export interface FetchActiveLiveRunResult {
-    liveRunSnapshot?: LiveRunSnapshot
-    errorMessage?: string
+  liveRunSnapshot?: LiveRunSnapshot
+  errorMessage?: string
+}
+
+export interface StartBatchRunResult {
+  batchSummary?: BatchSummaryResponse
+  successMessage?: string
+  errorMessage?: string
+}
+
+export interface FetchBatchSummaryResult {
+  batchSummary?: BatchSummaryResponse
+  errorMessage?: string
+}
+
+export interface FetchBatchItemDetailResult {
+  batchItemDetail?: BatchItemDetailResponse
+  errorMessage?: string
+}
+
+export interface CancelBatchRunResult {
+  batchSummary?: BatchSummaryResponse
+  successMessage?: string
+  errorMessage?: string
 }

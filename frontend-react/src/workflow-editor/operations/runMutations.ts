@@ -1,171 +1,271 @@
 import {
-    getActiveLiveRun,
-    runDraftWorkflow,
-    runSubgraphTestWorkflow,
-    startLiveRun,
+  cancelBatchRun,
+  getActiveLiveRun,
+  getBatchItemDetail,
+  getBatchSummary,
+  runDraftWorkflow,
+  runSubgraphTestWorkflow,
+  startBatchRun,
+  startLiveRun,
 } from '../../api'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
 import { buildEditorPayload } from '../domain/workflowEditorMappers'
 import { getErrorMessage } from '../domain/workflowEditorRequests'
 import type {
-    WorkflowEditorEdge,
-    WorkflowEditorNode,
+  WorkflowEditorEdge,
+  WorkflowEditorNode,
 } from '../workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../workflowEditorTypes'
 import type {
-    FetchActiveLiveRunResult,
-    RunWorkflowResult,
-    StartLiveRunResult,
-    SubgraphTestWorkflowResult,
+  CancelBatchRunResult,
+  FetchActiveLiveRunResult,
+  FetchBatchItemDetailResult,
+  FetchBatchSummaryResult,
+  RunWorkflowResult,
+  StartBatchRunResult,
+  StartLiveRunResult,
+  SubgraphTestWorkflowResult,
 } from './operationResultHelpers'
 
 export async function runDraftWorkflowResult(
-    nodes: WorkflowEditorNode[],
-    edges: WorkflowEditorEdge[],
-    contextLinks: WorkflowContextLink[],
-    runInputs: WorkflowState,
-    canvasId: string
+  nodes: WorkflowEditorNode[],
+  edges: WorkflowEditorEdge[],
+  contextLinks: WorkflowContextLink[],
+  runInputs: WorkflowState,
+  canvasId: string
 ): Promise<RunWorkflowResult> {
-    /**
-     * 前端 direct run 请求编排入口。
-     *
-     * 正式口径：
-     * - 将当前编辑态 nodes / edges / contextLinks 收敛为 workflow payload
-     * - 对 runInputs 做快照，避免后续本地编辑污染本次请求
-     * - 当前 prompt_overrides 固定为空对象，保留为扩展位
-     *
-     * 不负责：
-     * - display run 映射
-     * - persisted run 写入
-     */
-    const inputStateSnapshot: WorkflowState = { ...(runInputs || {}) }
-    const workflow = buildEditorPayload(nodes, edges, contextLinks)
+  /**
+   * 前端 direct run 请求编排入口。
+   *
+   * 正式口径：
+   * - 将当前编辑态 nodes / edges / contextLinks 收敛为 workflow payload
+   * - 对 runInputs 做快照，避免后续本地编辑污染本次请求
+   * - 当前 prompt_overrides 固定为空对象，保留为扩展位
+   *
+   * 不负责：
+   * - display run 映射
+   * - persisted run 写入
+   */
+  const inputStateSnapshot: WorkflowState = { ...(runInputs || {}) }
+  const workflow = buildEditorPayload(nodes, edges, contextLinks)
 
-    try {
-        const runResult = await runDraftWorkflow(
-            {
-                workflow,
-                input_state: inputStateSnapshot,
-                prompt_overrides: {},
-            },
-            canvasId
-        )
+  try {
+    const runResult = await runDraftWorkflow(
+      {
+        workflow,
+        input_state: inputStateSnapshot,
+        prompt_overrides: {},
+      },
+      canvasId
+    )
 
-        return {
-            runResult,
-            successMessage:
-                runResult.status === 'success'
-                    ? 'Workflow executed successfully'
-                    : undefined,
-        }
-    } catch (error) {
-        return {
-            errorMessage: getErrorMessage(error, 'Run failed'),
-        }
+    return {
+      runResult,
+      successMessage:
+        runResult.status === 'success'
+          ? 'Workflow executed successfully'
+          : undefined,
     }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Run failed'),
+    }
+  }
 }
 
 export async function startLiveRunResult(
-    nodes: WorkflowEditorNode[],
-    edges: WorkflowEditorEdge[],
-    contextLinks: WorkflowContextLink[],
-    runInputs: WorkflowState,
-    canvasId: string
+  nodes: WorkflowEditorNode[],
+  edges: WorkflowEditorEdge[],
+  contextLinks: WorkflowContextLink[],
+  runInputs: WorkflowState,
+  canvasId: string
 ): Promise<StartLiveRunResult> {
-    const inputStateSnapshot: WorkflowState = { ...(runInputs || {}) }
-    const workflow = buildEditorPayload(nodes, edges, contextLinks)
+  const inputStateSnapshot: WorkflowState = { ...(runInputs || {}) }
+  const workflow = buildEditorPayload(nodes, edges, contextLinks)
 
-    try {
-        const liveRunStart = await startLiveRun(
-            {
-                workflow,
-                input_state: inputStateSnapshot,
-                prompt_overrides: {},
-            },
-            canvasId
-        )
+  try {
+    const liveRunStart = await startLiveRun(
+      {
+        workflow,
+        input_state: inputStateSnapshot,
+        prompt_overrides: {},
+      },
+      canvasId
+    )
 
-        return {
-            liveRunStart,
-            successMessage: 'Live run started',
-        }
-    } catch (error) {
-        return {
-            errorMessage: getErrorMessage(error, 'Live run failed to start'),
-        }
+    return {
+      liveRunStart,
+      successMessage: 'Live run started',
     }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Live run failed to start'),
+    }
+  }
 }
 
 export async function fetchActiveLiveRunResult(): Promise<FetchActiveLiveRunResult> {
-    try {
-        const liveRunSnapshot = await getActiveLiveRun()
-        return {
-            liveRunSnapshot,
-        }
-    } catch (error) {
-        return {
-            errorMessage: getErrorMessage(error, 'Failed to fetch active live run'),
-        }
+  try {
+    const liveRunSnapshot = await getActiveLiveRun()
+    return {
+      liveRunSnapshot,
     }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Failed to fetch active live run'),
+    }
+  }
+}
+
+export async function startBatchRunResult(
+  nodes: WorkflowEditorNode[],
+  edges: WorkflowEditorEdge[],
+  contextLinks: WorkflowContextLink[],
+  inputValues: unknown[],
+  maxParallel: number | undefined,
+  canvasId: string
+): Promise<StartBatchRunResult> {
+  /**
+   * 前端 batch run 请求编排入口。
+   *
+   * 正式口径：
+   * - 将当前编辑态 nodes / edges / contextLinks 收敛为 workflow payload
+   * - 对 inputValues 做浅快照，避免后续本地编辑污染本次请求
+   * - 第一版 batch transport 不承载 prompt_overrides
+   *
+   * 不负责：
+   * - batch 页面 ownership / stale 语义
+   * - item detail display 映射
+   * - batch summary 轮询状态持有
+   */
+  const workflow = buildEditorPayload(nodes, edges, contextLinks)
+  const inputValuesSnapshot = Array.isArray(inputValues) ? [...inputValues] : []
+
+  try {
+    const batchSummary = await startBatchRun(
+      {
+        workflow,
+        input_values: inputValuesSnapshot,
+        max_parallel: maxParallel,
+      },
+      canvasId
+    )
+
+    return {
+      batchSummary,
+      successMessage: 'Batch run started',
+    }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Batch run failed to start'),
+    }
+  }
+}
+
+export async function fetchBatchSummaryResult(
+  batchId: string
+): Promise<FetchBatchSummaryResult> {
+  try {
+    const batchSummary = await getBatchSummary(batchId)
+    return {
+      batchSummary,
+    }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Failed to fetch batch summary'),
+    }
+  }
+}
+
+export async function fetchBatchItemDetailResult(
+  batchId: string,
+  itemId: string
+): Promise<FetchBatchItemDetailResult> {
+  try {
+    const batchItemDetail = await getBatchItemDetail(batchId, itemId)
+    return {
+      batchItemDetail,
+    }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Failed to fetch batch item detail'),
+    }
+  }
+}
+
+export async function cancelBatchRunResult(
+  batchId: string
+): Promise<CancelBatchRunResult> {
+  try {
+    const batchSummary = await cancelBatchRun(batchId)
+    return {
+      batchSummary,
+      successMessage: 'Batch cancel requested',
+    }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Failed to cancel batch run'),
+    }
+  }
 }
 
 export async function runSubgraphTestResult(
-    nodes: WorkflowEditorNode[],
-    edges: WorkflowEditorEdge[],
-    contextLinks: WorkflowContextLink[],
-    startNodeId: string,
-    subgraphTestState: WorkflowState,
-    canvasId: string,
-    endNodeIds?: string[]
+  nodes: WorkflowEditorNode[],
+  edges: WorkflowEditorEdge[],
+  contextLinks: WorkflowContextLink[],
+  startNodeId: string,
+  subgraphTestState: WorkflowState,
+  canvasId: string,
+  endNodeIds?: string[]
 ): Promise<SubgraphTestWorkflowResult> {
-    /**
-     * 前端 subgraph test 请求编排入口。
-     *
-     * 正式口径：
-     * - 将当前编辑态 nodes / edges / contextLinks 收敛为 workflow payload
-     * - 由 startNodeId 指定子图测试起点
-     * - endNodeIds 为空时，后端按“到所有可达下游”执行
-     * - 对 subgraphTestState / endNodeIds 做快照，避免后续本地编辑污染本次请求
-     * - 当前 prompt_overrides 固定为空对象，保留为扩展位
-     *
-     * 不负责：
-     * - 页面级 reusable test state 更新
-     * - display run 映射
-     * - pinnedPromptContext / cached result 资产语义
-     *
-     * 注意：
-     * - 后端 transport 字段名仍是 test_state，这里只在前端变量命名上收口
-     */
-    const workflow = buildEditorPayload(nodes, edges, contextLinks)
-    const subgraphTestStateSnapshot: WorkflowState = {
-        ...(subgraphTestState || {}),
-    }
-    const endNodeIdsSnapshot = Array.isArray(endNodeIds)
-        ? [...endNodeIds]
-        : undefined
+  /**
+   * 前端 subgraph test 请求编排入口。
+   *
+   * 正式口径：
+   * - 将当前编辑态 nodes / edges / contextLinks 收敛为 workflow payload
+   * - 由 startNodeId 指定子图测试起点
+   * - endNodeIds 为空时，后端按“到所有可达下游”执行
+   * - 对 subgraphTestState / endNodeIds 做快照，避免后续本地编辑污染本次请求
+   * - 当前 prompt_overrides 固定为空对象，保留为扩展位
+   *
+   * 不负责：
+   * - 页面级 reusable test state 更新
+   * - display run 映射
+   * - pinnedPromptContext / cached result 资产语义
+   *
+   * 注意：
+   * - 后端 transport 字段名仍是 test_state，这里只在前端变量命名上收口
+   */
+  const workflow = buildEditorPayload(nodes, edges, contextLinks)
+  const subgraphTestStateSnapshot: WorkflowState = {
+    ...(subgraphTestState || {}),
+  }
+  const endNodeIdsSnapshot = Array.isArray(endNodeIds)
+    ? [...endNodeIds]
+    : undefined
 
-    try {
-        const subgraphTestResult = await runSubgraphTestWorkflow(
-            {
-                workflow,
-                start_node_id: startNodeId,
-                end_node_ids: endNodeIdsSnapshot,
-                test_state: subgraphTestStateSnapshot,
-                prompt_overrides: {},
-            },
-            canvasId
-        )
+  try {
+    const subgraphTestResult = await runSubgraphTestWorkflow(
+      {
+        workflow,
+        start_node_id: startNodeId,
+        end_node_ids: endNodeIdsSnapshot,
+        test_state: subgraphTestStateSnapshot,
+        prompt_overrides: {},
+      },
+      canvasId
+    )
 
-        return {
-            subgraphTestResult,
-            successMessage:
-                subgraphTestResult.status === 'success'
-                    ? `Subgraph test succeeded: ${startNodeId}`
-                    : undefined,
-        }
-    } catch (error) {
-        return {
-            errorMessage: getErrorMessage(error, 'Subgraph test failed'),
-        }
+    return {
+      subgraphTestResult,
+      successMessage:
+        subgraphTestResult.status === 'success'
+          ? `Subgraph test succeeded: ${startNodeId}`
+          : undefined,
     }
+  } catch (error) {
+    return {
+      errorMessage: getErrorMessage(error, 'Subgraph test failed'),
+    }
+  }
 }
