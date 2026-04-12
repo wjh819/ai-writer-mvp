@@ -39,38 +39,43 @@ export function useWorkflowPageContext(defaultCanvasId: string) {
     }, [graphPersistedVersion, committedGraphPersistedVersion])
 
     return {
-        requestedCanvasId,
-        setRequestedCanvasId,
-        activeCanvasId,
-        setActiveCanvasId,
-        activeWorkflowContextId,
-        setActiveWorkflowContextId,
-        temporaryCanvasId,
-        setTemporaryCanvasId,
-
-        graphSemanticVersion,
-        setGraphSemanticVersion,
-        handleGraphSemanticChanged,
-
-        graphPersistedVersion,
-        setGraphPersistedVersion,
-        handleGraphPersistedChanged,
-
-        committedGraphPersistedVersion,
-        setCommittedGraphPersistedVersion,
-        isGraphDirty,
-
-        workflowWarnings,
-        setWorkflowWarnings,
-
-        isModelResourcePanelOpen,
-        setIsModelResourcePanelOpen,
-
-        pageErrorMessage,
-        setPageErrorMessage,
-        clearPageError,
-
-        isSwitchingWorkflow,
-        setIsSwitchingWorkflow,
+        canvasState: {
+            requestedCanvasId,
+            activeCanvasId,
+            activeWorkflowContextId,
+            temporaryCanvasId,
+        },
+        canvasActions: {
+            setRequestedCanvasId,
+            setActiveCanvasId,
+            setActiveWorkflowContextId,
+            setTemporaryCanvasId,
+        },
+        graphState: {
+            graphSemanticVersion,
+            graphPersistedVersion,
+            committedGraphPersistedVersion,
+            isGraphDirty,
+        },
+        graphActions: {
+            setGraphSemanticVersion,
+            setGraphPersistedVersion,
+            setCommittedGraphPersistedVersion,
+            handleGraphSemanticChanged,
+            handleGraphPersistedChanged,
+        },
+        pageState: {
+            workflowWarnings,
+            pageErrorMessage,
+            isSwitchingWorkflow,
+            isModelResourcePanelOpen,
+        },
+        pageActions: {
+            setWorkflowWarnings,
+            setPageErrorMessage,
+            clearPageError,
+            setIsSwitchingWorkflow,
+            setIsModelResourcePanelOpen,
+        },
     }
 }
