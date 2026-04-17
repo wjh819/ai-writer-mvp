@@ -64,26 +64,30 @@ function createOptions(
       selectNodeById: vi.fn(),
     },
     runtime: {
-      subgraphTestState: {},
-      activeSubgraphTestResult: null,
-      activeSubgraphTestStartNodeId: null,
-      subgraphTestResultsByNodeId: {},
-      staleSubgraphTestResultIds: {},
-      lastSuccessfulSubgraphTestStartNodeId: null,
-      getWorkflowSidecarNodeAssets: vi.fn(
-        (() => ({ pinnedInputs: {}, metadata: {} })) as UseWorkflowEditorSubgraphTestSectionOptions['runtime']['getWorkflowSidecarNodeAssets']
-      ),
-      updateWorkflowSidecarNodeAssets: vi.fn(),
-      pruneWorkflowSidecar: vi.fn(),
-      markSubgraphTestResultStale: vi.fn(),
-      clearSubgraphTestResultStale: vi.fn(),
-      handleRunSubgraphTest: vi.fn(
-        (async () => ({})) as UseWorkflowEditorSubgraphTestSectionOptions['runtime']['handleRunSubgraphTest']
-      ),
-      clearSubgraphTestResult: vi.fn(),
-      pruneSubgraphTestArtifacts: vi.fn(),
-      resetSubgraphTestState: vi.fn(),
-      resetSubgraphTestContext: vi.fn(),
+      subgraphTest: {
+        subgraphTestState: {},
+        activeSubgraphTestResult: null,
+        activeSubgraphTestStartNodeId: null,
+        subgraphTestResultsByNodeId: {},
+        staleSubgraphTestResultIds: {},
+        lastSuccessfulSubgraphTestStartNodeId: null,
+        markSubgraphTestResultStale: vi.fn(),
+        clearSubgraphTestResultStale: vi.fn(),
+        handleRunSubgraphTest: vi.fn(
+          (async () => ({})) as UseWorkflowEditorSubgraphTestSectionOptions['runtime']['subgraphTest']['handleRunSubgraphTest']
+        ),
+        clearSubgraphTestResult: vi.fn(),
+        pruneSubgraphTestArtifacts: vi.fn(),
+        resetSubgraphTestState: vi.fn(),
+        resetSubgraphTestContext: vi.fn(),
+      },
+      sidecar: {
+        getWorkflowSidecarNodeAssets: vi.fn(
+          (() => ({ pinnedInputs: {}, metadata: {} })) as UseWorkflowEditorSubgraphTestSectionOptions['runtime']['sidecar']['getWorkflowSidecarNodeAssets']
+        ),
+        updateWorkflowSidecarNodeAssets: vi.fn(),
+        pruneWorkflowSidecar: vi.fn(),
+      },
     },
     runStatus: {
       isLiveRunActive: false,
@@ -173,7 +177,7 @@ describe('useWorkflowEditorSubgraphTestSection', () => {
       result.current.resetSubgraphTestSectionForCommittedWorkflow([], [], [])
     })
 
-    expect(options.runtime.resetSubgraphTestContext).toHaveBeenCalledTimes(1)
+    expect(options.runtime.subgraphTest.resetSubgraphTestContext).toHaveBeenCalledTimes(1)
     expect(panel.invalidation.commitSemanticGraphSnapshot).toHaveBeenCalledWith(
       [],
       [],

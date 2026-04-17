@@ -2,7 +2,7 @@ import type {
     EffectiveSubgraphTestInputItem,
     SubgraphTestInputSource,
 } from '../../workflow-editor/state/workflowEditorSubgraphTestInputs'
-import { ValueBlock } from '../run/RunValueBlock'
+import { ValueBlock } from './NodeValueBlock'
 
 interface NodeTestInputSectionProps {
     nodeId: string

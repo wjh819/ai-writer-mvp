@@ -5,7 +5,7 @@ from threading import Thread
 from uuid import uuid4
 
 from app_errors import AppError, InvalidInputError
-from api.run_http_schemas import LiveRunStartResponse
+from contracts.run_contracts import LiveRunStartResponse
 from api.run_live_store import RunLiveStore
 from api.workflow_paths import (
     ensure_workflow_exists,
@@ -17,8 +17,13 @@ from api.workflow_run_inputs import (
     _normalize_state_object,
 )
 from api.workflow_run_result_factory import utc_now_iso
-from core.engine import WorkflowDefinitionError, WorkflowEngine
-from core.execution_types import WorkflowRunError
+from backend_workflow_engine import WorkflowDefinitionError, WorkflowEngine
+from backend_workflow_engine.execution_types import WorkflowRunError
+from core.llm import get_llm, invoke_llm
+from core.model_resource_registry import (
+    load_model_resource_registry,
+    resolve_model_resource,
+)
 from core.output_exporter import WorkflowOutputExporter
 
 """
@@ -38,6 +43,13 @@ workflow live run orchestration 服务层。
 - request-level 输入收敛规则定义
 - run-level 结果壳构造规则定义
 """
+
+
+def _build_model_resource_resolver(model_resource_registry: dict[str, dict]):
+    def _resolve(model_resource_id: str) -> dict[str, Any]:
+        return resolve_model_resource(model_resource_id, model_resource_registry)
+
+    return _resolve
 
 
 class _LiveRunProgressCallback:
@@ -109,6 +121,7 @@ def _execute_live_draft_workflow_background(
     live_store: RunLiveStore,
 ) -> None:
     try:
+        model_resource_registry = load_model_resource_registry()
         output_exporter = WorkflowOutputExporter(
             get_canvas_outputs_dir(canvas_id)
         )
@@ -116,7 +129,12 @@ def _execute_live_draft_workflow_background(
         engine = WorkflowEngine(
             workflow_data=workflow,
             prompt_overrides=prompt_overrides,
-            output_exporter=output_exporter,
+            output_sink=output_exporter,
+            model_resource_resolver=_build_model_resource_resolver(
+                model_resource_registry
+            ),
+            llm_factory=get_llm,
+            llm_invoker=invoke_llm,
             progress_callback=_LiveRunProgressCallback(
                 run_id=run_id,
                 live_store=live_store,

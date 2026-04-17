@@ -1,7 +1,7 @@
 import { useCallback, useEffect } from 'react'
 
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import { getRunInputKey } from '../../workflow-editor/state/workflowEditorRunInputs'
 import type {
   WorkflowEditorEdge,
@@ -9,8 +9,10 @@ import type {
 } from '../../workflow-editor/workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../../workflow-editor/workflowEditorTypes'
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
-type RunSectionRuntimeBindings = Pick<WorkflowRuntimeState, 'runInputs' | 'syncRunInputs'>
+type RunSectionRuntimeBindings = Pick<
+  WorkflowRuntimeState['runInputs'],
+  'runInputs' | 'syncRunInputs'
+>
 
 interface UseWorkflowEditorRunSectionOptions {
   nodes: WorkflowEditorNode[]

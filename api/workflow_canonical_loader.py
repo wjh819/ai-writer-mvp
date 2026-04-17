@@ -5,7 +5,7 @@ from api.workflow_converter import yaml_to_editor_schema
 from api.workflow_normalizer import normalize_workflow_editor_data
 from api.workflow_prompt_io import attach_prompt_texts_to_raw_editor_shape
 from api.workflow_paths import ensure_workflow_exists, get_canvas_workflow_path
-from api.workflow_validator import validate_workflow_editor_data
+from backend_workflow_canonical import validate_workflow_editor_data
 from api.workflow_yaml_io import load_yaml_workflow
 from contracts.workflow_contracts import WorkflowEditorData
 

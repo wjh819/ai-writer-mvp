@@ -2,7 +2,7 @@ import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 
 import { useCanvasLifecycle } from './useCanvasLifecycle'
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import type {
   WorkflowEditorEdge,
   WorkflowEditorNode,
@@ -17,18 +17,18 @@ const EMPTY_WORKFLOW_SIDECAR: WorkflowSidecarData = {
   nodes: {},
 }
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
-type CanvasSectionRuntimeBindings = Pick<
-  WorkflowRuntimeState,
-  | 'canvasList'
-  | 'workflowSidecar'
-  | 'loadCurrentWorkflow'
-  | 'refreshWorkflowList'
-  | 'handleDeleteCanvas'
-  | 'handleSave'
-  | 'replaceWorkflowSidecar'
-  | 'resetRunInputContext'
->
+interface CanvasSectionRuntimeBindings {
+  bootstrap: Pick<WorkflowRuntimeState['bootstrap'], 'canvasList' | 'refreshWorkflowList'>
+  persistence: Pick<
+    WorkflowRuntimeState['persistence'],
+    'loadCurrentWorkflow' | 'handleDeleteCanvas' | 'handleSave'
+  >
+  sidecar: Pick<
+    WorkflowRuntimeState['sidecar'],
+    'workflowSidecar' | 'replaceWorkflowSidecar'
+  >
+  runInputs: Pick<WorkflowRuntimeState['runInputs'], 'resetRunInputContext'>
+}
 
 interface UseWorkflowEditorCanvasSectionOptions {
   requestedCanvasId: string
@@ -99,16 +99,9 @@ export function useWorkflowEditorCanvasSection({
   setBatchMaxParallel,
   isGraphEditingLocked,
 }: UseWorkflowEditorCanvasSectionOptions) {
-  const {
-    canvasList,
-    workflowSidecar,
-    loadCurrentWorkflow,
-    refreshWorkflowList,
-    handleDeleteCanvas,
-    handleSave,
-    replaceWorkflowSidecar,
-    resetRunInputContext,
-  } = runtime
+  const { bootstrap, persistence, sidecar, runInputs } = runtime
+  const replaceWorkflowSidecar = sidecar.replaceWorkflowSidecar
+  const resetRunInputContext = runInputs.resetRunInputContext
 
   const resetGraphSideEffectsForCommittedWorkflow = useCallback(
     (
@@ -158,11 +151,11 @@ export function useWorkflowEditorCanvasSection({
     setActiveWorkflowContextId,
     temporaryCanvasId,
     setTemporaryCanvasId,
-    canvasList,
+    canvasList: bootstrap.canvasList,
     nodes,
     edges,
     contextLinks,
-    workflowSidecar,
+    workflowSidecar: sidecar.workflowSidecar,
     graphPersistedVersion,
     isGraphDirty,
     clearPageError,
@@ -170,10 +163,10 @@ export function useWorkflowEditorCanvasSection({
     setWorkflowWarnings,
     setIsSwitchingWorkflow,
     setCommittedGraphPersistedVersion,
-    loadCurrentWorkflow,
-    refreshWorkflowList,
-    handleDeleteCanvas,
-    handleSave,
+    loadCurrentWorkflow: persistence.loadCurrentWorkflow,
+    refreshWorkflowList: bootstrap.refreshWorkflowList,
+    handleDeleteCanvas: persistence.handleDeleteCanvas,
+    handleSave: persistence.handleSave,
     resetGraphSideEffectsForCommittedWorkflow,
     isGraphEditingLocked,
   })

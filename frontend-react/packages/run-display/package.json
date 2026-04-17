@@ -1,0 +1,25 @@
+{
+  "name": "@aiwriter/run-display",
+  "version": "0.1.0",
+  "private": false,
+  "type": "module",
+  "sideEffects": false,
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/types/packages/run-display/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/types/packages/run-display/src/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "node ./scripts/clean.mjs",
+    "build": "npm run clean && npm run build:js && npm run build:types",
+    "build:js": "node ../../node_modules/vite/bin/vite.js build --config ./vite.config.ts",
+    "build:types": "node ../../node_modules/typescript/bin/tsc -p ./tsconfig.types.json"
+  }
+}

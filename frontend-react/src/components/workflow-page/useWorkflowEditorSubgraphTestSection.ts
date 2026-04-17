@@ -3,13 +3,13 @@ import { useCallback } from 'react'
 import type {
   EffectiveSubgraphTestInputItem,
 } from '../../workflow-editor/state/workflowEditorSubgraphTestInputs'
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import type {
   WorkflowEditorEdge,
   WorkflowEditorNode,
 } from '../../workflow-editor/workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../../workflow-editor/workflowEditorTypes'
-import type { DisplayRun } from '../run/runDisplayModels'
+import type { DisplayRun } from '@aiwriter/run-display'
 import type {
   SubgraphTestPanelRuntimeOptions,
   UseWorkflowSubgraphTestPanelResult,
@@ -57,53 +57,63 @@ interface UseWorkflowEditorSubgraphTestSectionOptions {
   }
 }
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
-type WorkflowEditorSubgraphSectionRuntimeBindings = Pick<
-  WorkflowRuntimeState,
-  | 'subgraphTestState'
-  | 'activeSubgraphTestResult'
-  | 'activeSubgraphTestStartNodeId'
-  | 'subgraphTestResultsByNodeId'
-  | 'staleSubgraphTestResultIds'
-  | 'lastSuccessfulSubgraphTestStartNodeId'
-  | 'getWorkflowSidecarNodeAssets'
-  | 'updateWorkflowSidecarNodeAssets'
-  | 'pruneWorkflowSidecar'
-  | 'markSubgraphTestResultStale'
-  | 'clearSubgraphTestResultStale'
-  | 'handleRunSubgraphTest'
-  | 'clearSubgraphTestResult'
-  | 'pruneSubgraphTestArtifacts'
-  | 'resetSubgraphTestState'
-  | 'resetSubgraphTestContext'
->
+interface WorkflowEditorSubgraphSectionRuntimeBindings {
+  subgraphTest: Pick<
+    WorkflowRuntimeState['subgraphTest'],
+    | 'subgraphTestState'
+    | 'activeSubgraphTestResult'
+    | 'activeSubgraphTestStartNodeId'
+    | 'subgraphTestResultsByNodeId'
+    | 'staleSubgraphTestResultIds'
+    | 'lastSuccessfulSubgraphTestStartNodeId'
+    | 'markSubgraphTestResultStale'
+    | 'clearSubgraphTestResultStale'
+    | 'handleRunSubgraphTest'
+    | 'clearSubgraphTestResult'
+    | 'pruneSubgraphTestArtifacts'
+    | 'resetSubgraphTestState'
+    | 'resetSubgraphTestContext'
+  >
+  sidecar: Pick<
+    WorkflowRuntimeState['sidecar'],
+    | 'getWorkflowSidecarNodeAssets'
+    | 'updateWorkflowSidecarNodeAssets'
+    | 'pruneWorkflowSidecar'
+  >
+}
 
 function buildSubgraphTestPanelRuntimeBindings(
   runtime: WorkflowEditorSubgraphSectionRuntimeBindings
 ): SubgraphTestPanelRuntimeOptions {
   return {
     state: {
-      subgraphTestState: runtime.subgraphTestState,
-      activeSubgraphTestResult: runtime.activeSubgraphTestResult,
-      activeSubgraphTestStartNodeId: runtime.activeSubgraphTestStartNodeId,
-      subgraphTestResultsByNodeId: runtime.subgraphTestResultsByNodeId,
-      staleSubgraphTestResultIds: runtime.staleSubgraphTestResultIds,
+      subgraphTestState: runtime.subgraphTest.subgraphTestState,
+      activeSubgraphTestResult: runtime.subgraphTest.activeSubgraphTestResult,
+      activeSubgraphTestStartNodeId:
+        runtime.subgraphTest.activeSubgraphTestStartNodeId,
+      subgraphTestResultsByNodeId:
+        runtime.subgraphTest.subgraphTestResultsByNodeId,
+      staleSubgraphTestResultIds:
+        runtime.subgraphTest.staleSubgraphTestResultIds,
       lastSuccessfulSubgraphTestStartNodeId:
-        runtime.lastSuccessfulSubgraphTestStartNodeId,
+        runtime.subgraphTest.lastSuccessfulSubgraphTestStartNodeId,
     },
     actions: {
-      markSubgraphTestResultStale: runtime.markSubgraphTestResultStale,
-      clearSubgraphTestResultStale: runtime.clearSubgraphTestResultStale,
-      handleRunSubgraphTest: runtime.handleRunSubgraphTest,
-      clearSubgraphTestResult: runtime.clearSubgraphTestResult,
-      pruneSubgraphTestArtifacts: runtime.pruneSubgraphTestArtifacts,
-      resetSubgraphTestState: runtime.resetSubgraphTestState,
+      markSubgraphTestResultStale:
+        runtime.subgraphTest.markSubgraphTestResultStale,
+      clearSubgraphTestResultStale:
+        runtime.subgraphTest.clearSubgraphTestResultStale,
+      handleRunSubgraphTest: runtime.subgraphTest.handleRunSubgraphTest,
+      clearSubgraphTestResult: runtime.subgraphTest.clearSubgraphTestResult,
+      pruneSubgraphTestArtifacts:
+        runtime.subgraphTest.pruneSubgraphTestArtifacts,
+      resetSubgraphTestState: runtime.subgraphTest.resetSubgraphTestState,
     },
     sidecar: {
-      getWorkflowSidecarNodeAssets: runtime.getWorkflowSidecarNodeAssets,
+      getWorkflowSidecarNodeAssets: runtime.sidecar.getWorkflowSidecarNodeAssets,
       updateWorkflowSidecarNodeAssets:
-        runtime.updateWorkflowSidecarNodeAssets,
-      pruneWorkflowSidecar: runtime.pruneWorkflowSidecar,
+        runtime.sidecar.updateWorkflowSidecarNodeAssets,
+      pruneWorkflowSidecar: runtime.sidecar.pruneWorkflowSidecar,
     },
   }
 }
@@ -162,12 +172,12 @@ export function useWorkflowEditorSubgraphTestSection({
       nextEdges: WorkflowEditorEdge[],
       nextContextLinks: WorkflowContextLink[]
     ) => {
-      runtime.resetSubgraphTestContext()
+      runtime.subgraphTest.resetSubgraphTestContext()
       commitSemanticGraphSnapshot(nextNodes, nextEdges, nextContextLinks)
       resetSubgraphTestPanelView()
     },
     [
-      runtime.resetSubgraphTestContext,
+      runtime.subgraphTest.resetSubgraphTestContext,
       commitSemanticGraphSnapshot,
       resetSubgraphTestPanelView,
     ]

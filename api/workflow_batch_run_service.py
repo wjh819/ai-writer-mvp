@@ -14,7 +14,7 @@ from api.run_batch_store import (
     BatchRunNotFoundError,
     BatchRunStore,
 )
-from api.run_http_schemas import (
+from contracts.run_contracts import (
     BatchItemDetailResponse,
     BatchSummaryResponse,
     RunResult,

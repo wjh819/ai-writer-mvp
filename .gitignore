@@ -1,9 +1,53 @@
-config/
-workflows/
-.idea/
-.venv/
+# Project runtime data (root only)
+/config/
+/workflows/
+
+# Local tool/cache/temp
+/.tmp/
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
 __pycache__/
-*.pyc
+*.py[cod]
+*.pyo
+
+# Python packaging/build artifacts
+build/
+dist/
+*.egg-info/
+*.whl
+*.tar.gz
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Frontend local artifacts
+frontend-react/node_modules/
+frontend-react/.vite/
+frontend-react/.vitest/
+frontend-react/coverage/
+frontend-react/.eslintcache
+
+# IDE / OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Local env/secrets
+.env
+.env.*
+!.env.example
+
+# Misc local files
 .codex
+$CONFIG_FILE
+*.log
+
+.github/
 doc/

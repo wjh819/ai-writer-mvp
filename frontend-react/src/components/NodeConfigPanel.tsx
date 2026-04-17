@@ -9,7 +9,7 @@ import type {
     OutputNodeConfig,
     PromptNodeConfig,
 } from '../workflow-editor/workflowEditorTypes'
-import type { DisplayRun } from './run/runDisplayModels'
+import type { DisplayRun } from '@aiwriter/run-display'
 import type { EffectiveSubgraphTestInputItem } from '../workflow-editor/state/workflowEditorSubgraphTestInputs'
 
 import NodeConfigSection from './node-config-panel/NodeConfigSection'

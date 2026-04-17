@@ -1,4 +1,4 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 
 import pathlib
 import sys
@@ -20,8 +20,8 @@ from contracts.workflow_contracts import (
     WorkflowEditorData,
     WorkflowNode,
 )
-from core.engine import WorkflowEngine
-from core.execution_types import WorkflowRunError
+from backend_workflow_engine import WorkflowEngine
+from backend_workflow_engine.execution_types import WorkflowRunError
 
 
 def _position() -> Position:
@@ -103,18 +103,30 @@ def _workflow(*, nodes: list[WorkflowNode], edges: list[WorkflowEdge] | None = N
 
 
 def _patch_engine_runtime(monkeypatch, responses_or_callable):
+    model_resource_registry = {
+        "model-a": {
+            "provider": "openai_compatible",
+            "api_key": "test-key",
+            "model": "test-model",
+            "base_url": "http://example.test",
+        }
+    }
+
+    def resolve_model_resource_port(model_resource_id: str):
+        normalized_id = str(model_resource_id or "").strip()
+        if not normalized_id:
+            raise ValueError("Prompt node modelResourceId is required for run")
+
+        if normalized_id not in model_resource_registry:
+            raise ValueError(f"Unknown model resource id: {normalized_id}")
+
+        return model_resource_registry[normalized_id]
+
     monkeypatch.setattr(
-        "core.engine._load_model_resource_registry",
-        lambda: {
-            "model-a": {
-                "provider": "openai_compatible",
-                "api_key": "test-key",
-                "model": "test-model",
-                "base_url": "http://example.test",
-            }
-        },
+        "backend_workflow_engine.engine._unconfigured_model_resource_resolver",
+        resolve_model_resource_port,
     )
-    monkeypatch.setattr("core.engine_node_runners.get_llm", lambda **_kwargs: object())
+    monkeypatch.setattr("backend_workflow_engine.engine._unconfigured_llm_factory", lambda **_kwargs: object())
 
     if callable(responses_or_callable):
         invoke = responses_or_callable
@@ -128,7 +140,7 @@ def _patch_engine_runtime(monkeypatch, responses_or_callable):
                 raise response
             return SimpleNamespace(content=response)
 
-    monkeypatch.setattr("core.engine_node_runners.invoke_llm", invoke)
+    monkeypatch.setattr("backend_workflow_engine.engine._unconfigured_llm_invoker", invoke)
 
 
 def test_run_success_baseline(monkeypatch):
@@ -340,7 +352,7 @@ def test_same_engine_second_run_does_not_reuse_prompt_window_history(monkeypatch
 
 
 def test_failed_prompt_does_not_commit_window_or_pollute_next_run_branch_baseline(monkeypatch):
-    import core.engine_node_runners as engine_node_runners
+    import backend_workflow_engine.engine_node_runners as engine_node_runners
 
     workflow = _workflow(
         nodes=[
@@ -460,3 +472,4 @@ def test_missing_inputs_error_classification(monkeypatch):
     assert error.partial_state == {}
     assert [step.node_id for step in error.steps] == ["prompt_1"]
     assert [step.status for step in error.steps] == ["failed"]
+

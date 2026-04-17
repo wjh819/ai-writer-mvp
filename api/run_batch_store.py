@@ -3,7 +3,7 @@ from __future__ import annotations
 from threading import RLock
 from typing import Iterable
 
-from api.run_http_schemas import (
+from contracts.run_contracts import (
     BatchItemDetailResponse,
     BatchItemSummary,
     BatchSummaryResponse,

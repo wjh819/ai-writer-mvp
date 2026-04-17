@@ -1,0 +1,25 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "aiwriter-workflow-canonical"
+version = "0.1.0"
+description = "Canonical workflow validators for ai-writer backend."
+requires-python = ">=3.12"
+dependencies = [
+  "aiwriter-run-contracts>=0.1.0",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "build>=1.2,<2",
+]
+
+[tool.setuptools]
+packages = ["backend_workflow_canonical"]
+py-modules = ["app_errors"]
+
+[tool.setuptools.package-dir]
+backend_workflow_canonical = "."

@@ -3,7 +3,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from typing import Any
 
-from core.execution_types import WorkflowExecutionResult
+from backend_workflow_engine.execution_types import WorkflowExecutionResult
 
 """
 workflow run-level 结果壳构造层。

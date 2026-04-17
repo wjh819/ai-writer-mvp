@@ -1,7 +1,7 @@
 import { useCallback, useMemo, type ComponentProps } from 'react'
 import type { NodeTypes } from 'reactflow'
 
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import { getRunInputKey } from '../../workflow-editor/state/workflowEditorRunInputs'
 import WorkflowNode from '../WorkflowNode'
 import WorkflowSidebar from '../WorkflowSidebar'
@@ -16,7 +16,6 @@ import type {
 import type { useWorkflowEditorGraphSection } from './useWorkflowEditorGraphSection'
 import type { useWorkflowEditorSubgraphTestSection } from './useWorkflowEditorSubgraphTestSection'
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
 type CanvasSectionState = ReturnType<typeof useWorkflowEditorCanvasSection>
 type DisplayRunSectionState = ReturnType<typeof useWorkflowEditorDisplayRunSection>
 type DisplayRunState = ReturnType<typeof useWorkflowEditorDisplayRunState>
@@ -42,10 +41,10 @@ interface UseWorkflowPanelsOptions {
     isLoadingWorkflow: boolean
   }
   runtime: {
-    canvasList: WorkflowRuntimeState['canvasList']
-    modelResources: WorkflowRuntimeState['modelResources']
-    runInputs: WorkflowRuntimeState['runInputs']
-    updateRunInput: WorkflowRuntimeState['updateRunInput']
+    canvasList: WorkflowRuntimeState['bootstrap']['canvasList']
+    modelResources: WorkflowRuntimeState['bootstrap']['modelResources']
+    runInputs: WorkflowRuntimeState['runInputs']['runInputs']
+    updateRunInput: WorkflowRuntimeState['runInputs']['updateRunInput']
     batchInputText: string
     onBatchInputTextChange: (value: string) => void
     batchMaxParallel: number

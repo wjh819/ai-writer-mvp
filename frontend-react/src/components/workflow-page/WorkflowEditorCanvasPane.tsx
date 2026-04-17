@@ -16,9 +16,8 @@ import type {
   WorkflowGraphEdge,
   WorkflowEditorNode,
 } from '../../workflow-editor/workflowEditorGraphTypes'
-import type { DisplayRun } from '../run/runDisplayModels'
+import { RunResultPanel, type DisplayRun } from '@aiwriter/run-display'
 import WorkflowSelectionBar from '../WorkflowSelectionBar'
-import RunResultPanel from '../run/RunResultPanel'
 import WorkflowEditorBatchSummarySection from './WorkflowEditorBatchSummarySection'
 import WorkflowPageBanners from './WorkflowPageBanners'
 

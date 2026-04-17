@@ -10,8 +10,10 @@ import type {
   WorkflowEditorNode,
 } from '../../workflow-editor/workflowEditorGraphTypes'
 import type { WorkflowLoadWarning } from '../../workflow-editor/workflowEditorUiTypes'
-import type { DisplayRun } from '../run/runDisplayModels'
-import { buildDisplayRunFromLiveSnapshot } from '../run/runDisplayMappers'
+import {
+  buildDisplayRunFromLiveSnapshot,
+  type DisplayRun,
+} from '@aiwriter/run-display'
 
 function trim(value: unknown): string {
   if (value === null || typeof value === 'undefined') {

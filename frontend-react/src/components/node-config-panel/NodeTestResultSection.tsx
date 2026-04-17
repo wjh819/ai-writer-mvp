@@ -1,5 +1,5 @@
-import type { DisplayRun } from '../run/runDisplayModels'
-import { ValueBlock } from '../run/RunValueBlock'
+import type { DisplayRun } from '@aiwriter/run-display'
+import { ValueBlock } from './NodeValueBlock'
 
 interface NodeTestResultSectionProps {
     isSubgraphTestRunning: boolean

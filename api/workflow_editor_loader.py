@@ -13,7 +13,7 @@ from api.workflow_paths import (
     get_sibling_sidecar_path_from_workflow_path,
 )
 from api.workflow_sidecar_io import _load_sidecar_from_path_or_empty
-from api.workflow_validator import (
+from backend_workflow_canonical import (
     collect_context_source_outbound_rule_errors,
     validate_workflow_structure,
 )

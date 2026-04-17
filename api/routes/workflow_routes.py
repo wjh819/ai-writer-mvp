@@ -25,10 +25,16 @@ from api.workflow_loader import (
     normalize_workflow_sidecar_data,
 )
 from api.workflow_normalizer import normalize_workflow_editor_data
-from api.workflow_validator import validate_workflow_editor_data
+from backend_workflow_canonical import (
+    set_model_resource_registry_provider,
+    validate_workflow_editor_data,
+)
 from api.routes.route_helpers import split_save_workflow_payload
+from core.model_resource_registry import load_model_resource_registry
 
 router = APIRouter()
+
+set_model_resource_registry_provider(load_model_resource_registry)
 
 
 def _collect_prompt_node_ids(workflow) -> list[str]:

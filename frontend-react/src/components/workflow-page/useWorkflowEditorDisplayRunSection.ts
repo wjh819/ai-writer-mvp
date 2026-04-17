@@ -6,7 +6,7 @@ import { useWorkflowEditorDisplayState } from './useWorkflowEditorDisplayState'
 import { useWorkflowRunContext } from './useWorkflowRunContext'
 import type { RunResult } from '../../run/runTypes'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import type {
   WorkflowEditorEdge,
   WorkflowEditorNode,
@@ -24,9 +24,8 @@ import type {
   StartLiveRunActionResult,
 } from './useLiveRunContext'
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
 type DisplayRunRuntimeActions = Pick<
-  WorkflowRuntimeState,
+  WorkflowRuntimeState['runExecution'],
   | 'handleRun'
   | 'handleStartLiveRun'
   | 'handleFetchActiveLiveRun'
@@ -36,7 +35,7 @@ type DisplayRunRuntimeActions = Pick<
   | 'handleCancelBatchRun'
 >
 type DisplayRunStateRuntimeBindings = Pick<
-  WorkflowRuntimeState,
+  WorkflowRuntimeState['bootstrap'],
   'bootstrapErrorMessage'
 >
 

@@ -8,7 +8,7 @@ import type {
 } from '../../workflow-editor/workflowEditorGraphTypes'
 import type { WorkflowContextLink } from '../../workflow-editor/workflowEditorTypes'
 import type { WorkflowRunContext } from '../../workflow-editor/workflowEditorUiTypes'
-import { buildDisplayRunFromDirectRun } from '../run/runDisplayMappers'
+import { buildDisplayRunFromDirectRun } from '@aiwriter/run-display'
 
 interface RunWorkflowActionResult {
     runResult?: RunResult

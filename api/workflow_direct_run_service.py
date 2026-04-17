@@ -19,8 +19,16 @@ from api.workflow_paths import (
     get_canvas_outputs_dir,
     get_canvas_workflow_path,
 )
-from core.engine import WorkflowDefinitionError, WorkflowEngine
-from core.execution_types import WorkflowExecutionResult, WorkflowRunError
+from backend_workflow_engine import WorkflowDefinitionError, WorkflowEngine
+from backend_workflow_engine.execution_types import (
+    WorkflowExecutionResult,
+    WorkflowRunError,
+)
+from core.llm import get_llm, invoke_llm
+from core.model_resource_registry import (
+    load_model_resource_registry,
+    resolve_model_resource,
+)
 from core.output_exporter import WorkflowOutputExporter
 
 """
@@ -41,6 +49,13 @@ workflow 同步执行入口服务层。
 """
 
 
+def _build_model_resource_resolver(model_resource_registry: dict[str, dict]):
+    def _resolve(model_resource_id: str) -> dict[str, Any]:
+        return resolve_model_resource(model_resource_id, model_resource_registry)
+
+    return _resolve
+
+
 def execute_draft_workflow(
     *,
     canvas_id: str,
@@ -55,6 +70,7 @@ def execute_draft_workflow(
     safe_input_state: dict[str, Any] = {}
     safe_prompt_overrides: dict[str, str] = {}
     output_exporter: WorkflowOutputExporter | None = None
+    model_resource_registry: dict[str, dict] = {}
 
     try:
         safe_input_state = _normalize_state_object(
@@ -67,11 +83,17 @@ def execute_draft_workflow(
         output_exporter = WorkflowOutputExporter(
             get_canvas_outputs_dir(canvas_id)
         )
+        model_resource_registry = load_model_resource_registry()
 
         engine = WorkflowEngine(
             workflow_data=workflow,
             prompt_overrides=safe_prompt_overrides,
-            output_exporter=output_exporter,
+            output_sink=output_exporter,
+            model_resource_resolver=_build_model_resource_resolver(
+                model_resource_registry
+            ),
+            llm_factory=get_llm,
+            llm_invoker=invoke_llm,
         )
 
         final_state, steps = engine.run(safe_input_state)
@@ -191,6 +213,7 @@ def execute_partial_workflow(
     safe_prompt_overrides: dict[str, str] = {}
     safe_start_node_id = ""
     safe_end_node_ids: list[str] = []
+    model_resource_registry: dict[str, dict] = {}
 
     try:
         safe_test_state = _normalize_state_object(
@@ -207,9 +230,16 @@ def execute_partial_workflow(
             label="End node ids",
         )
 
+        model_resource_registry = load_model_resource_registry()
+
         engine = WorkflowEngine(
             workflow_data=workflow,
             prompt_overrides=safe_prompt_overrides,
+            model_resource_resolver=_build_model_resource_resolver(
+                model_resource_registry
+            ),
+            llm_factory=get_llm,
+            llm_invoker=invoke_llm,
         )
 
         final_state, steps = engine.run_subgraph(

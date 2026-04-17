@@ -1,0 +1,35 @@
+[build-system]
+requires = ["setuptools>=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-writer-mvp-backend"
+version = "0.1.0"
+description = "Backend service and contracts for ai-writer-mvp."
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi",
+  "uvicorn",
+  "langchain",
+  "langchain-openai",
+  "openai",
+  "python-dotenv",
+  "pyyaml",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8,<9",
+  "mypy>=1.10,<2",
+  "ruff>=0.6,<1",
+  "build>=1.2,<2",
+]
+
+[tool.setuptools]
+py-modules = ["app_errors", "fastapi_app"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["api*", "core*", "contracts*", "shared*", "storage*", "backend_workflow_canonical*", "backend_workflow_engine*"]
+exclude = ["tests*", "frontend-react*", "doc*", "workflows*", "config*"]
+namespaces = true

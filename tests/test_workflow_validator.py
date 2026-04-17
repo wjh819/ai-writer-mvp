@@ -10,8 +10,8 @@ sys.path.insert(0, str(pathlib.Path(__file__).resolve().parents[1]))
 
 from app_errors import InvalidInputError
 from api.routes import run_routes, workflow_routes
-from api.run_http_schemas import BatchRunRequest, RunDraftRequest, SubgraphTestRequest
-from api.workflow_validator import validate_workflow_editor_data
+from contracts.run_contracts import BatchRunRequest, RunDraftRequest, SubgraphTestRequest
+from backend_workflow_canonical import validate_workflow_editor_data
 
 
 class _ModelDumpResult:
@@ -32,9 +32,12 @@ def test_validate_workflow_editor_data_runs_structure_before_dependency(monkeypa
     def fake_dependency(arg):
         calls.append(("dependency", arg))
 
-    monkeypatch.setattr("api.workflow_validator.validate_workflow_structure", fake_structure)
     monkeypatch.setattr(
-        "api.workflow_validator.validate_workflow_dependencies",
+        "backend_workflow_canonical.workflow_validator.validate_workflow_structure",
+        fake_structure,
+    )
+    monkeypatch.setattr(
+        "backend_workflow_canonical.workflow_validator.validate_workflow_dependencies",
         fake_dependency,
     )
 
@@ -55,9 +58,12 @@ def test_validate_workflow_editor_data_prefers_structure_error_over_dependency(m
     def fail_dependency(_workflow):
         raise AssertionError("dependency validation must not run after structure failure")
 
-    monkeypatch.setattr("api.workflow_validator.validate_workflow_structure", fake_structure)
     monkeypatch.setattr(
-        "api.workflow_validator.validate_workflow_dependencies",
+        "backend_workflow_canonical.workflow_validator.validate_workflow_structure",
+        fake_structure,
+    )
+    monkeypatch.setattr(
+        "backend_workflow_canonical.workflow_validator.validate_workflow_dependencies",
         fail_dependency,
     )
 

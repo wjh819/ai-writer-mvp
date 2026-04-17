@@ -69,13 +69,24 @@ export function useWorkflowEditorPageAssembler({
   const [batchMaxParallel, setBatchMaxParallel] = useState(4)
 
   const runtime = useWorkflowRuntime()
+  const graphRuntime = runtime.graphRuntime ?? {
+    runInputs: runtime.runInputs,
+    subgraphTest: runtime.subgraphTest,
+  }
+  const runExecutionRuntime = runtime.runExecutionRuntime ?? {
+    runExecution: runtime.runExecution,
+  }
+  const sidecarAssetsRuntime = runtime.sidecarAssetsRuntime ?? {
+    sidecar: runtime.sidecar,
+  }
+  const refreshModelResources = runtime.bootstrap.refreshModelResources
 
   const displayRunSection = useWorkflowEditorDisplayRunSection({
     activeCanvasId,
     activeWorkflowContextId,
     graphSemanticVersion,
     clearPageError,
-    runtimeActions: runtime,
+    runtimeActions: runExecutionRuntime.runExecution,
   })
 
   // This bridge stays at assembler level because graph and subgraph sections are
@@ -95,7 +106,10 @@ export function useWorkflowEditorPageAssembler({
     onGraphError: setPageErrorMessage,
     onGraphClearError: clearPageError,
     onRequestSubgraphTest: handleRequestSubgraphTestFromCanvas,
-    runtime,
+    runtime: {
+      runningSubgraphTestNodeId:
+        graphRuntime.subgraphTest.runningSubgraphTestNodeId,
+    },
     isGraphEditingLocked: displayRunSection.status.isGraphEditingLocked,
     liveRunSnapshot: displayRunSection.state.activeLiveRunSnapshot,
   })
@@ -110,7 +124,7 @@ export function useWorkflowEditorPageAssembler({
     edges,
     selectedEdgeId,
     workflowWarnings,
-    runtime,
+    runtime: runtime.bootstrap,
     pageErrorMessage,
     isGraphDirty,
     isLiveRunActive: displayRunSection.status.isLiveRunActive,
@@ -139,7 +153,10 @@ export function useWorkflowEditorPageAssembler({
       onGraphPersistedChanged: handleGraphPersistedChanged,
       selectNodeById: graphSection.subgraphSectionBindings.selectNodeById,
     },
-    runtime,
+    runtime: {
+      subgraphTest: graphRuntime.subgraphTest,
+      sidecar: sidecarAssetsRuntime.sidecar,
+    },
     runStatus: {
       isLiveRunActive: displayRunSection.status.isLiveRunActive,
       isBatchRunActive: displayRunSection.status.isBatchRunActive,
@@ -163,7 +180,12 @@ export function useWorkflowEditorPageAssembler({
 
     graphPersistedVersion,
     isGraphDirty,
-    runtime,
+    runtime: {
+      bootstrap: runtime.bootstrap,
+      persistence: runtime.persistence,
+      sidecar: sidecarAssetsRuntime.sidecar,
+      runInputs: graphRuntime.runInputs,
+    },
 
     clearPageError,
     setPageErrorMessage,
@@ -190,7 +212,7 @@ export function useWorkflowEditorPageAssembler({
     edges,
     contextLinks,
     inputNodes: graphSection.sidebarBindings.inputNodes,
-    runtime,
+    runtime: graphRuntime.runInputs,
     batchInputText,
     batchMaxParallel,
     setPageErrorMessage,
@@ -207,12 +229,12 @@ export function useWorkflowEditorPageAssembler({
   )
 
   const handleModelResourcesChanged = useCallback(async () => {
-    const result = await runtime.refreshModelResources()
+    const result = await refreshModelResources()
     if (result.errorMessage) {
       setPageErrorMessage(result.errorMessage)
       throw new Error(result.errorMessage)
     }
-  }, [runtime.refreshModelResources, setPageErrorMessage])
+  }, [refreshModelResources, setPageErrorMessage])
 
   const panels = useWorkflowPanels({
     canvas: {
@@ -220,13 +242,13 @@ export function useWorkflowEditorPageAssembler({
       activeCanvasId,
       temporaryCanvasId,
       isSwitchingWorkflow,
-      isLoadingWorkflow: runtime.isLoadingWorkflow,
+      isLoadingWorkflow: runtime.persistence.isLoadingWorkflow,
     },
     runtime: {
-      canvasList: runtime.canvasList,
-      modelResources: runtime.modelResources,
-      runInputs: runtime.runInputs,
-      updateRunInput: runtime.updateRunInput,
+      canvasList: runtime.bootstrap.canvasList,
+      modelResources: runtime.bootstrap.modelResources,
+      runInputs: graphRuntime.runInputs.runInputs,
+      updateRunInput: graphRuntime.runInputs.updateRunInput,
       batchInputText,
       onBatchInputTextChange: setBatchInputText,
       batchMaxParallel,
@@ -235,9 +257,9 @@ export function useWorkflowEditorPageAssembler({
     pageStatus: {
       isModelResourcePanelOpen,
       setIsModelResourcePanelOpen,
-      isSaving: runtime.isSaving,
-      isRunning: runtime.isRunning,
-      isDeleting: runtime.isDeleting,
+      isSaving: runtime.persistence.isSaving,
+      isRunning: runtime.persistence.isRunning,
+      isDeleting: runtime.persistence.isDeleting,
     },
     actions: {
       onModelResourcesChanged: handleModelResourcesChanged,

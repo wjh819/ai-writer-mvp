@@ -12,7 +12,7 @@ from api.run_batch_store import (
     BatchRunNotFoundError,
     get_batch_run_store,
 )
-from api.run_http_schemas import (
+from contracts.run_contracts import (
     BatchRunRequest,
     RunDraftRequest,
     SubgraphTestRequest,
@@ -32,15 +32,19 @@ from api.workflow_run_service import (
     execute_partial_workflow,
     start_live_draft_workflow,
 )
-from api.workflow_validator import (
+from backend_workflow_canonical import (
+    set_model_resource_registry_provider,
     validate_partial_execution_workflow,
     validate_workflow_editor_data,
 )
+from core.model_resource_registry import load_model_resource_registry
 
 router = APIRouter()
 
 _live_store = get_run_live_store()
 _batch_store = get_batch_run_store()
+
+set_model_resource_registry_provider(load_model_resource_registry)
 
 
 @router.post("/workflows/{canvas_id}/run-draft")

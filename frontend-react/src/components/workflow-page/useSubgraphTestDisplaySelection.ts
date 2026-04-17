@@ -1,8 +1,10 @@
 import { useMemo } from 'react'
 
 import type { RunResult } from '../../run/runTypes'
-import { buildDisplayRunFromDirectRun } from '../run/runDisplayMappers'
-import type { DisplayRun } from '../run/runDisplayModels'
+import {
+  buildDisplayRunFromDirectRun,
+  type DisplayRun,
+} from '@aiwriter/run-display'
 import type { WorkflowEditorNode } from '../../workflow-editor/workflowEditorGraphTypes'
 
 export interface UseSubgraphTestDisplaySelectionOptions {

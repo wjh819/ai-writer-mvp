@@ -1,5 +1,5 @@
-import type { DisplayRun } from '../run/runDisplayModels'
-import { PrettyJson } from '../run/RunValueBlock'
+import type { DisplayRun } from '@aiwriter/run-display'
+import { PrettyJson } from './NodeValueBlock'
 
 interface NodeTestRawJsonSectionProps {
     displayRun: DisplayRun | null

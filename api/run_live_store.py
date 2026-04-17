@@ -3,7 +3,7 @@ from __future__ import annotations
 from threading import RLock
 from typing import Any, Iterable
 
-from api.run_http_schemas import LiveRunSnapshot
+from contracts.run_contracts import LiveRunSnapshot
 from api.run_result_mapper import map_execution_step_to_run_step
 
 

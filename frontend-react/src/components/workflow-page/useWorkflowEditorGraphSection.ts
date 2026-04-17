@@ -2,12 +2,11 @@ import { useMemo } from 'react'
 
 import { useWorkflowGraphEditor } from '../../workflow-editor/controllers/useWorkflowGraphEditor'
 import type { LiveRunSnapshot } from '../../run/runTypes'
-import type { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflowRuntime'
+import type { WorkflowRuntimeState } from '../../workflow-editor/controllers/useWorkflowRuntime'
 import type { WorkflowRunContext } from '../../workflow-editor/workflowEditorUiTypes'
 
-type WorkflowRuntimeState = ReturnType<typeof useWorkflowRuntime>
 type GraphSectionRuntimeBindings = Pick<
-  WorkflowRuntimeState,
+  WorkflowRuntimeState['subgraphTest'],
   'runningSubgraphTestNodeId'
 >
 

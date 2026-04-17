@@ -3,15 +3,20 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
+    "dev": "npm run build:run-display-package && vite",
+    "build": "npm run build:run-display-package && vite build",
+    "build:run-display-package": "npm --prefix packages/run-display run build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
+    "test": "npm run build:run-display-package && vitest run",
     "test:watch": "vitest"
   },
   "dependencies": {
+    "@aiwriter/run-display": "0.1.0",
     "axios": "^1.13.6",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

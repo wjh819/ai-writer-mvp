@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
-import { buildDisplayRunFromDirectRun } from '../run/runDisplayMappers'
-import type { DisplayRun } from '../run/runDisplayModels'
+import {
+  buildDisplayRunFromDirectRun,
+  type DisplayRun,
+} from '@aiwriter/run-display'
 import type {
   WorkflowEditorEdge,
   WorkflowEditorNode,

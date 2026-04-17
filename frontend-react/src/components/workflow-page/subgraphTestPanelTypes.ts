@@ -1,6 +1,6 @@
 import type { RunResult } from '../../run/runTypes'
 import type { WorkflowState } from '../../shared/workflowSharedTypes'
-import type { DisplayRun } from '../run/runDisplayModels'
+import type { DisplayRun } from '@aiwriter/run-display'
 import type {
   EffectiveSubgraphTestInputItem,
 } from '../../workflow-editor/state/workflowEditorSubgraphTestInputs'

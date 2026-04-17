@@ -3,7 +3,7 @@ from __future__ import annotations
 from typing import Any
 
 from api.run_result_mapper import build_run_result_from_execution
-from core.execution_types import WorkflowExecutionResult
+from backend_workflow_engine.execution_types import WorkflowExecutionResult
 
 """
 direct run / subgraph test response 收口层。

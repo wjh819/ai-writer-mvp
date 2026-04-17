@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from api.run_http_schemas import (
+from contracts.run_contracts import (
     InputFailedRunStep,
     InputSuccessRunStep,
     OutputFailedRunStep,
@@ -9,7 +9,7 @@ from api.run_http_schemas import (
     PromptSuccessRunStep,
     RunResult,
 )
-from core.execution_types import (
+from backend_workflow_engine.execution_types import (
     InputFailedExecutionStep,
     InputSuccessExecutionStep,
     OutputFailedExecutionStep,
