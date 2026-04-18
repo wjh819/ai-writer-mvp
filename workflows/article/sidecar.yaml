@@ -1,0 +1,5 @@
+nodes:
+  prompt_node_1:
+    pinnedInputs:
+      topic_text: php
+    metadata: {}

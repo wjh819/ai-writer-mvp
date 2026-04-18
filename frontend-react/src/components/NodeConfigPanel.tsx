@@ -91,7 +91,7 @@ export default function NodeConfigPanel({
     if (!node) {
         return (
             <div style={{ padding: 16, color: '#666', fontSize: 13 }}>
-                No node selected
+                未选择节点
             </div>
         )
     }
@@ -144,7 +144,7 @@ export default function NodeConfigPanel({
                     padding: 12,
                 }}
             >
-                <div style={{ fontWeight: 700, marginBottom: 12 }}>Node Config</div>
+                <div style={{ fontWeight: 700, marginBottom: 12 }}>节点配置</div>
 
                 {isGraphEditingLocked ? (
                     <div
@@ -158,7 +158,7 @@ export default function NodeConfigPanel({
                             fontSize: 12,
                         }}
                     >
-                        Live run is active. Node config editing is locked.
+                        实时运行中，节点配置编辑已锁定。
                     </div>
                 ) : null}
 
@@ -217,7 +217,7 @@ export default function NodeConfigPanel({
                         fontWeight: 700,
                     }}
                 >
-                    Node Test
+                    节点测试
                     {isSubgraphTestExpanded ? ' ▲' : ' ▼'}
                 </button>
 
@@ -235,7 +235,7 @@ export default function NodeConfigPanel({
                                     fontSize: 12,
                                 }}
                             >
-                                Node test is disabled while a full live run is active.
+                                完整实时运行进行中，节点测试已禁用。
                             </div>
                         ) : (
                             <>

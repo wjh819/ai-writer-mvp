@@ -230,7 +230,7 @@ function renderCreateBindingHandle(isLocked: boolean) {
           pointerEvents: 'none',
         }}
       >
-        + binding
+        + 绑定
       </div>
 
       <Handle
@@ -261,7 +261,7 @@ function renderInboundBindingsBlock(
   return (
     <>
       <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 6 }}>
-        inbound bindings (authoritative):
+        入边绑定（权威）：
       </div>
 
       <div
@@ -374,11 +374,11 @@ function renderPromptWindowSummary(data: WorkflowNodeData) {
     ? data.graphWindowTargetNodeIds.map(trim).filter(Boolean)
     : []
 
-  let summaryText = 'window: new_window'
+  let summaryText = '窗口：新窗口'
   if (mode === 'continue') {
-    summaryText = `window: continue ← ${sourceNodeId || '-'}`
+    summaryText = `窗口：继续 <- ${sourceNodeId || '-'}`
   } else if (mode === 'branch') {
-    summaryText = `window: branch ← ${sourceNodeId || '-'}`
+    summaryText = `窗口：分支 <- ${sourceNodeId || '-'}`
   }
 
   return (
@@ -395,7 +395,7 @@ function renderPromptWindowSummary(data: WorkflowNodeData) {
       </div>
 
       <div style={{ fontSize: 12, marginBottom: 8, opacity: 0.88 }}>
-        context out: {targets.length ? targets.join(', ') : '-'}
+        上下文输出：{targets.length ? targets.join(', ') : '-'}
       </div>
     </>
   )
@@ -424,7 +424,7 @@ function renderContextTargetHandle(isLocked: boolean) {
           pointerEvents: 'none',
         }}
       >
-        ctx in
+        上下文入
       </div>
 
       <Handle
@@ -472,7 +472,7 @@ function renderContextSourceHandle(isLocked: boolean) {
           pointerEvents: 'none',
         }}
       >
-        ctx out
+        上下文出
       </div>
 
       <Handle
@@ -687,7 +687,7 @@ export default function WorkflowNode({
             flexWrap: 'wrap',
           }}
         >
-          <div style={{ fontWeight: 700 }}>{id || 'Unnamed Node'}</div>
+          <div style={{ fontWeight: 700 }}>{id || '未命名节点'}</div>
 
           {liveStatusChip ? (
             <span
@@ -744,10 +744,10 @@ export default function WorkflowNode({
             }}
           >
             {isSubgraphTestRunning
-              ? 'Running...'
+              ? '运行中...'
               : isNodeInteractionLocked
-                ? 'Locked'
-                : 'Test'}
+                ? '已锁定'
+                : '测试'}
           </button>
         )}
       </div>
@@ -765,7 +765,7 @@ export default function WorkflowNode({
             fontWeight: 600,
           }}
         >
-          This node is currently executing in the active live run.
+          当前节点正在实时运行中执行。
         </div>
       ) : null}
 
@@ -781,7 +781,7 @@ export default function WorkflowNode({
             fontSize: 12,
           }}
         >
-          Live failure: {liveErrorMessage.split('\n')[0]}
+          实时运行失败：{liveErrorMessage.split('\n')[0]}
         </div>
       ) : null}
 
@@ -801,10 +801,10 @@ export default function WorkflowNode({
 
           {isExecuted && (
             <>
-              {renderPreviewBlock('last output', data.runtimeOutput)}
+              {renderPreviewBlock('最近输出', data.runtimeOutput)}
 
               <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
-                published to state key
+                已写入状态键
               </div>
               <div
                 style={{
@@ -826,11 +826,11 @@ export default function WorkflowNode({
 {nodeType === 'prompt' && config.type === 'prompt' && (
   <>
     <div style={{ fontSize: 12, marginBottom: 4 }}>
-      prompt text: {config.promptText ? '(configured)' : '-'}
+      提示词：{config.promptText ? '（已配置）' : '-'}
     </div>
 
     <div style={{ fontSize: 12, marginBottom: 4 }}>
-      model resource: {config.modelResourceId || '-'}
+      模型资源：{config.modelResourceId || '-'}
     </div>
 
     <div style={{ fontSize: 12, marginBottom: 4 }}>
@@ -841,7 +841,7 @@ export default function WorkflowNode({
     {renderInboundBindingsBlock(inboundBindings)}
 
     <div style={{ fontSize: 12, opacity: 0.85, marginBottom: 4 }}>
-      prompt variable hints (text-derived, not authoritative):
+      Prompt 变量提示（文本推导，非权威）：
     </div>
     <div
       style={{
@@ -858,10 +858,10 @@ export default function WorkflowNode({
 
     {isExecuted && (
       <>
-        {renderPreviewBlock('last inputs', data.runtimeInputs)}
-        {renderPreviewBlock('last raw output', data.runtimeOutput)}
+        {renderPreviewBlock('最近输入', data.runtimeInputs)}
+        {renderPreviewBlock('最近原始输出', data.runtimeOutput)}
         {renderPreviewBlock(
-          'last published state',
+          '最近写入状态',
           data.runtimePublishedState
         )}
       </>
@@ -879,11 +879,11 @@ export default function WorkflowNode({
 
           {isExecuted && (
             <>
-              {renderPreviewBlock('last inputs', data.runtimeInputs)}
-              {renderPreviewBlock('last aggregated output', data.runtimeOutput)}
+              {renderPreviewBlock('最近输入', data.runtimeInputs)}
+              {renderPreviewBlock('最近聚合输出', data.runtimeOutput)}
 
               <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 4 }}>
-                published to state key
+                已写入状态键
               </div>
               <div
                 style={{
@@ -911,7 +911,7 @@ export default function WorkflowNode({
             opacity: 0.9,
           }}
         >
-          Graph editing is locked while the live run is active.
+          实时运行中，图编辑已锁定。
         </div>
       ) : null}
 

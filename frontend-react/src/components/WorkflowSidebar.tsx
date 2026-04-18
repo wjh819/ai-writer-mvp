@@ -221,7 +221,7 @@ export default function WorkflowSidebar({
               whiteSpace: 'pre-wrap',
             }}
           >
-            Batch run currently requires exactly one input node.
+            当前批处理运行要求且仅允许一个输入节点。
           </div>
         ) : (
           <div
@@ -232,7 +232,7 @@ export default function WorkflowSidebar({
               whiteSpace: 'pre-wrap',
             }}
           >
-            Enter one value per line for input key: {singleBatchInputKey}
+            请按行输入，每行一个值。对应输入键：{singleBatchInputKey}
           </div>
         )}
 
@@ -245,7 +245,7 @@ export default function WorkflowSidebar({
               whiteSpace: 'pre-wrap',
             }}
           >
-            Batch cancellation requested. Running items will finish naturally.
+            已请求取消批处理。正在运行的条目会自然完成。
           </div>
         ) : null}
 
@@ -255,7 +255,7 @@ export default function WorkflowSidebar({
           rows={6}
           style={{ width: '100%', marginBottom: 8, resize: 'vertical' }}
           disabled={isGraphEditingLocked}
-          placeholder='One input value per line'
+          placeholder='每行一个输入值'
         />
 
         <label style={{ display: 'block', marginBottom: 4 }}>Max Parallel</label>

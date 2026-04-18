@@ -35,25 +35,25 @@ export function mapErrorTypeLabel(errorType?: string) {
    *
    * 注意：
    * - 这里只做展示文案映射
-   * - 未知 error_type 会统一回退为 'Run Failed'
+   * - 未知 error_type 会统一回退为 '运行失败'
    */
   switch (errorType) {
     case 'missing_inputs':
-      return 'Missing Inputs'
+      return '缺少输入'
     case 'prompt_render_failed':
-      return 'Prompt Render Failed'
+      return '提示词渲染失败'
     case 'structured_output_invalid':
-      return 'Structured Output Invalid'
+      return '结构化输出无效'
     case 'workflow_definition_error':
-      return 'Workflow Definition Error'
+      return '工作流定义错误'
     case 'node_execution_failed':
-      return 'Node Execution Failed'
+      return '节点执行失败'
     case 'request_invalid':
     case 'request_error':
-      return 'Request Failed'
+      return '请求失败'
     case 'unexpected_error':
-      return 'Unexpected Error'
+      return '未预期错误'
     default:
-      return 'Run Failed'
+      return '运行失败'
   }
 }

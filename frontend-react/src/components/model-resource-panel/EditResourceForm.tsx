@@ -38,7 +38,7 @@ export default function EditResourceForm({
         <>
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Provider
+                    提供方
                 </label>
                 <select
                     value={draftEditProvider}
@@ -48,13 +48,13 @@ export default function EditResourceForm({
                     style={{ width: '100%' }}
                     disabled={isUpdating}
                 >
-                    <option value='openai_compatible'>OpenAI Compatible</option>
+                    <option value='openai_compatible'>OpenAI 兼容</option>
                 </select>
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Provider Model
+                    提供方模型
                 </label>
                 <input
                     value={draftEditProviderModel}
@@ -66,7 +66,7 @@ export default function EditResourceForm({
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Replace API Key
+                    替换 API Key
                 </label>
                 <input
                     type='password'
@@ -74,16 +74,16 @@ export default function EditResourceForm({
                     onChange={e => onDraftEditApiKeyChange(e.target.value)}
                     style={{ width: '100%' }}
                     disabled={isUpdating}
-                    placeholder='Leave empty to keep existing key'
+                    placeholder='留空则保留现有 key'
                 />
                 <div style={{ marginTop: 4, fontSize: 11, color: '#64748b' }}>
-                    Keep blank to preserve the current key.
+                    留空可保留当前 key。
                 </div>
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Base URL
+                    基础 URL
                 </label>
                 <input
                     value={draftEditBaseUrl}
@@ -105,10 +105,10 @@ export default function EditResourceForm({
                     onClick={() => onSave(resource.id)}
                     disabled={isUpdating}
                 >
-                    {isUpdating ? 'Saving...' : 'Save'}
+                    {isUpdating ? '保存中...' : '保存'}
                 </button>
                 <button type='button' onClick={onCancel} disabled={isUpdating}>
-                    Cancel
+                    取消
                 </button>
             </div>
         </>

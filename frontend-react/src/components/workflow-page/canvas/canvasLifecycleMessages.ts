@@ -8,8 +8,8 @@ export function buildCanvasSwitchErrorMessage(params: {
   const { targetCanvasId, activeCanvasId, errorMessage } = params
 
   return [
-    `Failed to switch canvas to "${targetCanvasId}".`,
-    `Active canvas remains "${activeCanvasId}".`,
+    `切换画布到 "${targetCanvasId}" 失败。`,
+    `当前仍停留在画布 "${activeCanvasId}"。`,
     errorMessage,
   ].join('\n')
 }
@@ -22,18 +22,18 @@ export function validateCanvasId(value: string): string {
   const normalized = normalizeCanvasId(value)
 
   if (!normalized) {
-    return 'Canvas id is required'
+    return '画布 ID 不能为空'
   }
 
   if (!CANVAS_ID_RE.test(normalized)) {
-    return 'Canvas id must start with a letter or number, and contain only letters, numbers, underscores, and hyphens'
+    return '画布 ID 必须以字母或数字开头，且仅能包含字母、数字、下划线和连字符'
   }
 
   return ''
 }
 
 export function getLiveRunLockedMessage(): string {
-  return 'Canvas actions are disabled while a full live run is active.'
+  return '完整 Live Run 进行中，画布相关操作已暂时禁用。'
 }
 
 export function buildWorkflowStatusMessage(
@@ -48,7 +48,7 @@ export function buildWorkflowStatusMessage(
     return ''
   }
 
-  return `Switching canvas from "${activeCanvasId}" to "${requestedCanvasId}"...`
+  return `正在从画布 "${activeCanvasId}" 切换到 "${requestedCanvasId}"...`
 }
 
 export function buildTemporaryCanvasStatusMessage(
@@ -60,8 +60,8 @@ export function buildTemporaryCanvasStatusMessage(
   }
 
   return [
-    `Editing unsaved blank canvas "${activeCanvasId}".`,
-    'This canvas only exists locally until the first successful save.',
+    `正在编辑未保存的空白画布 "${activeCanvasId}"。`,
+    '该画布仅在本地存在，首次保存成功后才会成为正式画布。',
   ].join('\n')
 }
 
@@ -71,13 +71,13 @@ export function buildDiscardTemporaryCanvasConfirmationMessage(params: {
 }): string {
   const { activeCanvasId, nextCanvasId } = params
   const nextTargetText = nextCanvasId
-    ? `switch to "${nextCanvasId}"`
-    : 'continue'
+    ? `切换到 "${nextCanvasId}"`
+    : '继续当前操作'
 
   return [
-    `Canvas "${activeCanvasId}" has not been saved yet.`,
-    `If you ${nextTargetText}, this temporary blank canvas will be discarded.`,
-    'Do you want to proceed?',
+    `画布 "${activeCanvasId}" 尚未保存。`,
+    `如果你选择${nextTargetText}，该临时空白画布将被丢弃。`,
+    '是否继续？',
   ].join('\n')
 }
 
@@ -90,31 +90,31 @@ export function buildDeleteConfirmationMessage(params: {
 
   if (isActiveCanvasTemporary) {
     const messageLines = [
-      `Discard temporary canvas "${activeCanvasId}"?`,
-      'This blank canvas only exists locally and has not been saved yet.',
+      `要丢弃临时画布 "${activeCanvasId}" 吗？`,
+      '该空白画布仅在本地存在，且尚未保存。',
     ]
 
     if (isGraphDirty) {
       messageLines.push(
-        'Current unsaved edits on this temporary canvas will be lost.'
+        '该临时画布上的未保存修改将会丢失。'
       )
     }
 
-    messageLines.push('This action cannot be undone.')
+    messageLines.push('此操作无法撤销。')
     return messageLines.join('\n')
   }
 
   const messageLines = [
-    `Delete formal canvas "${activeCanvasId}"?`,
-    'This will permanently delete the current canvas files.',
+    `要删除正式画布 "${activeCanvasId}" 吗？`,
+    '这会永久删除当前画布对应的文件。',
   ]
 
   if (isGraphDirty) {
     messageLines.push(
-      'Current unsaved draft changes on this canvas will also be lost.'
+      '该画布当前未保存的草稿改动也会丢失。'
     )
   }
 
-  messageLines.push('This action cannot be undone.')
+  messageLines.push('此操作无法撤销。')
   return messageLines.join('\n')
 }

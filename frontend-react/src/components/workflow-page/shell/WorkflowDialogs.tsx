@@ -101,17 +101,16 @@ export default function WorkflowDialogs({
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-                            Create Blank Canvas
+                            新建空白画布
                         </div>
 
                         <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
-                            Enter a new canvas id. The blank canvas will exist locally first
-                            and become a formal canvas after the first successful save.
+                            请输入新的画布 ID。空白画布会先在本地创建，首次保存成功后会变为正式画布。
                         </div>
 
                         <div style={{ marginBottom: 12 }}>
                             <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                                Canvas ID
+                                画布 ID
                             </label>
                             <input
                                 ref={createCanvasInputRef}
@@ -128,7 +127,7 @@ export default function WorkflowDialogs({
                                     }
                                 }}
                                 style={{ width: '100%' }}
-                                placeholder='e.g. article_draft_2'
+                                placeholder='例如：article_draft_2'
                                 disabled={isGraphEditingLocked}
                             />
                         </div>
@@ -197,7 +196,7 @@ export default function WorkflowDialogs({
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{ fontSize: 16, fontWeight: 700, marginBottom: 8 }}>
-                            Create Binding
+                            创建绑定
                         </div>
 
                         <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
@@ -208,7 +207,7 @@ export default function WorkflowDialogs({
 
                         <div style={{ marginBottom: 12 }}>
                             <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                                Target Input
+                                目标输入
                             </label>
                             <input
                                 ref={pendingTargetInputRef}
@@ -229,7 +228,7 @@ export default function WorkflowDialogs({
                                     }
                                 }}
                                 style={{ width: '100%' }}
-                                placeholder='e.g. topic / outline / draft'
+                                placeholder='例如：topic / outline / draft'
                                 disabled={isGraphEditingLocked}
                             />
                         </div>

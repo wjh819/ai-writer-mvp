@@ -44,7 +44,7 @@ export default function CanvasActions({
                 disabled={isActionDisabled || !canDeleteCurrentCanvas}
                 title={
                     !canDeleteCurrentCanvas
-                        ? 'At least one formal saved canvas must remain'
+                        ? '至少需要保留一个已保存的正式画布'
                         : undefined
                 }
             >
@@ -77,8 +77,8 @@ export default function CanvasActions({
 
             <div style={{ marginTop: 16, fontSize: 12, color: '#666' }}>
                 {modelResourceCount === 0
-                    ? 'No model resources loaded'
-                    : `${modelResourceCount} model resource(s) available`}
+                    ? '未加载模型资源'
+                    : `可用模型资源：${modelResourceCount} 个`}
             </div>
         </>
     )

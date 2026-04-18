@@ -42,27 +42,25 @@ export default function SidebarRunActions({
     <>
       {!hasAnyNodes ? (
         <div style={{ marginBottom: 12, fontSize: 12, color: '#92400e' }}>
-          Add at least one node before saving or running this canvas.
+          请先添加至少一个节点，再进行保存或运行。
         </div>
       ) : null}
 
       {isLiveRunActive ? (
         <div style={{ marginBottom: 12, fontSize: 12, color: '#92400e' }}>
-          Live run in progress. Save, run, batch run, and clear actions are
-          temporarily locked.
+          实时运行中，保存、运行、批处理运行和清空操作已暂时锁定。
         </div>
       ) : null}
 
       {isBatchRunActive && !isBatchCancelRequested ? (
         <div style={{ marginBottom: 12, fontSize: 12, color: '#92400e' }}>
-          Batch run in progress. Save, run, and graph editing actions are
-          temporarily locked.
+          批处理运行中，保存、运行和图编辑操作已暂时锁定。
         </div>
       ) : null}
 
       {isBatchRunActive && isBatchCancelRequested ? (
         <div style={{ marginBottom: 12, fontSize: 12, color: '#92400e' }}>
-          Batch cancellation requested. Running items will finish naturally.
+          已请求取消批处理。正在运行的条目会自然完成。
         </div>
       ) : null}
 

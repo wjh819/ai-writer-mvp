@@ -129,7 +129,7 @@ export function useSubgraphTestInvalidation({
     resetSubgraphTestState()
     feedback.setErrorMessage('')
     feedback.setInfoMessage(
-      'Reusable subgraph test state was cleared because upstream graph semantics changed. Existing cached test results were kept and marked as stale where affected.'
+      '由于上游图语义发生变化，已清空可复用的子图测试状态。已有缓存测试结果会保留，并在受影响处标记为过期。'
     )
   }, [
     graphSemanticVersion,

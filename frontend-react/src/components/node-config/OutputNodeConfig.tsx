@@ -32,18 +32,18 @@ export default function OutputNodeConfigForm({
   return (
     <>
       <div style={{ marginBottom: 12 }}>
-        <label>Derived Inputs</label>
+        <label>派生输入</label>
 
         <input
           value={derivedTargetInputs.join(', ')}
           readOnly
           disabled={disabled}
           style={{ width: '100%', background: '#f5f5f5', color: '#666' }}
-          placeholder='Derived from current incoming bindings (may be empty)'
+          placeholder='由当前入边绑定推导（可能为空）'
         />
 
         <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-          This list is derived from incoming edges and is not saved into node config.
+          该列表由入边推导，不会保存到节点配置中。
         </div>
       </div>
     </>

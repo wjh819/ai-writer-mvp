@@ -15,7 +15,7 @@ export default function NodeTestRawJsonSection({
     return (
         <details>
             <summary style={{ cursor: 'pointer', fontSize: 12 }}>
-                Raw Test Result
+                原始测试结果
             </summary>
             <div style={{ marginTop: 8 }}>
                 <PrettyJson value={displayRun.raw} collapsed />

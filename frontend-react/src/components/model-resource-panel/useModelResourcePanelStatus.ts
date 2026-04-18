@@ -15,7 +15,7 @@ export function useModelResourcePanelStatus() {
       setStatusErrorMessage('')
     } catch {
       setModelResourceStatus(null)
-      setStatusErrorMessage('Failed to load model resource status')
+      setStatusErrorMessage('加载模型资源状态失败')
     }
   }, [])
 
@@ -37,7 +37,7 @@ export function useModelResourcePanelStatus() {
         }
 
         setModelResourceStatus(null)
-        setStatusErrorMessage('Failed to load model resource status')
+        setStatusErrorMessage('加载模型资源状态失败')
       }
     }
 

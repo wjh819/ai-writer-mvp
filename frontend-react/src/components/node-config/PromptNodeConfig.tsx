@@ -83,10 +83,10 @@ function buildWindowRelationSummary(params: {
   return {
     modeText:
       mode === 'continue'
-        ? 'continue'
+        ? '继续'
         : mode === 'branch'
-          ? 'branch'
-          : 'new_window',
+          ? '分支'
+          : '新窗口',
     sourceText: mode === 'new_window' ? '-' : sourceNodeId || '-',
     targetsText: targets.length > 0 ? targets.join(', ') : '-',
   }
@@ -144,20 +144,20 @@ export default function PromptNodeConfigForm({
     <>
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>
-          Prompt Text
+          提示词文本
         </label>
         <textarea
           value={config.promptText}
           disabled={disabled}
           onChange={e => updateConfig({ promptText: e.target.value })}
           style={{ width: '100%', minHeight: 140 }}
-          placeholder='Write prompt text here...'
+          placeholder='在此输入提示词...'
         />
       </div>
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 4 }}>
-          Model Resource
+          模型资源
         </label>
         <select
           value={config.modelResourceId}
@@ -165,7 +165,7 @@ export default function PromptNodeConfigForm({
           onChange={e => updateConfig({ modelResourceId: e.target.value })}
           style={{ width: '100%' }}
         >
-          <option value=''>Select a model resource</option>
+          <option value=''>请选择模型资源</option>
           {modelResources.map(resource => (
             <option key={resource.id} value={resource.id}>
               {getResourceOptionLabel(resource)}
@@ -173,14 +173,13 @@ export default function PromptNodeConfigForm({
           ))}
         </select>
         <div style={{ marginTop: 4, fontSize: 12, color: '#666' }}>
-          Resource identity and connection info are managed by the shared
-          resource layer. This node only stores modelResourceId.
+          资源标识与连接信息由共享资源层管理；当前节点仅保存 modelResourceId。
         </div>
       </div>
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>
-          Window Relation
+          窗口关系
         </label>
         <div
           style={{
@@ -193,27 +192,26 @@ export default function PromptNodeConfigForm({
           }}
         >
           <div style={{ marginBottom: 6 }}>
-            Prompt window inheritance/branching is defined by context links on
-            the graph. It is not edited in prompt config.
+            Prompt 窗口的继承/分支由图上的 context links 定义，不在 prompt 配置中编辑。
           </div>
 
           <div style={{ marginBottom: 4 }}>
-            <strong>Mode:</strong> {windowSummary.modeText}
+            <strong>模式：</strong> {windowSummary.modeText}
           </div>
 
           <div style={{ marginBottom: 4 }}>
-            <strong>Source Prompt:</strong> {windowSummary.sourceText}
+            <strong>来源 Prompt：</strong> {windowSummary.sourceText}
           </div>
 
           <div>
-            <strong>Context Targets:</strong> {windowSummary.targetsText}
+            <strong>上下文目标：</strong> {windowSummary.targetsText}
           </div>
         </div>
       </div>
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>
-          Derived Target Inputs
+          派生目标输入
         </label>
 
         {derivedTargetInputs.length === 0 ? (
@@ -227,7 +225,7 @@ export default function PromptNodeConfigForm({
               background: '#f8fafc',
             }}
           >
-            No target inputs are currently derived from inbound data edges.
+            当前没有从入边数据连线推导出的目标输入。
           </div>
         ) : (
           <div
@@ -251,7 +249,7 @@ export default function PromptNodeConfigForm({
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>
-          Inbound Bindings (Authoritative)
+          入边绑定（权威）
         </label>
 
         {inboundBindings.length === 0 ? (
@@ -265,7 +263,7 @@ export default function PromptNodeConfigForm({
               background: '#f8fafc',
             }}
           >
-            No inbound bindings yet
+            暂无入边绑定
           </div>
         ) : (
           <div
@@ -292,7 +290,7 @@ export default function PromptNodeConfigForm({
 
       <div style={{ marginBottom: 12 }}>
         <label style={{ display: 'block', marginBottom: 6 }}>
-          Prompt Variable Hints (Hint Only)
+          Prompt 变量提示（仅提示）
         </label>
 
         <div
@@ -306,12 +304,11 @@ export default function PromptNodeConfigForm({
           }}
         >
           <div style={{ marginBottom: 6 }}>
-            These names are parsed from prompt text only. The system only
-            recognizes inbound bindings from edges.
+            这些名称仅从提示词文本解析得到。系统只识别由边定义的入边绑定。
           </div>
 
           {promptVariableHints.length === 0 ? (
-            <div>No variable hints parsed from prompt text.</div>
+            <div>未从提示词文本解析到变量提示。</div>
           ) : (
             promptVariableHints.map(name => (
               <div key={name} style={{ marginBottom: 4 }}>
@@ -324,12 +321,12 @@ export default function PromptNodeConfigForm({
 
       <div style={{ marginBottom: 12 }}>
         <div style={{ marginBottom: 6 }}>
-          <strong>LLM Runtime Params</strong>
+          <strong>LLM 运行参数</strong>
         </div>
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>
-            Temperature
+            温度
           </label>
           <input
             type='number'
@@ -344,7 +341,7 @@ export default function PromptNodeConfigForm({
         </div>
 
         <div style={{ marginBottom: 8 }}>
-          <label style={{ display: 'block', marginBottom: 4 }}>Timeout</label>
+          <label style={{ display: 'block', marginBottom: 4 }}>超时</label>
           <input
             type='number'
             value={config.llm.timeout}
@@ -356,7 +353,7 @@ export default function PromptNodeConfigForm({
 
         <div style={{ marginBottom: 8 }}>
           <label style={{ display: 'block', marginBottom: 4 }}>
-            Max Retries
+            最大重试次数
           </label>
           <input
             type='number'

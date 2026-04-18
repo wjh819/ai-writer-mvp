@@ -11,20 +11,20 @@ export function buildPrimaryState(params: {
     if (status === 'running') {
         return {
             primaryState: currentState || {},
-            primaryStateTitle: 'Current Live State',
+            primaryStateTitle: '当前实时状态',
         }
     }
 
     if (status === 'success') {
         return {
             primaryState: finalState || {},
-            primaryStateTitle: 'Final State',
+            primaryStateTitle: '最终状态',
         }
     }
 
     return {
         primaryState: partialState || {},
-        primaryStateTitle: 'Partial State Before Failure',
+        primaryStateTitle: '失败前的部分状态',
     }
 }
 

@@ -93,7 +93,7 @@ export function useSubgraphTestRunnerActions({
     }
 
     if (!result.subgraphTestResult) {
-      feedback.setErrorMessage('Subgraph test failed')
+      feedback.setErrorMessage('子图测试失败')
       return
     }
 
@@ -101,14 +101,14 @@ export function useSubgraphTestRunnerActions({
     clearSubgraphTestResultStale(selectedNode.id)
 
     if (result.subgraphTestResult.status === 'failed') {
-      feedback.setInfoMessage('Subgraph test finished with failure state.')
+      feedback.setInfoMessage('子图测试已结束，结果为失败状态。')
       feedback.setErrorMessage(
-        result.subgraphTestResult.error_message || 'Subgraph test failed'
+        result.subgraphTestResult.error_message || '子图测试失败'
       )
       return
     }
 
-    feedback.setInfoMessage('Subgraph test completed.')
+    feedback.setInfoMessage('子图测试已完成。')
   }, [
     isNodeTestLocked,
     feedback,
@@ -139,7 +139,7 @@ export function useSubgraphTestRunnerActions({
     clearSubgraphTestResultStale(selectedNode.id)
     feedback.clear()
     clearPageError()
-    feedback.setInfoMessage('Current cached subgraph test result was cleared.')
+    feedback.setInfoMessage('已清除当前缓存的子图测试结果。')
   }, [
     isNodeTestLocked,
     feedback,
@@ -160,7 +160,7 @@ export function useSubgraphTestRunnerActions({
     feedback.clear()
     clearPageError()
     feedback.setInfoMessage(
-      'Reusable subgraph test state was cleared. Cached subgraph test results were kept.'
+      '已清空可复用的子图测试状态，缓存的子图测试结果已保留。'
     )
   }, [
     isNodeTestLocked,

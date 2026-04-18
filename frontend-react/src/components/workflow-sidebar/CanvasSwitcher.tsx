@@ -47,20 +47,20 @@ export default function CanvasSwitcher({
             </div>
 
             <div style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
-                Active: {activeCanvasId || '(none)'}
+                当前生效：{activeCanvasId || '（无）'}
             </div>
 
             {isShowingCanvasSwitchingState ? (
                 <div style={{ fontSize: 12, color: '#1d4ed8', marginBottom: 12 }}>
-                    Requested: {requestedCanvasId}
+                    目标切换：{requestedCanvasId}
                 </div>
             ) : isGraphEditingLocked ? (
                 <div style={{ fontSize: 12, color: '#92400e', marginBottom: 12 }}>
-                    Live run in progress. Canvas switching is temporarily locked.
+                    实时运行中，暂时无法切换画布。
                 </div>
             ) : (
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
-                    {isSwitchingWorkflow ? 'Loading canvas...' : 'Canvas ready'}
+                    {isSwitchingWorkflow ? '正在加载画布...' : '画布已就绪'}
                 </div>
             )}
         </>

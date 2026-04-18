@@ -42,25 +42,25 @@ export default function CreateResourceForm({
             }}
         >
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 12 }}>
-                Create Model Resource
+                新建模型资源
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Resource ID
+                    资源 ID
                 </label>
                 <input
                     value={draftResourceId}
                     onChange={e => onDraftResourceIdChange(e.target.value)}
                     style={{ width: '100%' }}
-                    placeholder='e.g. writer-fast'
+                    placeholder='例如：writer-fast'
                     disabled={isCreating}
                 />
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Provider
+                    提供方
                 </label>
                 <select
                     value={draftProvider}
@@ -70,19 +70,19 @@ export default function CreateResourceForm({
                     style={{ width: '100%' }}
                     disabled={isCreating}
                 >
-                    <option value='openai_compatible'>OpenAI Compatible</option>
+                    <option value='openai_compatible'>OpenAI 兼容</option>
                 </select>
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Provider Model
+                    提供方模型
                 </label>
                 <input
                     value={draftProviderModel}
                     onChange={e => onDraftProviderModelChange(e.target.value)}
                     style={{ width: '100%' }}
-                    placeholder='e.g. deepseek-chat'
+                    placeholder='例如：deepseek-chat'
                     disabled={isCreating}
                 />
             </div>
@@ -96,20 +96,20 @@ export default function CreateResourceForm({
                     value={draftApiKey}
                     onChange={e => onDraftApiKeyChange(e.target.value)}
                     style={{ width: '100%' }}
-                    placeholder='e.g. sk-xxxx'
+                    placeholder='例如：sk-xxxx'
                     disabled={isCreating}
                 />
             </div>
 
             <div style={{ marginBottom: 10 }}>
                 <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-                    Base URL
+                    基础 URL
                 </label>
                 <input
                     value={draftBaseUrl}
                     onChange={e => onDraftBaseUrlChange(e.target.value)}
                     style={{ width: '100%' }}
-                    placeholder='e.g. https://api.deepseek.com/v1'
+                    placeholder='例如：https://api.deepseek.com/v1'
                     disabled={isCreating}
                 />
             </div>
@@ -121,7 +121,7 @@ export default function CreateResourceForm({
             ) : null}
 
             <button type='button' onClick={onCreate} disabled={isCreating}>
-                {isCreating ? 'Creating...' : 'Create Resource'}
+                {isCreating ? '创建中...' : '创建资源'}
             </button>
         </div>
     )

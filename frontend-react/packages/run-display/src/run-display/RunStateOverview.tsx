@@ -103,7 +103,7 @@ function SummaryKeyList({
         {title} ({keys.length})
       </div>
       {keys.length === 0 ? (
-        <div style={{ fontSize: 12, color: '#64748b' }}>None</div>
+        <div style={{ fontSize: 12, color: '#64748b' }}>无</div>
       ) : (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
           {keys.map(key => (
@@ -148,7 +148,7 @@ function SummaryKeyList({
 export default function RunStateOverview({
   inputState,
   resultState,
-  resultStateTitle = 'Result State',
+  resultStateTitle = '结果状态',
 }: {
   inputState: WorkflowState
   resultState: WorkflowState
@@ -158,7 +158,7 @@ export default function RunStateOverview({
 
   return (
     <>
-      <div style={{ fontWeight: 600, marginBottom: 8 }}>Run State Overview</div>
+      <div style={{ fontWeight: 600, marginBottom: 8 }}>运行状态总览</div>
 
       <div
         style={{
@@ -168,7 +168,7 @@ export default function RunStateOverview({
           marginBottom: 12,
         }}
       >
-        <ValueBlock title='Input State' value={inputState} />
+        <ValueBlock title='输入状态' value={inputState} />
         <ValueBlock title={resultStateTitle} value={resultState} />
       </div>
 
@@ -180,10 +180,10 @@ export default function RunStateOverview({
         }}
       >
         <SummaryKeyList
-          title='New fields (missing before run)'
+          title='新增字段（运行前不存在）'
           keys={overallDiff.addedKeys}
         />
-        <SummaryKeyList title='Updated fields' keys={overallDiff.modifiedKeys} />
+        <SummaryKeyList title='更新字段' keys={overallDiff.modifiedKeys} />
       </div>
     </>
   )

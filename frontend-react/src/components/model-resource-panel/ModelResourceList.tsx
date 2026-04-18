@@ -32,18 +32,18 @@ interface ModelResourceListProps {
 
 function maskApiKey(value: string) {
     if (!value) {
-        return '(empty)'
+        return '（空）'
     }
     if (value.length <= 8) {
-        return '••••••••'
+        return '********'
     }
-    return `${value.slice(0, 4)}••••${value.slice(-4)}`
+    return `${value.slice(0, 4)}****${value.slice(-4)}`
 }
 
 function getProviderLabel(provider: ModelResourceProvider) {
     switch (provider) {
         case 'openai_compatible':
-            return 'OpenAI Compatible'
+            return 'OpenAI 兼容'
         default:
             return provider
     }
@@ -73,7 +73,7 @@ export default function ModelResourceList({
                                               onDeleteResource,
                                           }: ModelResourceListProps) {
     if (resources.length === 0) {
-        return <div style={{ color: '#666', fontSize: 13 }}>No model resources found</div>
+        return <div style={{ color: '#666', fontSize: 13 }}>未找到模型资源</div>
     }
 
     return (
@@ -123,7 +123,7 @@ export default function ModelResourceList({
                                         marginBottom: 6,
                                     }}
                                 >
-                                    <strong>Provider:</strong> {getProviderLabel(resource.provider)}
+                                    <strong>提供方：</strong> {getProviderLabel(resource.provider)}
                                 </div>
 
                                 <div
@@ -134,7 +134,7 @@ export default function ModelResourceList({
                                         marginBottom: 6,
                                     }}
                                 >
-                                    <strong>Model:</strong> {resource.model}
+                                    <strong>模型：</strong> {resource.model}
                                 </div>
 
                                 <div
@@ -145,7 +145,7 @@ export default function ModelResourceList({
                                         marginBottom: 6,
                                     }}
                                 >
-                                    <strong>Base URL:</strong> {resource.base_url}
+                                    <strong>基础 URL：</strong> {resource.base_url}
                                 </div>
 
                                 <div
@@ -156,7 +156,7 @@ export default function ModelResourceList({
                                         marginBottom: 10,
                                     }}
                                 >
-                                    <strong>API Key:</strong> {maskApiKey(resource.api_key)}
+                                    <strong>API Key：</strong> {maskApiKey(resource.api_key)}
                                 </div>
 
                                 {showDeleteError ? (
@@ -172,7 +172,7 @@ export default function ModelResourceList({
                                         onClick={() => onStartEdit(resource)}
                                         disabled={isUpdating || isCreating || !!deletingResourceId}
                                     >
-                                        Edit Resource
+                                        编辑资源
                                     </button>
 
                                     <button
@@ -180,7 +180,7 @@ export default function ModelResourceList({
                                         onClick={() => onDeleteResource(resource.id)}
                                         disabled={isUpdating || isCreating || !!deletingResourceId}
                                     >
-                                        {deletingResourceId === resource.id ? 'Deleting...' : 'Delete'}
+                                        {deletingResourceId === resource.id ? '删除中...' : '删除'}
                                     </button>
                                 </div>
                             </>

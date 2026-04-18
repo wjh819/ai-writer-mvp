@@ -34,12 +34,12 @@ export default function DeleteBlockedDetail({
             {deleteBlockedDetail?.references?.length ? (
                 <div style={{ marginTop: 8 }}>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                        Referenced by workflows
+                        被以下工作流引用
                     </div>
                     <ul style={{ margin: 0, paddingLeft: 18 }}>
                         {deleteBlockedDetail.references.map((item, index) => (
                             <li key={`${item.workflow_name}-${item.node_id}-${index}`}>
-                                {item.workflow_name} · node {item.node_id}
+                                工作流 {item.workflow_name} 的节点 {item.node_id}
                             </li>
                         ))}
                     </ul>
@@ -49,7 +49,7 @@ export default function DeleteBlockedDetail({
             {deleteBlockedDetail?.incomplete_workflows?.length ? (
                 <div style={{ marginTop: 8 }}>
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                        Workflows that could not be scanned reliably
+                        以下工作流未能可靠扫描
                     </div>
                     <ul style={{ margin: 0, paddingLeft: 18 }}>
                         {deleteBlockedDetail.incomplete_workflows.map((item, index) => (

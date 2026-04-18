@@ -6,29 +6,29 @@ interface RunResultHeaderProps {
 
 function getPanelTitle(displayRun: DisplayRun | null): string {
   if (!displayRun) {
-    return 'Run Result'
+    return '运行结果'
   }
 
   if (displayRun.runScope === 'subgraph') {
-    return 'Node Test Result'
+    return '节点测试结果'
   }
 
   if (displayRun.isLive) {
-    return 'Live Run'
+    return '实时运行'
   }
 
-  return 'Run Result'
+  return '运行结果'
 }
 
 function getLiveMessage(displayRun: DisplayRun): string {
-  const lines = ['Live run is still in progress.']
+  const lines = ['实时运行仍在进行中。']
 
   if (displayRun.activeNodeId) {
-    lines.push(`Current active node: ${displayRun.activeNodeId}`)
+    lines.push(`当前活动节点：${displayRun.activeNodeId}`)
   }
 
   if (displayRun.runId) {
-    lines.push(`Run ID: ${displayRun.runId}`)
+    lines.push(`运行 ID：${displayRun.runId}`)
   }
 
   return lines.join('\n')
@@ -36,10 +36,10 @@ function getLiveMessage(displayRun: DisplayRun): string {
 
 function getStaleMessage(displayRun: DisplayRun): string {
   if (displayRun.runScope === 'subgraph') {
-    return 'This node test result belongs to an older semantic version of the current workflow graph. It is kept for reference only.'
+    return '该节点测试结果属于当前工作流图的较旧语义版本，仅供参考。'
   }
 
-  return 'This run result belongs to an older semantic version of the current workflow graph. It is kept for reference only.'
+  return '该运行结果属于当前工作流图的较旧语义版本，仅供参考。'
 }
 
 export default function RunResultHeader({
@@ -85,24 +85,24 @@ export default function RunResultHeader({
       {displayRun ? (
         <>
           <div style={{ marginBottom: 8 }}>
-            <strong>Status:</strong> {displayRun.status || '-'}
+            <strong>状态：</strong> {displayRun.status || '-'}
           </div>
 
           <div style={{ marginBottom: 8 }}>
-            <strong>Scope:</strong> {displayRun.runScope || '-'}
+            <strong>范围：</strong> {displayRun.runScope || '-'}
           </div>
         </>
       ) : null}
 
       {displayRun?.runId ? (
         <div style={{ marginBottom: 8 }}>
-          <strong>Run ID:</strong> {displayRun.runId}
+          <strong>运行 ID：</strong> {displayRun.runId}
         </div>
       ) : null}
 
       {displayRun?.isLive && displayRun.activeNodeId ? (
         <div style={{ marginBottom: 8 }}>
-          <strong>Active Node:</strong> {displayRun.activeNodeId}
+          <strong>活动节点：</strong> {displayRun.activeNodeId}
         </div>
       ) : null}
     </>

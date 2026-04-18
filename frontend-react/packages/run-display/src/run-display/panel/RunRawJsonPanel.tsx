@@ -9,7 +9,7 @@ export default function RunRawJsonPanel({
                                         }: RunRawJsonPanelProps) {
     return (
         <details style={{ marginTop: 12 }}>
-            <summary style={{ cursor: 'pointer' }}>Raw JSON</summary>
+            <summary style={{ cursor: 'pointer' }}>原始 JSON</summary>
             <div style={{ marginTop: 8 }}>
                 <PrettyJson value={value} />
             </div>

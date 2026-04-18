@@ -72,19 +72,19 @@ export function useModelResourcePanelActions({
     const nextBaseUrl = draftBaseUrl.trim()
 
     if (!nextId) {
-      setCreateErrorMessage('Resource ID is required')
+      setCreateErrorMessage('资源 ID 为必填项')
       return
     }
     if (!nextModel) {
-      setCreateErrorMessage('Provider model is required')
+      setCreateErrorMessage('提供方模型为必填项')
       return
     }
     if (!nextApiKey) {
-      setCreateErrorMessage('API key is required')
+      setCreateErrorMessage('API Key 为必填项')
       return
     }
     if (!nextBaseUrl) {
-      setCreateErrorMessage('Base URL is required')
+      setCreateErrorMessage('基础 URL 为必填项')
       return
     }
 
@@ -109,7 +109,7 @@ export function useModelResourcePanelActions({
       setDraftBaseUrl(DEFAULT_BASE_URL)
     } catch (error) {
       setCreateErrorMessage(
-        extractErrorMessage(error, 'Failed to create model resource')
+        extractErrorMessage(error, '创建模型资源失败')
       )
     } finally {
       setIsCreating(false)
@@ -140,11 +140,11 @@ export function useModelResourcePanelActions({
     const nextBaseUrl = draftEditBaseUrl.trim()
 
     if (!nextModel) {
-      setEditErrorMessage('Provider model is required')
+      setEditErrorMessage('提供方模型为必填项')
       return
     }
     if (!nextBaseUrl) {
-      setEditErrorMessage('Base URL is required')
+      setEditErrorMessage('基础 URL 为必填项')
       return
     }
 
@@ -169,7 +169,7 @@ export function useModelResourcePanelActions({
       setDraftEditBaseUrl('')
     } catch (error) {
       setEditErrorMessage(
-        extractErrorMessage(error, 'Failed to update model resource')
+        extractErrorMessage(error, '更新模型资源失败')
       )
     } finally {
       setIsUpdating(false)
@@ -194,7 +194,7 @@ export function useModelResourcePanelActions({
       setDeleteErrorResourceId(resourceId)
       setDeleteBlockedDetail(extractDeleteBlockedDetail(error))
       setDeleteErrorMessage(
-        extractErrorMessage(error, 'Failed to delete model resource')
+        extractErrorMessage(error, '删除模型资源失败')
       )
     } finally {
       setDeletingResourceId('')

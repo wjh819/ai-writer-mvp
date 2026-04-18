@@ -13,8 +13,8 @@ describe('RunResultPanel', () => {
   it('renders empty state when no run result is available', () => {
     render(<RunResultPanel displayRun={null} />)
 
-    expect(screen.getByText('Run Result')).toBeTruthy()
-    expect(screen.getByText('No run result yet')).toBeTruthy()
+    expect(screen.getByText('运行结果')).toBeTruthy()
+    expect(screen.getByText('暂无运行结果')).toBeTruthy()
   })
 
   it('renders mapped run summary and steps as a smoke check', () => {
@@ -45,11 +45,11 @@ describe('RunResultPanel', () => {
 
     render(<RunResultPanel displayRun={displayRun} />)
 
-    expect(screen.getByText('Status:')).toBeTruthy()
+    expect(screen.getByText('状态：')).toBeTruthy()
     expect(screen.getAllByText('failed').length).toBeGreaterThan(0)
-    expect(screen.getByText('Run Failure Summary')).toBeTruthy()
-    expect(screen.getByText('Execution Steps')).toBeTruthy()
-    expect(screen.getByText('Run State Overview')).toBeTruthy()
+    expect(screen.getByText('运行失败摘要')).toBeTruthy()
+    expect(screen.getByText('执行步骤')).toBeTruthy()
+    expect(screen.getByText('运行状态总览')).toBeTruthy()
   })
 })
 

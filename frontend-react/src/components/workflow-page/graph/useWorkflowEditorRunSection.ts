@@ -63,7 +63,7 @@ export function useWorkflowEditorRunSection({
     const result = await startLiveRun(nodes, edges, contextLinks, runInputs)
 
     if (!result.liveRunStart) {
-      setPageErrorMessage(result.errorMessage || 'Live run failed to start')
+      setPageErrorMessage(result.errorMessage || '实时运行启动失败')
     }
   }, [
     startLiveRun,
@@ -77,7 +77,7 @@ export function useWorkflowEditorRunSection({
   const handleRunBatchWorkflow = useCallback(async () => {
     if (inputNodes.length !== 1) {
       setPageErrorMessage(
-        'Batch run currently requires exactly one input node.'
+        '当前批处理运行要求且仅允许一个输入节点。'
       )
       return
     }
@@ -90,13 +90,13 @@ export function useWorkflowEditorRunSection({
 
     if (!inputKey) {
       setPageErrorMessage(
-        'The single input node must declare a non-empty inputKey.'
+        '该唯一输入节点必须声明非空的 inputKey。'
       )
       return
     }
 
     if (!inputValues.length) {
-      setPageErrorMessage('Batch input values must not be empty.')
+      setPageErrorMessage('批处理输入值不能为空。')
       return
     }
 
@@ -110,7 +110,7 @@ export function useWorkflowEditorRunSection({
     )
 
     if (!result?.batchSummary) {
-      setPageErrorMessage(result?.errorMessage || 'Batch run failed to start')
+      setPageErrorMessage(result?.errorMessage || '批处理运行启动失败')
     }
   }, [
     inputNodes,

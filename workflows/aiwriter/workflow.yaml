@@ -1,0 +1,171 @@
+nodes:
+  prompt_node_1:
+    type: prompt
+    position:
+      x: -2442.6503643788546
+      y: -349.4349742344374
+    outputs:
+    - name: ai_role
+      stateKey: state_ai_role
+    comment: A：自动生成 {AI_ROLE}
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  input_node_1:
+    type: input
+    position:
+      x: -2697.972827770376
+      y: -749.2586643877817
+    outputs:
+    - name: value
+      stateKey: out_input_node_1
+    inputKey: input_node_1
+    defaultValue: ''
+  prompt_node_2:
+    type: prompt
+    position:
+      x: -2041.5818588810873
+      y: -397.6967207114957
+    outputs:
+    - name: safe_test_targets
+      stateKey: state_safe_test_targets
+    comment: B：自动生成 {SAFE_TEST_TARGETS}
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  prompt_node_3:
+    type: prompt
+    position:
+      x: -1610.8215896215745
+      y: -444.5319562240736
+    outputs:
+    - name: ability_analysis
+      stateKey: state_ability_analysis
+    comment: 节点定位提示词
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  prompt_node_4:
+    type: prompt
+    position:
+      x: -1151.7648515870674
+      y: -441.741700638991
+    outputs:
+    - name: course_skeleton
+      stateKey: state_course_skeleton
+    comment: 课程结构重组
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  prompt_node_5:
+    type: prompt
+    position:
+      x: -2593.6515683946627
+      y: 87.25545140044346
+    outputs:
+    - name: expanded_article
+      stateKey: state_expanded_article
+    comment: 结构工程扩写层
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  prompt_node_6:
+    type: prompt
+    position:
+      x: -2045.0
+      y: 108.0
+    outputs:
+    - name: audited_article
+      stateKey: state_audited_article
+    comment: 技术准确性与权威核验层
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  prompt_node_8:
+    type: prompt
+    position:
+      x: -1566.0
+      y: 246.0
+    outputs:
+    - name: final_article
+      stateKey: state_final_article
+    comment: 课程风格统一与工业化终审层
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 1200
+      max_retries: 2
+  output_node_1:
+    type: output
+    position:
+      x: -696.0
+      y: 312.0
+    outputs:
+    - name: result
+      stateKey: out_output_node_1
+edges:
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_1
+  targetInput: topic
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_2
+  targetInput: topic
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_3
+  targetInput: topic
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_4
+  targetInput: topic
+- source: prompt_node_3
+  sourceOutput: ability_analysis
+  target: prompt_node_4
+  targetInput: ability_analysis
+- source: input_node_1
+  sourceOutput: value
+  target: prompt_node_5
+  targetInput: topic
+- source: prompt_node_1
+  sourceOutput: ai_role
+  target: prompt_node_5
+  targetInput: ai_role
+- source: prompt_node_2
+  sourceOutput: safe_test_targets
+  target: prompt_node_5
+  targetInput: safe_test_targets
+- source: prompt_node_3
+  sourceOutput: ability_analysis
+  target: prompt_node_5
+  targetInput: ability_analysis
+- source: prompt_node_4
+  sourceOutput: course_skeleton
+  target: prompt_node_5
+  targetInput: course_skeleton
+- source: prompt_node_5
+  sourceOutput: expanded_article
+  target: prompt_node_6
+  targetInput: expanded_article
+- source: prompt_node_8
+  sourceOutput: final_article
+  target: output_node_1
+  targetInput: final_article
+- source: prompt_node_6
+  sourceOutput: audited_article
+  target: prompt_node_8
+  targetInput: audited_article
+contextLinks: []

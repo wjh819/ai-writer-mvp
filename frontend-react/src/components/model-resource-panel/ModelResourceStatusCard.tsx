@@ -8,13 +8,13 @@ interface ModelResourceStatusCardProps {
 function getStatusText(status: ModelResourceConfigHealth['status']) {
     switch (status) {
         case 'file_missing':
-            return 'Config file is missing'
+            return '配置文件缺失'
         case 'file_invalid':
-            return 'Config file is invalid'
+            return '配置文件无效'
         case 'file_empty':
-            return 'Config file is empty'
+            return '配置文件为空'
         case 'file_active':
-            return 'Config file is active'
+            return '配置文件已启用'
         default:
             return status
     }
@@ -35,7 +35,7 @@ export default function ModelResourceStatusCard({
             }}
         >
             <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 8 }}>
-                Resource Status
+                资源状态
             </div>
 
             {statusErrorMessage ? (
@@ -43,15 +43,15 @@ export default function ModelResourceStatusCard({
             ) : modelResourceStatus ? (
                 <>
                     <div style={{ fontSize: 12, marginBottom: 6 }}>
-                        <strong>Status:</strong> {getStatusText(modelResourceStatus.status)}
+                        <strong>状态：</strong> {getStatusText(modelResourceStatus.status)}
                     </div>
                     <div style={{ fontSize: 12, color: '#666', wordBreak: 'break-all' }}>
-                        <strong>Config Path:</strong> {modelResourceStatus.config_path}
+                        <strong>配置路径：</strong> {modelResourceStatus.config_path}
                     </div>
                 </>
             ) : (
                 <div style={{ fontSize: 12, color: '#666' }}>
-                    Loading resource status...
+                    正在加载资源状态...
                 </div>
             )}
         </div>

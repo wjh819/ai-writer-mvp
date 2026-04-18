@@ -36,7 +36,7 @@ export default function WorkflowPageBanners({
                         whiteSpace: 'pre-wrap',
                     }}
                 >
-                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Live Run</div>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>实时运行</div>
                     <div>{liveRunStatusMessage}</div>
                 </div>
             )}
@@ -54,7 +54,7 @@ export default function WorkflowPageBanners({
                         whiteSpace: 'pre-wrap',
                     }}
                 >
-                    <div style={{ fontWeight: 600, marginBottom: 4 }}>Canvas Status</div>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>画布状态</div>
                     <div>{workflowStatusMessage}</div>
                 </div>
             )}
@@ -72,7 +72,7 @@ export default function WorkflowPageBanners({
                         whiteSpace: 'pre-wrap',
                     }}
                 >
-                    <div style={{ fontWeight: 600, marginBottom: 4 }}>New Canvas</div>
+                    <div style={{ fontWeight: 600, marginBottom: 4 }}>新建画布</div>
                     <div>{temporaryCanvasStatusMessage}</div>
                 </div>
             )}
@@ -91,7 +91,7 @@ export default function WorkflowPageBanners({
                     }}
                 >
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                        Workflow Error
+                        工作流错误
                     </div>
                     <div>{topLevelErrorMessage}</div>
                 </div>
@@ -111,7 +111,7 @@ export default function WorkflowPageBanners({
                     }}
                 >
                     <div style={{ fontWeight: 600, marginBottom: 4 }}>
-                        Workflow Warnings
+                        工作流警告
                     </div>
                     <div>{workflowWarningsMessage}</div>
                 </div>
@@ -135,7 +135,7 @@ export default function WorkflowPageBanners({
                     }}
                 >
                     <div>
-                        <div style={{ fontWeight: 600, marginBottom: 4 }}>Draft Status</div>
+                        <div style={{ fontWeight: 600, marginBottom: 4 }}>草稿状态</div>
                         <div>{draftStatusMessage}</div>
                     </div>
 

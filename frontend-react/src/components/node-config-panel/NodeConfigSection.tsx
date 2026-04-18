@@ -23,7 +23,7 @@ export default function NodeConfigSection({
         <>
             <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
-                    Node ID
+                    节点 ID
                 </div>
                 <div
                     style={{
@@ -42,7 +42,7 @@ export default function NodeConfigSection({
 
             <div style={{ marginBottom: 16 }}>
                 <div style={{ fontSize: 12, color: '#666', marginBottom: 4 }}>
-                    Node Type
+                    节点类型
                 </div>
                 <div
                     style={{
@@ -61,7 +61,7 @@ export default function NodeConfigSection({
             {configType === 'input' && onInputKeyChange ? (
                 <div style={{ marginBottom: 16 }}>
                     <label style={{ display: 'block', marginBottom: 4 }}>
-                        Input Key
+                        输入键
                     </label>
                     <input
                         value={inputKey}
@@ -74,7 +74,7 @@ export default function NodeConfigSection({
 
             <div style={{ marginBottom: 16 }}>
                 <label style={{ display: 'block', marginBottom: 4 }}>
-                    Comment
+                    备注
                 </label>
                 <textarea
                     value={comment}

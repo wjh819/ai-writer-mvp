@@ -62,7 +62,7 @@ export default function RunStepCardBase({
   const failureText = step.errorDetail || step.errorMessage || ''
   const failureSummary = failureText
     ? failureText.split('\n')[0]
-    : 'Step execution failed'
+    : '步骤执行失败'
 
   const writebackCount = step.writeback?.items?.length || 0
 
@@ -96,10 +96,10 @@ export default function RunStepCardBase({
         }
 
   const outputTitle = isAggregatedOutputStep
-    ? 'Aggregated Output'
+    ? '聚合输出'
     : step.type === 'prompt' && writebackCount > 1
-      ? 'Raw Output'
-      : 'Output'
+      ? '原始输出'
+      : '输出'
 
   const hasWindowInfo =
     step.type === 'prompt' &&
@@ -107,11 +107,11 @@ export default function RunStepCardBase({
 
   const windowModeLabel =
     step.windowMode === 'new_window'
-      ? 'New Window'
+      ? '新窗口'
       : step.windowMode === 'continue'
-        ? 'Continue'
+        ? '延续'
         : step.windowMode === 'branch'
-          ? 'Branch'
+          ? '分支'
           : '-'
 
   return (
@@ -149,7 +149,7 @@ export default function RunStepCardBase({
       >
         <div>
           <div style={{ fontSize: 12, color: '#64748b', marginBottom: 2 }}>
-            Step {step.index + 1}
+            步骤 {step.index + 1}
           </div>
           <strong>{step.node}</strong>
         </div>
@@ -180,7 +180,7 @@ export default function RunStepCardBase({
             color: '#1d4ed8',
           }}
         >
-          This step is currently executing. Intermediate output may not be available yet.
+          当前步骤正在执行，中间输出可能暂不可用。
         </div>
       ) : null}
 
@@ -192,7 +192,7 @@ export default function RunStepCardBase({
   }}
 >
   <div>
-    <strong>type:</strong> {step.type}
+    <strong>类型：</strong> {step.type}
   </div>
 </div>
 
@@ -209,13 +209,13 @@ export default function RunStepCardBase({
           }}
         >
           <div style={{ marginBottom: 4 }}>
-            <strong>started:</strong> {step.startedAt || '-'}
+            <strong>开始：</strong> {step.startedAt || '-'}
           </div>
           <div style={{ marginBottom: 4 }}>
-            <strong>finished:</strong> {step.finishedAt || '-'}
+            <strong>结束：</strong> {step.finishedAt || '-'}
           </div>
           <div>
-            <strong>duration:</strong> {formatDuration(step.durationMs)}
+            <strong>耗时：</strong> {formatDuration(step.durationMs)}
           </div>
         </div>
       )}
@@ -233,26 +233,26 @@ export default function RunStepCardBase({
           }}
         >
           <div style={{ fontWeight: 600, marginBottom: 6 }}>
-            Conversation Window
+            会话窗口
           </div>
 
           <div style={{ marginBottom: 4 }}>
-            <strong>mode:</strong> {windowModeLabel}
+            <strong>模式：</strong> {windowModeLabel}
           </div>
 
           {step.windowSourceNodeId ? (
             <div style={{ marginBottom: 4 }}>
-              <strong>source prompt node:</strong> {step.windowSourceNodeId}
+              <strong>来源提示节点：</strong> {step.windowSourceNodeId}
             </div>
           ) : null}
 
           <div style={{ marginBottom: 4 }}>
-            <strong>window id:</strong> {step.windowId || '-'}
+            <strong>窗口 ID：</strong> {step.windowId || '-'}
           </div>
 
           {step.windowParentId ? (
             <div>
-              <strong>parent window id:</strong> {step.windowParentId}
+              <strong>父窗口 ID：</strong> {step.windowParentId}
             </div>
           ) : null}
         </div>
@@ -263,12 +263,12 @@ export default function RunStepCardBase({
       {!isAggregatedOutputStep && (
         <>
           {step.inputs ? (
-            <ValueBlock title='Inputs' value={step.inputs} />
+            <ValueBlock title='输入' value={step.inputs} />
           ) : (
             <div style={{ marginBottom: 8 }}>
-              <div style={{ fontWeight: 600, marginBottom: 4 }}>Inputs</div>
+              <div style={{ fontWeight: 600, marginBottom: 4 }}>输入</div>
               <div style={{ fontSize: 12, color: '#64748b' }}>
-                No structured inputs recorded for this step type.
+                当前步骤类型未记录结构化输入。
               </div>
             </div>
           )}
@@ -287,14 +287,13 @@ export default function RunStepCardBase({
             color: '#475569',
           }}
         >
-          This output node aggregated multiple inbound bindings into one object.
-          The separate Inputs block is hidden because it is identical to the final
-          aggregated output.
+          该输出节点将多个入站绑定聚合为一个对象。由于与最终聚合输出一致，
+          已隐藏单独的输入区块。
         </div>
       )}
 
       {step.renderedPrompt && (
-        <ValueBlock title='Rendered Prompt' value={step.renderedPrompt} />
+        <ValueBlock title='渲染后提示词' value={step.renderedPrompt} />
       )}
 
       {isRunning ? (
@@ -309,7 +308,7 @@ export default function RunStepCardBase({
             color: '#1d4ed8',
           }}
         >
-          Step is still running. Final output will appear after completion.
+          步骤仍在运行，完成后将显示最终输出。
         </div>
       ) : isFailed ? (
         <>
@@ -324,12 +323,12 @@ export default function RunStepCardBase({
               color: '#991b1b',
             }}
           >
-            <div style={{ fontWeight: 600, marginBottom: 4 }}>Failure Summary</div>
+            <div style={{ fontWeight: 600, marginBottom: 4 }}>失败摘要</div>
             <div>{failureSummary}</div>
           </div>
 
           <ValueBlock
-            title='Failure Detail'
+            title='失败详情'
             value={failureText}
             collapsed={false}
           />

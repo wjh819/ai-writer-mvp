@@ -137,35 +137,35 @@ export function useWorkflowEditorDisplayState({
     }
 
     if (pageErrorMessage) {
-      return 'Current canvas still contains unsaved draft changes. Save again after fixing errors, or revert to the last saved canvas.'
+      return '当前画布仍有未保存的草稿改动。请先修复错误再保存，或回退到最近一次已保存版本。'
     }
 
-    return 'Current canvas contains unsaved draft changes.'
+    return '当前画布包含未保存的草稿改动。'
   }, [isGraphDirty, pageErrorMessage])
 
   const activeRunStatusMessage = useMemo(() => {
     if (isLiveRunActive) {
       if (!activeLiveRunSnapshot) {
-        return 'Live run is starting...'
+        return '实时运行正在启动...'
       }
 
       const activeNodeId = trim(activeLiveRunSnapshot.active_node_id)
       return activeNodeId
-        ? `Live run is in progress. Active node: ${activeNodeId}`
-        : 'Live run is in progress.'
+        ? `实时运行进行中。当前活跃节点：${activeNodeId}`
+        : '实时运行进行中。'
     }
 
     if (batchSummary) {
       const completedCount =
         batchSummary.succeeded + batchSummary.failed + batchSummary.cancelled
 
-      const staleSuffix = isBatchResultStale ? ' (stale)' : ''
+      const staleSuffix = isBatchResultStale ? '（已过期）' : ''
 
       if (batchSummary.status === 'running' && isBatchCancelRequested) {
-        return `Batch cancellation requested. Running items will finish naturally. Completed ${completedCount} / ${batchSummary.total}.${staleSuffix}`
+        return `已请求取消批处理。正在运行的条目会自然完成。已完成 ${completedCount} / ${batchSummary.total}。${staleSuffix}`
       }
 
-      return `Batch run status: ${batchSummary.status}. Completed ${completedCount} / ${batchSummary.total}.${staleSuffix}`
+      return `批处理状态：${batchSummary.status}。已完成 ${completedCount} / ${batchSummary.total}。${staleSuffix}`
     }
 
     return ''

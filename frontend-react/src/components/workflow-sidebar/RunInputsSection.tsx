@@ -29,12 +29,12 @@ export default function RunInputsSection({
                         whiteSpace: 'pre-wrap',
                     }}
                 >
-                    Live run in progress. Run inputs are temporarily locked.
+                    实时运行中，运行输入已暂时锁定。
                 </div>
             ) : null}
 
             {inputNodes.length === 0 ? (
-                <div style={{ color: '#666', fontSize: 13 }}>No input nodes found</div>
+                <div style={{ color: '#666', fontSize: 13 }}>未找到输入节点</div>
             ) : (
                 inputNodes.map(node => {
                     const key = getRunInputKey(node)

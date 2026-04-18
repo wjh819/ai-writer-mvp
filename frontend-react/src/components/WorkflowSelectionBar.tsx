@@ -107,10 +107,10 @@ export default function WorkflowSelectionBar({
       ) : (
         <span style={{ color: '#666' }}>
           {isLoadingWorkflow
-            ? 'Loading...'
+            ? '加载中...'
             : isGraphEditingLocked
-              ? 'Live run is active. Graph editing is locked.'
-              : 'No node or edge selected. Click a purple context edge to switch continue / branch.'}
+              ? '实时运行中，图编辑已锁定。'
+              : '当前未选中节点或连线。点击紫色上下文连线可切换 continue / branch。'}
         </span>
       )}
     </div>

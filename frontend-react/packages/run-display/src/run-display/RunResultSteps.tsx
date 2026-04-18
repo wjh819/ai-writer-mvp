@@ -29,11 +29,11 @@ export default function RunResultSteps({
   return (
     <>
       <div style={{ marginBottom: 8 }}>
-        <strong>Execution Steps</strong>
+        <strong>执行步骤</strong>
       </div>
 
       {steps.length === 0 ? (
-        <div style={{ color: '#666' }}>No steps returned</div>
+        <div style={{ color: '#666' }}>未返回步骤</div>
       ) : (
         <div style={{ position: 'relative', paddingLeft: 12 }}>
           <div

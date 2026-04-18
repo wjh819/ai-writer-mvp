@@ -1,0 +1,78 @@
+nodes:
+  input_node_1:
+    type: input
+    position:
+      x: -807.5371566584024
+      y: -222.5079096314745
+    outputs:
+    - name: result
+      stateKey: state_topic
+    comment: 测试主题输入
+    inputKey: topic
+    defaultValue: ''
+  prompt_node_1:
+    type: prompt
+    position:
+      x: -2274.0922491450083
+      y: 30.736655199405448
+    outputs:
+    - name: title
+      stateKey: state_title
+    - name: outline
+      stateKey: state_outline
+    - name: keywords
+      stateKey: state_keywords
+    comment: 单节点多输出测试
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 120
+      max_retries: 2
+  output_node_1:
+    type: output
+    position:
+      x: 163.0980665910207
+      y: 1048.7807028576483
+    outputs:
+    - name: result
+      stateKey: final_payload
+    comment: 聚合多输出结果
+  prompt_node_2:
+    type: prompt
+    position:
+      x: -413.84971953362225
+      y: 219.97032837484937
+    outputs:
+    - name: result
+      stateKey: out_prompt_node_2
+    modelResourceId: '1'
+    llm:
+      temperature: 0.2
+      timeout: 120
+      max_retries: 2
+edges:
+- source: prompt_node_1
+  sourceOutput: title
+  target: output_node_1
+  targetInput: title
+- source: prompt_node_1
+  sourceOutput: outline
+  target: output_node_1
+  targetInput: outline
+- source: prompt_node_1
+  sourceOutput: keywords
+  target: output_node_1
+  targetInput: keywords
+- source: input_node_1
+  sourceOutput: result
+  target: prompt_node_1
+  targetInput: topic_text
+- source: input_node_1
+  sourceOutput: result
+  target: prompt_node_2
+  targetInput: a1
+contextLinks:
+- id: ctx-1775868737606-c94mwo
+  source: prompt_node_1
+  target: prompt_node_2
+  mode: continue

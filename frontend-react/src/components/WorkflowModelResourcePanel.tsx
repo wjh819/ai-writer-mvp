@@ -70,8 +70,8 @@ export default function WorkflowModelResourcePanel({
 
     return (
         <ModelResourcePanelShell
-            title='Model Resources'
-            subtitle='File-managed shared model resources.'
+            title='模型资源'
+            subtitle='由文件管理的共享模型资源。'
             onClose={onClose}
         >
             <CreateResourceForm

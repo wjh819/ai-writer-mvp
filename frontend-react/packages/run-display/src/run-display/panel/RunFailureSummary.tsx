@@ -7,8 +7,8 @@ interface RunFailureSummaryProps {
 
 function getFailureSummaryTitle(displayRun: DisplayRun): string {
     return displayRun.runScope === 'subgraph'
-        ? 'Node Test Failure Summary'
-        : 'Run Failure Summary'
+        ? '节点测试失败摘要'
+        : '运行失败摘要'
 }
 
 export default function RunFailureSummary({
@@ -35,12 +35,12 @@ export default function RunFailureSummary({
             </div>
 
             <div style={{ marginBottom: 4 }}>
-                <strong>Type:</strong> {displayRun.failureInfo.typeLabel}
+                <strong>类型：</strong> {displayRun.failureInfo.typeLabel}
             </div>
 
             {displayRun.failureInfo.failedNode ? (
                 <div style={{ marginBottom: 4 }}>
-                    <strong>Failed step:</strong> {displayRun.failureInfo.failedNode}
+                    <strong>失败步骤：</strong> {displayRun.failureInfo.failedNode}
                 </div>
             ) : null}
 
@@ -48,7 +48,7 @@ export default function RunFailureSummary({
 
             {displayRun.failureInfo.detail ? (
                 <ValueBlock
-                    title='Error Detail'
+                    title='错误详情'
                     value={displayRun.failureInfo.detail}
                     collapsed={false}
                 />

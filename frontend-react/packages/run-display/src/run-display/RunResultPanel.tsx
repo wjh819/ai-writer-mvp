@@ -40,7 +40,7 @@ export default function RunResultPanel({
         >
             <RunResultHeader displayRun={displayRun} />
 
-            {!displayRun ? <div style={{ color: '#666' }}>No run result yet</div> : null}
+            {!displayRun ? <div style={{ color: '#666' }}>暂无运行结果</div> : null}
 
             {displayRun ? (
                 <>

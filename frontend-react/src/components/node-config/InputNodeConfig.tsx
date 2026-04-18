@@ -37,7 +37,7 @@ export default function InputNodeConfigForm({
   return (
     <div style={{ marginBottom: 12 }}>
       <label style={{ display: 'block', fontSize: 12, marginBottom: 4 }}>
-        Default Value
+        默认值
       </label>
       <input
         value={config.defaultValue}
@@ -51,7 +51,7 @@ export default function InputNodeConfigForm({
         style={{ width: '100%' }}
       />
       <div style={{ fontSize: 12, color: '#666', marginTop: 4 }}>
-        Used only when direct run request.state does not provide this inputKey.
+        仅当 direct run 的 request.state 未提供该 inputKey 时使用。
       </div>
     </div>
   )

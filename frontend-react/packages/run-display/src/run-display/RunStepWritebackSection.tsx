@@ -23,7 +23,7 @@ export default function RunStepWritebackSection({
       }}
     >
       <div style={{ fontWeight: 600, marginBottom: 8 }}>
-        State Writeback
+        状态回写
         {writeback.items.length > 1 ? ` (${writeback.items.length})` : ''}
       </div>
 
@@ -39,7 +39,7 @@ export default function RunStepWritebackSection({
           }}
         >
           <div style={{ marginBottom: 8, fontSize: 13 }}>
-            <strong>key:</strong> {item.key}
+            <strong>键：</strong> {item.key}
           </div>
 
           <div
@@ -49,8 +49,8 @@ export default function RunStepWritebackSection({
               gap: 10,
             }}
           >
-            <ValueBlock title='Before' value={item.beforeValue} />
-            <ValueBlock title='After' value={item.afterValue} />
+            <ValueBlock title='变更前' value={item.beforeValue} />
+            <ValueBlock title='变更后' value={item.afterValue} />
           </div>
         </div>
       ))}
