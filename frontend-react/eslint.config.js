@@ -46,10 +46,6 @@ export default defineConfig([
           patterns: [
             {
               group: [
-                './run',
-                './run/*',
-                '../run',
-                '../run/*',
                 '../../components/run',
                 '../../components/run/*',
                 '../components/run',
@@ -181,7 +177,7 @@ export default defineConfig([
     },
   },
   {
-    files: ['src/components/workflow-page/useWorkflowEditorPageAssembler.ts'],
+    files: ['src/components/workflow-page/orchestration/useWorkflowEditorPageAssembler.ts'],
     rules: {
       'no-restricted-imports': [
         'error',
@@ -191,25 +187,117 @@ export default defineConfig([
               group: [
                 '../../workflow-editor/domain',
                 '../../workflow-editor/domain/*',
+                '../../../workflow-editor/domain',
+                '../../../workflow-editor/domain/*',
                 '../../workflow-editor/state',
                 '../../workflow-editor/state/*',
+                '../../../workflow-editor/state',
+                '../../../workflow-editor/state/*',
                 '../../workflow-editor/actions',
                 '../../workflow-editor/actions/*',
+                '../../../workflow-editor/actions',
+                '../../../workflow-editor/actions/*',
                 '../../workflow-editor/operations',
                 '../../workflow-editor/operations/*',
+                '../../../workflow-editor/operations',
+                '../../../workflow-editor/operations/*',
                 '../../workflow-editor/controllers/useWorkflowBootstrap',
+                '../../../workflow-editor/controllers/useWorkflowBootstrap',
                 '../../workflow-editor/controllers/useWorkflowGraphEditor',
+                '../../../workflow-editor/controllers/useWorkflowGraphEditor',
                 '../../workflow-editor/controllers/useWorkflowGraphEvents',
+                '../../../workflow-editor/controllers/useWorkflowGraphEvents',
                 '../../workflow-editor/controllers/useWorkflowGraphSelection',
+                '../../../workflow-editor/controllers/useWorkflowGraphSelection',
                 '../../workflow-editor/controllers/useWorkflowGraphState',
+                '../../../workflow-editor/controllers/useWorkflowGraphState',
                 '../../workflow-editor/controllers/useWorkflowPendingBinding',
+                '../../../workflow-editor/controllers/useWorkflowPendingBinding',
                 '../../workflow-editor/controllers/useWorkflowPersistence',
+                '../../../workflow-editor/controllers/useWorkflowPersistence',
                 '../../workflow-editor/controllers/useWorkflowRunInputs',
+                '../../../workflow-editor/controllers/useWorkflowRunInputs',
                 '../../workflow-editor/controllers/useWorkflowSidecarStore',
+                '../../../workflow-editor/controllers/useWorkflowSidecarStore',
                 '../../workflow-editor/controllers/useWorkflowSubgraphTestStore',
+                '../../../workflow-editor/controllers/useWorkflowSubgraphTestStore',
               ],
               message:
                 'workflow-page assembler must consume workflow-editor through the runtime facade and local section hooks only.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/components/workflow-page/{canvas,run,graph,subgraph}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../orchestration',
+                '../orchestration/*',
+                '../../orchestration',
+                '../../orchestration/*',
+                '**/components/workflow-page/orchestration',
+                '**/components/workflow-page/orchestration/*',
+              ],
+              message:
+                'workflow-page lower layers must not import orchestration layer (prevent host-layer back-jump).',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/components/workflow-page/{canvas,run,graph,subgraph}/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../shell',
+                '../shell/*',
+                '../../shell',
+                '../../shell/*',
+                '**/components/workflow-page/shell',
+                '**/components/workflow-page/shell/*',
+              ],
+              message:
+                'workflow-page domain layers (canvas/run/graph/subgraph) must not depend on shell rendering layer.',
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    files: ['src/components/workflow-page/shell/**/*.{ts,tsx}'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: [
+                '../../../workflow-editor/controllers',
+                '../../../workflow-editor/controllers/*',
+                '../../../workflow-editor/operations',
+                '../../../workflow-editor/operations/*',
+                '**/workflow-editor/controllers',
+                '**/workflow-editor/controllers/*',
+                '**/workflow-editor/operations',
+                '**/workflow-editor/operations/*',
+              ],
+              message:
+                'workflow-page shell layer must remain render-focused and not import workflow runtime controllers/operations.',
             },
           ],
         },

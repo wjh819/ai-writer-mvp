@@ -3,7 +3,7 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it } from 'vitest'
 
-import { useSubgraphTestSectionState } from './useSubgraphTestSectionState'
+import { useSubgraphTestSectionState } from './subgraph/useSubgraphTestSectionState'
 
 describe('useSubgraphTestSectionState', () => {
   it('derives lock state from live/batch run status', () => {
@@ -44,4 +44,3 @@ describe('useSubgraphTestSectionState', () => {
     expect(result.current.panelState.isSubgraphTestPanelExpanded).toBe(true)
   })
 })
-

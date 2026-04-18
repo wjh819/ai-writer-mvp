@@ -28,6 +28,7 @@ const WORKFLOW_RUNTIME_FILE = path.resolve(
 )
 const WORKFLOW_PAGE_ASSEMBLER_FILE = path.resolve(
   WORKFLOW_PAGE_DIR,
+  'orchestration',
   'useWorkflowEditorPageAssembler.ts'
 )
 
@@ -201,14 +202,36 @@ describe('workflow-editor boundary contract', () => {
         '**/packages/run-display/src/run-display/*',
         '../../workflow-editor/domain',
         '../../workflow-editor/domain/*',
+        '../../../workflow-editor/domain',
+        '../../../workflow-editor/domain/*',
         '../../workflow-editor/state',
         '../../workflow-editor/state/*',
+        '../../../workflow-editor/state',
+        '../../../workflow-editor/state/*',
         '../../workflow-editor/actions',
         '../../workflow-editor/actions/*',
+        '../../../workflow-editor/actions',
+        '../../../workflow-editor/actions/*',
         '../../workflow-editor/operations',
         '../../workflow-editor/operations/*',
+        '../../../workflow-editor/operations',
+        '../../../workflow-editor/operations/*',
         '../../workflow-editor/controllers/useWorkflowGraphEditor',
+        '../../../workflow-editor/controllers/useWorkflowGraphEditor',
         '../../workflow-editor/controllers/useWorkflowPersistence',
+        '../../../workflow-editor/controllers/useWorkflowPersistence',
+        '../orchestration',
+        '../orchestration/*',
+        '../../orchestration',
+        '../../orchestration/*',
+        '**/components/workflow-page/orchestration',
+        '**/components/workflow-page/orchestration/*',
+        '../shell',
+        '../shell/*',
+        '../../shell',
+        '../../shell/*',
+        '**/components/workflow-page/shell',
+        '**/components/workflow-page/shell/*',
       ])
     )
   })

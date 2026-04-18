@@ -4,7 +4,7 @@ import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useWorkflowGraphEditor } from '../../workflow-editor/controllers/useWorkflowGraphEditor'
-import { useWorkflowEditorGraphSection } from './useWorkflowEditorGraphSection'
+import { useWorkflowEditorGraphSection } from './graph/useWorkflowEditorGraphSection'
 
 vi.mock('../../workflow-editor/controllers/useWorkflowGraphEditor', () => ({
   useWorkflowGraphEditor: vi.fn(),

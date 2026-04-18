@@ -3,11 +3,11 @@
 import { act, renderHook } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
 
-import { useWorkflowEditorSubgraphTestSection } from './useWorkflowEditorSubgraphTestSection'
-import type { UseWorkflowSubgraphTestPanelResult } from './subgraphTestPanelTypes'
-import { useWorkflowSubgraphTestPanel } from './useWorkflowSubgraphTestPanel'
+import { useWorkflowEditorSubgraphTestSection } from './subgraph/useWorkflowEditorSubgraphTestSection'
+import type { UseWorkflowSubgraphTestPanelResult } from './subgraph/subgraphTestPanelTypes'
+import { useWorkflowSubgraphTestPanel } from './subgraph/useWorkflowSubgraphTestPanel'
 
-vi.mock('./useWorkflowSubgraphTestPanel', () => ({
+vi.mock('./subgraph/useWorkflowSubgraphTestPanel', () => ({
   useWorkflowSubgraphTestPanel: vi.fn(),
 }))
 

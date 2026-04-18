@@ -1,8 +1,8 @@
 import 'reactflow/dist/style.css'
 
-import WorkflowEditorPageShell from './workflow-page/WorkflowEditorPageShell'
-import { useWorkflowEditorPageAssembler } from './workflow-page/useWorkflowEditorPageAssembler'
-import { useWorkflowPageContext } from './workflow-page/useWorkflowPageContext'
+import WorkflowEditorPageShell from './workflow-page/shell/WorkflowEditorPageShell'
+import { useWorkflowEditorPageAssembler } from './workflow-page/orchestration/useWorkflowEditorPageAssembler'
+import { useWorkflowPageContext } from './workflow-page/orchestration/useWorkflowPageContext'
 
 const DEFAULT_CANVAS_ID = 'article'
 

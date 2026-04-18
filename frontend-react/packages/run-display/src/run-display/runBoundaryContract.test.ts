@@ -295,8 +295,6 @@ describe('run-display package boundary contract', () => {
       expect.arrayContaining([
         '@aiwriter/run-display',
         '@aiwriter/run-display/*',
-        './run',
-        '../run',
         'components/run',
         '**/components/run',
         'packages/run-display/src/run-display',

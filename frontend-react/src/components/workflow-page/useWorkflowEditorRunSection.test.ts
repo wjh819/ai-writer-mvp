@@ -3,7 +3,7 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useWorkflowEditorRunSection } from './useWorkflowEditorRunSection'
+import { useWorkflowEditorRunSection } from './graph/useWorkflowEditorRunSection'
 
 function createOptions(overrides: Partial<Parameters<typeof useWorkflowEditorRunSection>[0]> = {}) {
   return {

@@ -3,7 +3,7 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useWorkflowPanels } from './useWorkflowPanels'
+import { useWorkflowPanels } from './orchestration/useWorkflowPanels'
 
 type UseWorkflowPanelsOptions = Parameters<typeof useWorkflowPanels>[0]
 

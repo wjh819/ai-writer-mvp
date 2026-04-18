@@ -7,38 +7,38 @@ import { useWorkflowRuntime } from '../../workflow-editor/controllers/useWorkflo
 import {
   useWorkflowEditorDisplayRunSection,
   useWorkflowEditorDisplayRunState,
-} from './useWorkflowEditorDisplayRunSection'
-import { useWorkflowDialogsState } from './useWorkflowDialogsState'
-import { useWorkflowEditorCanvasSection } from './useWorkflowEditorCanvasSection'
-import { useWorkflowEditorGraphSection } from './useWorkflowEditorGraphSection'
-import { useWorkflowEditorRunSection } from './useWorkflowEditorRunSection'
-import { useWorkflowEditorSubgraphTestSection } from './useWorkflowEditorSubgraphTestSection'
-import { useWorkflowEditorPageAssembler } from './useWorkflowEditorPageAssembler'
-import { useWorkflowPanels } from './useWorkflowPanels'
+} from './run/useWorkflowEditorDisplayRunSection'
+import { useWorkflowDialogsState } from './orchestration/useWorkflowDialogsState'
+import { useWorkflowEditorCanvasSection } from './canvas/useWorkflowEditorCanvasSection'
+import { useWorkflowEditorGraphSection } from './graph/useWorkflowEditorGraphSection'
+import { useWorkflowEditorRunSection } from './graph/useWorkflowEditorRunSection'
+import { useWorkflowEditorSubgraphTestSection } from './subgraph/useWorkflowEditorSubgraphTestSection'
+import { useWorkflowEditorPageAssembler } from './orchestration/useWorkflowEditorPageAssembler'
+import { useWorkflowPanels } from './orchestration/useWorkflowPanels'
 
 vi.mock('../../workflow-editor/controllers/useWorkflowRuntime', () => ({
   useWorkflowRuntime: vi.fn(),
 }))
-vi.mock('./useWorkflowEditorDisplayRunSection', () => ({
+vi.mock('./run/useWorkflowEditorDisplayRunSection', () => ({
   useWorkflowEditorDisplayRunSection: vi.fn(),
   useWorkflowEditorDisplayRunState: vi.fn(),
 }))
-vi.mock('./useWorkflowEditorGraphSection', () => ({
+vi.mock('./graph/useWorkflowEditorGraphSection', () => ({
   useWorkflowEditorGraphSection: vi.fn(),
 }))
-vi.mock('./useWorkflowEditorSubgraphTestSection', () => ({
+vi.mock('./subgraph/useWorkflowEditorSubgraphTestSection', () => ({
   useWorkflowEditorSubgraphTestSection: vi.fn(),
 }))
-vi.mock('./useWorkflowEditorCanvasSection', () => ({
+vi.mock('./canvas/useWorkflowEditorCanvasSection', () => ({
   useWorkflowEditorCanvasSection: vi.fn(),
 }))
-vi.mock('./useWorkflowEditorRunSection', () => ({
+vi.mock('./graph/useWorkflowEditorRunSection', () => ({
   useWorkflowEditorRunSection: vi.fn(),
 }))
-vi.mock('./useWorkflowPanels', () => ({
+vi.mock('./orchestration/useWorkflowPanels', () => ({
   useWorkflowPanels: vi.fn(),
 }))
-vi.mock('./useWorkflowDialogsState', () => ({
+vi.mock('./orchestration/useWorkflowDialogsState', () => ({
   useWorkflowDialogsState: vi.fn(),
 }))
 

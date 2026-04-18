@@ -3,7 +3,7 @@
 import { renderHook } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useWorkflowDialogsState } from './useWorkflowDialogsState'
+import { useWorkflowDialogsState } from './orchestration/useWorkflowDialogsState'
 
 function createOptions(isGraphEditingLocked = false) {
   const onDraftCanvasIdChange = vi.fn()

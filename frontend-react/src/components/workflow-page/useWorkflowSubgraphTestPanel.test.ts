@@ -3,26 +3,26 @@
 import { renderHook } from '@testing-library/react'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { useSubgraphPinnedInputs } from './useSubgraphPinnedInputs'
-import { useSubgraphTestInvalidation } from './useSubgraphTestInvalidation'
-import { useSubgraphTestPanelLifecycle } from './useSubgraphTestPanelLifecycle'
-import { useSubgraphTestPanelState } from './useSubgraphTestPanelState'
-import { useSubgraphTestRunner } from './useSubgraphTestRunner'
-import { useWorkflowSubgraphTestPanel } from './useWorkflowSubgraphTestPanel'
+import { useSubgraphPinnedInputs } from './subgraph/useSubgraphPinnedInputs'
+import { useSubgraphTestInvalidation } from './subgraph/useSubgraphTestInvalidation'
+import { useSubgraphTestPanelLifecycle } from './subgraph/useSubgraphTestPanelLifecycle'
+import { useSubgraphTestPanelState } from './subgraph/useSubgraphTestPanelState'
+import { useSubgraphTestRunner } from './subgraph/useSubgraphTestRunner'
+import { useWorkflowSubgraphTestPanel } from './subgraph/useWorkflowSubgraphTestPanel'
 
-vi.mock('./useSubgraphTestPanelState', () => ({
+vi.mock('./subgraph/useSubgraphTestPanelState', () => ({
   useSubgraphTestPanelState: vi.fn(),
 }))
-vi.mock('./useSubgraphTestInvalidation', () => ({
+vi.mock('./subgraph/useSubgraphTestInvalidation', () => ({
   useSubgraphTestInvalidation: vi.fn(),
 }))
-vi.mock('./useSubgraphPinnedInputs', () => ({
+vi.mock('./subgraph/useSubgraphPinnedInputs', () => ({
   useSubgraphPinnedInputs: vi.fn(),
 }))
-vi.mock('./useSubgraphTestRunner', () => ({
+vi.mock('./subgraph/useSubgraphTestRunner', () => ({
   useSubgraphTestRunner: vi.fn(),
 }))
-vi.mock('./useSubgraphTestPanelLifecycle', () => ({
+vi.mock('./subgraph/useSubgraphTestPanelLifecycle', () => ({
   useSubgraphTestPanelLifecycle: vi.fn(),
 }))
 

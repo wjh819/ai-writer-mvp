@@ -3,7 +3,7 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi } from 'vitest'
 
-import { useCanvasLoadSwitch } from './useCanvasLoadSwitch'
+import { useCanvasLoadSwitch } from './canvas/useCanvasLoadSwitch'
 import type { LoadWorkflowActionResult } from '../../workflow-editor/runtimeActionTypes'
 
 function createLoadResult(
